@@ -1,0 +1,3071 @@
+{
+  "schemaVersion": "1.0.0",
+  "snapshot": {
+    "caseId": "FLT-FDE-2026-01",
+    "evidenceCutoff": "2026-08-18",
+    "snapshotTime": "2026-08-18T17:00:00+05:30",
+    "policyVersion": "0.1.0",
+    "calculationVersion": "e5883a11d58d",
+    "inputHash": "561c4abbf7ae",
+    "outputHash": "9d964232ffc4",
+    "isLive": false,
+    "isProduction": false
+  },
+  "case": {
+    "subject": {
+      "society": "Lakeview Residences",
+      "societyFamily": "lakeview",
+      "bhk": 2,
+      "areaSqft": 1175,
+      "furnishing": "semi-furnished"
+    },
+    "referenceDecision": {
+      "status": "PROVISIONAL_HOLD",
+      "source": "boss-assessment.md",
+      "generatedByPrototype": false,
+      "isProductionVerdict": false,
+      "ownerRole": "Acquisition Lead",
+      "reason": "Resolve market, landlord, capex and demand evidence."
+    }
+  },
+  "marketEvidence": {
+    "policy_version": "0.1.0",
+    "input_rows": 86,
+    "evidence_cutoff": "2026-08-18",
+    "subject": {
+      "society_family": "lakeview",
+      "bhk": 2,
+      "area_sqft": 1175,
+      "furnishing": "semi-furnished",
+      "landlord_base_rent": 56000,
+      "landlord_maintenance": 5000
+    },
+    "baselines": {
+      "B0": {
+        "count": 84,
+        "estimate": 59000
+      },
+      "B1": {
+        "effective_count": 9,
+        "estimate": 58000
+      },
+      "B2": {
+        "effective_count": 8,
+        "estimate": 58250
+      }
+    },
+    "b2_observed_asking_rent_band": {
+      "p25": 57375,
+      "p75": 59750,
+      "minimum": 56500,
+      "maximum": 62500
+    },
+    "b2_state_counts": {
+      "duplicate_collapsed": 2,
+      "exclude": 74,
+      "include": 8,
+      "needs_human_review": 2
+    },
+    "reason_counts": {
+      "area_outside_band": 48,
+      "attribute_conflict_candidate": 1,
+      "bhk_mismatch": 2,
+      "extreme_value_review": 1,
+      "furnishing_mismatch": 31,
+      "missing_required_field": 1,
+      "old_last_seen": 11,
+      "possible_duplicate": 2,
+      "society_not_target_family": 42
+    },
+    "duplicate_candidate_groups_in_eligible_set": 2,
+    "observed_portal_label_count": 3,
+    "maximum_leave_one_out_movement_pct": 0.429,
+    "reasonable_policy_sensitivity": {
+      "scenarios": [
+        {
+          "area_tolerance_sqft": 75,
+          "max_last_seen_age_days": 14,
+          "effective_count": 6,
+          "estimate": 58250
+        },
+        {
+          "area_tolerance_sqft": 75,
+          "max_last_seen_age_days": 30,
+          "effective_count": 6,
+          "estimate": 58250
+        },
+        {
+          "area_tolerance_sqft": 100,
+          "max_last_seen_age_days": 14,
+          "effective_count": 7,
+          "estimate": 58500
+        },
+        {
+          "area_tolerance_sqft": 100,
+          "max_last_seen_age_days": 30,
+          "effective_count": 8,
+          "estimate": 58250
+        },
+        {
+          "area_tolerance_sqft": 100,
+          "max_last_seen_age_days": 45,
+          "effective_count": 8,
+          "estimate": 58250
+        },
+        {
+          "area_tolerance_sqft": 125,
+          "max_last_seen_age_days": 30,
+          "effective_count": 12,
+          "estimate": 58250
+        }
+      ],
+      "minimum_estimate": 58250,
+      "maximum_estimate": 58500,
+      "maximum_spread_pct_of_frozen_estimate": 0.429
+    },
+    "asking_evidence_confidence": "HIGH",
+    "achievable_base_rent_confidence": "LOW",
+    "confidence_explanation": {
+      "asking_evidence": "Candidate-policy grade based on effective count, observed portal labels and perturbation stability; it is not a probability or a claim of source independence.",
+      "achievable_base_rent": "Downgraded because asking prices are not achieved rents and maintenance inclusion is unresolved."
+    },
+    "comparison_to_landlord_ask": {
+      "gap_to_base_rent": 2250,
+      "gap_to_all_in_owner_cost": -2750,
+      "warning": "The listing-rent maintenance basis is unknown, so neither comparison is decision-grade."
+    },
+    "unresolved_limitations": [
+      "Listing rents do not reliably state whether maintenance is included.",
+      "Asking rent is not achieved rent.",
+      "Duplicate candidates are inferred from observable fields and are not ground truth."
+    ],
+    "decision_boundary": "This proof estimates market evidence. It does not recommend ACQUIRE, NEGOTIATE, HOLD or PASS.",
+    "counterfactuals": [
+      {
+        "id": "restore-cp-0071",
+        "listing_id": "CP-0071",
+        "action": "restore_as_distinct_after_evidence_review",
+        "estimate": 58000,
+        "delta_from_baseline": -250,
+        "effective_count": 9,
+        "local_simulation_only": true
+      },
+      {
+        "id": "restore-cp-0075",
+        "listing_id": "CP-0075",
+        "action": "restore_as_distinct_after_evidence_review",
+        "estimate": 58500,
+        "delta_from_baseline": 250,
+        "effective_count": 9,
+        "local_simulation_only": true
+      },
+      {
+        "id": "include-cp-0081",
+        "listing_id": "CP-0081",
+        "action": "include_after_evidence_review",
+        "estimate": 58000,
+        "delta_from_baseline": -250,
+        "effective_count": 9,
+        "local_simulation_only": true
+      },
+      {
+        "id": "include-cp-0082",
+        "listing_id": "CP-0082",
+        "action": "include_after_evidence_review",
+        "estimate": 58000,
+        "delta_from_baseline": -250,
+        "effective_count": 9,
+        "local_simulation_only": true
+      }
+    ],
+    "manual_review_queue": [
+      {
+        "listing_id": "CP-0081",
+        "annotation_type": "attribute_conflict_candidate",
+        "assertion_state": "manual_annotation",
+        "source_file": "input/comments.md",
+        "allowed_resolutions": [
+          "confirm_3bhk",
+          "correct_to_2bhk_with_evidence",
+          "leave_unresolved"
+        ]
+      }
+    ],
+    "bandSemantics": "middle_50_pct_of_retained_asking_prices",
+    "askingConfidenceSemantics": "candidate_policy_conditional_stability_grade",
+    "isProbability": false,
+    "claimsSourceIndependence": false
+  },
+  "policy": {
+    "policy_version": "0.1.0",
+    "evidence_cutoff": "2026-08-18",
+    "subject": {
+      "society_family": "lakeview",
+      "bhk": 2,
+      "area_sqft": 1175,
+      "furnishing": "semi-furnished",
+      "landlord_base_rent": 56000,
+      "landlord_maintenance": 5000
+    },
+    "comparability": {
+      "area_tolerance_sqft": 100,
+      "max_last_seen_age_days": 30,
+      "require_same_society_family": true
+    },
+    "duplicate_candidate": {
+      "required_exact_fields": [
+        "posted_date",
+        "last_seen_date",
+        "bhk",
+        "furnishing_normalized",
+        "area_sqft",
+        "rent",
+        "deposit",
+        "society_family"
+      ]
+    },
+    "extreme_value_review": {
+      "lower_multiple_of_candidate_median": 0.5,
+      "upper_multiple_of_candidate_median": 1.75
+    },
+    "confidence": {
+      "high": {
+        "minimum_effective_comparables": 8,
+        "minimum_observed_portal_labels": 3,
+        "maximum_leave_one_group_out_movement_pct": 2.5
+      },
+      "medium": {
+        "minimum_effective_comparables": 5,
+        "minimum_observed_portal_labels": 2,
+        "maximum_leave_one_group_out_movement_pct": 5
+      },
+      "low": {
+        "minimum_effective_comparables": 3,
+        "maximum_leave_one_group_out_movement_pct": 10
+      }
+    },
+    "known_unresolved_limitations": [
+      "Listing rents do not reliably state whether maintenance is included.",
+      "Asking rent is not achieved rent.",
+      "Duplicate candidates are inferred from observable fields and are not ground truth."
+    ],
+    "authority": "candidate_proposal",
+    "isFlentProductionPolicy": false,
+    "sensitivityLocation": "analyze.py"
+  },
+  "listings": [
+    {
+      "listingId": "CP-0001",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Lakeview Res.",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1050,
+        "rentInr": 60000,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0002",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1050,
+        "rentInr": 55500,
+        "lastSeenDate": "2026-08-15"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 3
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0003",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Lakeview Residences",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1300,
+        "rentInr": 69500,
+        "lastSeenDate": "2026-06-02"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 77
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch",
+          "old_last_seen"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0004",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1375,
+        "rentInr": 62500,
+        "lastSeenDate": "2026-08-15"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 3
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0005",
+      "observed": {
+        "source": "Housing",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1000,
+        "rentInr": 68000,
+        "lastSeenDate": "2026-08-16"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 2
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0006",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1375,
+        "rentInr": 54500,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0007",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1200,
+        "rentInr": 54500,
+        "lastSeenDate": "2026-08-01"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 17
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0008",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1100,
+        "rentInr": 58000,
+        "lastSeenDate": "2026-08-08"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 10
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "include",
+        "b2State": "include",
+        "duplicateGroup": "DUP-F727609D",
+        "representativeListingId": "CP-0008",
+        "effectiveWeight": 1,
+        "reasonCodes": [],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0009",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Lakeview Res.",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 975,
+        "rentInr": 59500,
+        "lastSeenDate": "2026-08-03"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 15
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0010",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1200,
+        "rentInr": 58500,
+        "lastSeenDate": "2026-08-06"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 12
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "include",
+        "b2State": "include",
+        "duplicateGroup": null,
+        "representativeListingId": "CP-0010",
+        "effectiveWeight": 1,
+        "reasonCodes": [],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0011",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lakeview Res.",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1125,
+        "rentInr": 60500,
+        "lastSeenDate": "2026-08-15"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 3
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "include",
+        "b2State": "include",
+        "duplicateGroup": null,
+        "representativeListingId": "CP-0011",
+        "effectiveWeight": 1,
+        "reasonCodes": [],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0012",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1350,
+        "rentInr": 68500,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0013",
+      "observed": {
+        "source": "Housing",
+        "society": "Lakeview Res.",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1025,
+        "rentInr": 58000,
+        "lastSeenDate": "2026-08-14"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 4
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0014",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1250,
+        "rentInr": 55000,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0015",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Lakeview Res.",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1275,
+        "rentInr": 57500,
+        "lastSeenDate": "2026-07-21"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 28
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "include",
+        "b2State": "include",
+        "duplicateGroup": null,
+        "representativeListingId": "CP-0015",
+        "effectiveWeight": 1,
+        "reasonCodes": [],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0016",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lakeview Res.",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1375,
+        "rentInr": 72000,
+        "lastSeenDate": "2026-08-04"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 14
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0017",
+      "observed": {
+        "source": "Housing",
+        "society": "Lakeview Residences",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1050,
+        "rentInr": 58000,
+        "lastSeenDate": "2026-08-13"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 5
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0018",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1125,
+        "rentInr": 59500,
+        "lastSeenDate": "2026-08-14"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 4
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "include",
+        "b2State": "include",
+        "duplicateGroup": null,
+        "representativeListingId": "CP-0018",
+        "effectiveWeight": 1,
+        "reasonCodes": [],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0019",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1375,
+        "rentInr": 59500,
+        "lastSeenDate": "2026-08-10"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 8
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0020",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1350,
+        "rentInr": 61000,
+        "lastSeenDate": "2026-08-10"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 8
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0021",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1325,
+        "rentInr": 55000,
+        "lastSeenDate": "2026-08-15"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 3
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0022",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Lakeview Residences",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1175,
+        "rentInr": 56500,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "include",
+        "b2State": "include",
+        "duplicateGroup": null,
+        "representativeListingId": "CP-0022",
+        "effectiveWeight": 1,
+        "reasonCodes": [],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0023",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1200,
+        "rentInr": 57000,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "include",
+        "b2State": "include",
+        "duplicateGroup": null,
+        "representativeListingId": "CP-0023",
+        "effectiveWeight": 1,
+        "reasonCodes": [],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0024",
+      "observed": {
+        "source": "Housing",
+        "society": "Lakeview Residences",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1350,
+        "rentInr": 61500,
+        "lastSeenDate": "2026-07-11"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 38
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "old_last_seen"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0025",
+      "observed": {
+        "source": "Housing",
+        "society": "Lakeview Residences",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1350,
+        "rentInr": 60000,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0026",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lakeview Residences",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1350,
+        "rentInr": 58500,
+        "lastSeenDate": "2026-08-05"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 13
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0027",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1225,
+        "rentInr": 67000,
+        "lastSeenDate": "2026-08-02"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 16
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0028",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1375,
+        "rentInr": 62000,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0029",
+      "observed": {
+        "source": "Housing",
+        "society": "Lakeview Residences",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1200,
+        "rentInr": 51000,
+        "lastSeenDate": "2026-08-15"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 3
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0030",
+      "observed": {
+        "source": "Housing",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1325,
+        "rentInr": 63000,
+        "lastSeenDate": "2026-08-17"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 1
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0031",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1100,
+        "rentInr": 54000,
+        "lastSeenDate": "2026-08-05"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 13
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0032",
+      "observed": {
+        "source": "Housing",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1275,
+        "rentInr": 62500,
+        "lastSeenDate": "2026-08-04"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 14
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "include",
+        "b2State": "include",
+        "duplicateGroup": "DUP-4C4083B9",
+        "representativeListingId": "CP-0032",
+        "effectiveWeight": 1,
+        "reasonCodes": [],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0033",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Fern Grove Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1105,
+        "rentInr": 59500,
+        "lastSeenDate": "2026-08-10"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 8
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0034",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Fern Grove",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1255,
+        "rentInr": 63500,
+        "lastSeenDate": "2026-07-04"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 45
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "society_not_target_family",
+          "old_last_seen"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0035",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Fern Grove",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1255,
+        "rentInr": 65000,
+        "lastSeenDate": "2026-08-13"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 5
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0036",
+      "observed": {
+        "source": "Housing",
+        "society": "Fern Grove Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1155,
+        "rentInr": 59500,
+        "lastSeenDate": "2026-08-08"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 10
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0037",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "FernGrove Apartments",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1005,
+        "rentInr": 59000,
+        "lastSeenDate": "2026-08-11"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 7
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0038",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "FernGrove Apartments",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1155,
+        "rentInr": 60000,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0039",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Fern Grove",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1155,
+        "rentInr": 60500,
+        "lastSeenDate": "2026-08-11"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 7
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0040",
+      "observed": {
+        "source": "NoBroker",
+        "society": "FernGrove Apartments",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 955,
+        "rentInr": 62000,
+        "lastSeenDate": "2026-08-03"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 15
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0041",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Fern Grove",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1155,
+        "rentInr": 59000,
+        "lastSeenDate": "2026-08-13"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 5
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0042",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Fern Grove",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 980,
+        "rentInr": 59000,
+        "lastSeenDate": "2026-08-11"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 7
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0043",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Fern Grove Residency",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1080,
+        "rentInr": 56000,
+        "lastSeenDate": "2026-08-18"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 0
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0044",
+      "observed": {
+        "source": "Housing",
+        "society": "FernGrove Apartments",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 930,
+        "rentInr": 60500,
+        "lastSeenDate": "2026-06-13"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 66
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family",
+          "old_last_seen"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0045",
+      "observed": {
+        "source": "Housing",
+        "society": "Blue Water Hts",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1245,
+        "rentInr": 58000,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "bluewater-heights",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0046",
+      "observed": {
+        "source": "Housing",
+        "society": "Bluewater Heights",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1020,
+        "rentInr": 65000,
+        "lastSeenDate": "2026-06-24"
+      },
+      "derived": {
+        "societyFamily": "bluewater-heights",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 55
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch",
+          "society_not_target_family",
+          "old_last_seen"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0047",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Bluewater Height",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1020,
+        "rentInr": 54000,
+        "lastSeenDate": "2026-08-10"
+      },
+      "derived": {
+        "societyFamily": "bluewater-heights",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 8
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0048",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Blue Water Hts",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1270,
+        "rentInr": 59000,
+        "lastSeenDate": "2026-08-08"
+      },
+      "derived": {
+        "societyFamily": "bluewater-heights",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 10
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0049",
+      "observed": {
+        "source": "Housing",
+        "society": "Blue Water Hts",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1020,
+        "rentInr": 56000,
+        "lastSeenDate": "2026-05-26"
+      },
+      "derived": {
+        "societyFamily": "bluewater-heights",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 84
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family",
+          "old_last_seen"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0050",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Bluewater Height",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1220,
+        "rentInr": 65500,
+        "lastSeenDate": "2026-06-26"
+      },
+      "derived": {
+        "societyFamily": "bluewater-heights",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 53
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch",
+          "society_not_target_family",
+          "old_last_seen"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0051",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Bluewater Heights",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1145,
+        "rentInr": 65500,
+        "lastSeenDate": "2026-08-14"
+      },
+      "derived": {
+        "societyFamily": "bluewater-heights",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 4
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0052",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Bluewater Height",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1045,
+        "rentInr": 54000,
+        "lastSeenDate": "2026-08-07"
+      },
+      "derived": {
+        "societyFamily": "bluewater-heights",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 11
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0053",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Bluewater Heights",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1370,
+        "rentInr": 58000,
+        "lastSeenDate": "2026-08-06"
+      },
+      "derived": {
+        "societyFamily": "bluewater-heights",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 12
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0054",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Bluewater Height",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1020,
+        "rentInr": 47500,
+        "lastSeenDate": "2026-08-15"
+      },
+      "derived": {
+        "societyFamily": "bluewater-heights",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 3
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0055",
+      "observed": {
+        "source": "Housing",
+        "society": "Maple Courtyard",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1455,
+        "rentInr": 47500,
+        "lastSeenDate": "2026-08-02"
+      },
+      "derived": {
+        "societyFamily": "maple-courtyard",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 16
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0056",
+      "observed": {
+        "source": "Housing",
+        "society": "Maple Court Yard",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1430,
+        "rentInr": 54500,
+        "lastSeenDate": "2026-08-11"
+      },
+      "derived": {
+        "societyFamily": "maple-courtyard",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 7
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0057",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Maple Ctyard",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1455,
+        "rentInr": 51000,
+        "lastSeenDate": "2026-08-07"
+      },
+      "derived": {
+        "societyFamily": "maple-courtyard",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 11
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0058",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Maple Courtyard",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1130,
+        "rentInr": 45500,
+        "lastSeenDate": "2026-08-10"
+      },
+      "derived": {
+        "societyFamily": "maple-courtyard",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 8
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0059",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Maple Ctyard",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1405,
+        "rentInr": 50500,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "maple-courtyard",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0060",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Maple Courtyard",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1130,
+        "rentInr": 58500,
+        "lastSeenDate": "2026-08-15"
+      },
+      "derived": {
+        "societyFamily": "maple-courtyard",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 3
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0061",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Maple Courtyard",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1480,
+        "rentInr": 56500,
+        "lastSeenDate": "2026-08-07"
+      },
+      "derived": {
+        "societyFamily": "maple-courtyard",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 11
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0062",
+      "observed": {
+        "source": "Housing",
+        "society": "Maple Courtyard",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1330,
+        "rentInr": 61500,
+        "lastSeenDate": "2026-08-10"
+      },
+      "derived": {
+        "societyFamily": "maple-courtyard",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 8
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0063",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Park Side Terrace",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1015,
+        "rentInr": 55500,
+        "lastSeenDate": "2026-08-15"
+      },
+      "derived": {
+        "societyFamily": "parkside-terrace",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 3
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0064",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Parkside Terrace",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1290,
+        "rentInr": 49500,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "parkside-terrace",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0065",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Parkside Terraces",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1040,
+        "rentInr": 62000,
+        "lastSeenDate": "2026-08-10"
+      },
+      "derived": {
+        "societyFamily": "parkside-terrace",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 8
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0066",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Park Side Terrace",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1290,
+        "rentInr": 57000,
+        "lastSeenDate": "2026-08-11"
+      },
+      "derived": {
+        "societyFamily": "parkside-terrace",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 7
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0067",
+      "observed": {
+        "source": "Housing",
+        "society": "Parkside Terraces",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1140,
+        "rentInr": 56500,
+        "lastSeenDate": "2026-08-17"
+      },
+      "derived": {
+        "societyFamily": "parkside-terrace",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 1
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0068",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Parkside Terraces",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1040,
+        "rentInr": 56500,
+        "lastSeenDate": "2026-08-08"
+      },
+      "derived": {
+        "societyFamily": "parkside-terrace",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 10
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0069",
+      "observed": {
+        "source": "Housing",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1050,
+        "rentInr": 60500,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0070",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1375,
+        "rentInr": 63000,
+        "lastSeenDate": "2026-08-15"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 3
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0071",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1100,
+        "rentInr": 58000,
+        "lastSeenDate": "2026-08-08"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 10
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "duplicate_collapsed",
+        "b2State": "duplicate_collapsed",
+        "duplicateGroup": "DUP-F727609D",
+        "representativeListingId": "CP-0008",
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "possible_duplicate"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0072",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1350,
+        "rentInr": 68500,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0073",
+      "observed": {
+        "source": "Housing",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1050,
+        "rentInr": 58000,
+        "lastSeenDate": "2026-08-13"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 5
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0074",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1350,
+        "rentInr": 61500,
+        "lastSeenDate": "2026-07-11"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 38
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "old_last_seen"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0075",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1275,
+        "rentInr": 62500,
+        "lastSeenDate": "2026-08-04"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 14
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "duplicate_collapsed",
+        "b2State": "duplicate_collapsed",
+        "duplicateGroup": "DUP-4C4083B9",
+        "representativeListingId": "CP-0032",
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "possible_duplicate"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0076",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Fern Grove Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1155,
+        "rentInr": 59500,
+        "lastSeenDate": "2026-08-08"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 10
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0077",
+      "observed": {
+        "source": "Housing",
+        "society": "FernGrove Apartments",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": 930,
+        "rentInr": 60500,
+        "lastSeenDate": "2026-06-13"
+      },
+      "derived": {
+        "societyFamily": "fern-grove",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 66
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "society_not_target_family",
+          "old_last_seen"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0078",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Bluewater Height",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1220,
+        "rentInr": 65500,
+        "lastSeenDate": "2026-06-26"
+      },
+      "derived": {
+        "societyFamily": "bluewater-heights",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 53
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch",
+          "society_not_target_family",
+          "old_last_seen"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0079",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Maple Courtyard",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1130,
+        "rentInr": 46000,
+        "lastSeenDate": "2026-08-10"
+      },
+      "derived": {
+        "societyFamily": "maple-courtyard",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 8
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0080",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Parkside Terrace",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1290,
+        "rentInr": 50000,
+        "lastSeenDate": "2026-08-12"
+      },
+      "derived": {
+        "societyFamily": "parkside-terrace",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 6
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "area_outside_band",
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0081",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Lakeview Residences",
+        "bhk": 3,
+        "furnishing": "semi-furnished",
+        "areaSqft": 1175,
+        "rentInr": 58000,
+        "lastSeenDate": "2026-08-18"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 0
+      },
+      "decision": {
+        "b0State": "exclude",
+        "b1State": "exclude",
+        "b2State": "needs_human_review",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "bhk_mismatch",
+          "attribute_conflict_candidate"
+        ],
+        "annotationType": "attribute_conflict_candidate",
+        "annotationSource": "input/comments.md"
+      }
+    },
+    {
+      "listingId": "CP-0082",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi furnished",
+        "areaSqft": 1100,
+        "rentInr": 12000,
+        "lastSeenDate": "2026-08-18"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 0
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "include",
+        "b2State": "needs_human_review",
+        "duplicateGroup": null,
+        "representativeListingId": "CP-0082",
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "extreme_value_review"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0083",
+      "observed": {
+        "source": "Housing",
+        "society": "Lakeview Res.",
+        "bhk": 2,
+        "furnishing": "fully furnished",
+        "areaSqft": 1180,
+        "rentInr": 185000,
+        "lastSeenDate": "2026-08-17"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "fully-furnished",
+        "lastSeenAgeDays": 1
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0084",
+      "observed": {
+        "source": "CommonFloor",
+        "society": "Blue Water Hts",
+        "bhk": 2,
+        "furnishing": "unfurnished",
+        "areaSqft": 1210,
+        "rentInr": 52000,
+        "lastSeenDate": "2026-08-11"
+      },
+      "derived": {
+        "societyFamily": "bluewater-heights",
+        "furnishingNormalized": "unfurnished",
+        "lastSeenAgeDays": 7
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "furnishing_mismatch",
+          "society_not_target_family"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0085",
+      "observed": {
+        "source": "MagicBricks",
+        "society": "Lakeview Residences Phase 1",
+        "bhk": 1,
+        "furnishing": "semi-furnished",
+        "areaSqft": 2100,
+        "rentInr": 60000,
+        "lastSeenDate": "2026-05-04"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 106
+      },
+      "decision": {
+        "b0State": "exclude",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "bhk_mismatch",
+          "area_outside_band",
+          "old_last_seen"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    },
+    {
+      "listingId": "CP-0086",
+      "observed": {
+        "source": "NoBroker",
+        "society": "Lake View Residency",
+        "bhk": 2,
+        "furnishing": "semi-furnished",
+        "areaSqft": null,
+        "rentInr": 57000,
+        "lastSeenDate": "2026-08-18"
+      },
+      "derived": {
+        "societyFamily": "lakeview",
+        "furnishingNormalized": "semi-furnished",
+        "lastSeenAgeDays": 0
+      },
+      "decision": {
+        "b0State": "include",
+        "b1State": "exclude",
+        "b2State": "exclude",
+        "duplicateGroup": null,
+        "representativeListingId": null,
+        "effectiveWeight": 0,
+        "reasonCodes": [
+          "missing_required_field"
+        ],
+        "annotationType": null,
+        "annotationSource": null
+      }
+    }
+  ],
+  "economics": {
+    "source": "boss-assessment.md",
+    "numericallyConsumesMarketEstimate": false,
+    "marketLinkageStatus": "unresolved_until_rent_basis_and_decision_policy_are_declared",
+    "scenarios": [
+      {
+        "id": "opening_ask",
+        "label": "Opening terms",
+        "plannedTenantRevenue": 72000,
+        "occupancy": 0.95,
+        "occupancyAdjustedRevenue": 68400,
+        "baseRent": 56000,
+        "maintenance": 5000,
+        "monthlyOwnerCost": 61000,
+        "monthlyContribution": 7400,
+        "landlordDeposit": 280000,
+        "tenantDeposits": 180000,
+        "uncoveredDeposit": 100000,
+        "capex": 160000,
+        "capitalEmployed": 260000,
+        "simplePaybackMonths": 35.1,
+        "assertionState": "mixed_recorded_and_estimated",
+        "verificationState": "not_verified",
+        "decisionGrade": false,
+        "model": "STATIC SIMPLE PAYBACK — DIRECTIONAL, NOT DECISION-GRADE",
+        "omissionCodes": [
+          "first_fill_vacancy",
+          "rent_escalation",
+          "exit_painting",
+          "central_operating_costs"
+        ],
+        "note": "Matches the supplied exercise assessment."
+      },
+      {
+        "id": "verbal_54000",
+        "label": "Verbal ₹54k alternative",
+        "plannedTenantRevenue": 72000,
+        "occupancy": 0.95,
+        "occupancyAdjustedRevenue": 68400,
+        "baseRent": 54000,
+        "maintenance": 5000,
+        "monthlyOwnerCost": 59000,
+        "monthlyContribution": 9400,
+        "landlordDeposit": 280000,
+        "tenantDeposits": 180000,
+        "uncoveredDeposit": 100000,
+        "capex": 160000,
+        "capitalEmployed": 260000,
+        "simplePaybackMonths": 27.7,
+        "assertionState": "unconfirmed_and_time_sensitive",
+        "verificationState": "not_verified",
+        "decisionGrade": false,
+        "model": "STATIC SIMPLE PAYBACK — DIRECTIONAL, NOT DECISION-GRADE",
+        "omissionCodes": [
+          "first_fill_vacancy",
+          "rent_escalation",
+          "exit_painting",
+          "central_operating_costs"
+        ],
+        "note": "The landlord alternative was verbal and conditional on signing that week; it is not live."
+      },
+      {
+        "id": "room_2_downside_fixed_deposit",
+        "label": "Room 2 at ₹31k · fixed deposit assumption",
+        "plannedTenantRevenue": 69000,
+        "occupancy": 0.95,
+        "occupancyAdjustedRevenue": 65550,
+        "baseRent": 56000,
+        "maintenance": 5000,
+        "monthlyOwnerCost": 61000,
+        "monthlyContribution": 4550,
+        "landlordDeposit": 280000,
+        "tenantDeposits": 180000,
+        "uncoveredDeposit": 100000,
+        "capex": 160000,
+        "capitalEmployed": 260000,
+        "simplePaybackMonths": 57.1,
+        "assertionState": "estimated",
+        "verificationState": "not_verified",
+        "decisionGrade": false,
+        "model": "STATIC SIMPLE PAYBACK — DIRECTIONAL, NOT DECISION-GRADE",
+        "omissionCodes": [
+          "first_fill_vacancy",
+          "rent_escalation",
+          "exit_painting",
+          "central_operating_costs"
+        ],
+        "note": "Matches the supplied 57.1-month exercise scenario; tenant deposits remain fixed at ₹1.80L."
+      },
+      {
+        "id": "room_2_downside_linked_deposit",
+        "label": "Room 2 at ₹31k · deposit linked to revenue",
+        "plannedTenantRevenue": 69000,
+        "occupancy": 0.95,
+        "occupancyAdjustedRevenue": 65550,
+        "baseRent": 56000,
+        "maintenance": 5000,
+        "monthlyOwnerCost": 61000,
+        "monthlyContribution": 4550,
+        "landlordDeposit": 280000,
+        "tenantDeposits": 172500,
+        "uncoveredDeposit": 107500,
+        "capex": 160000,
+        "capitalEmployed": 267500,
+        "simplePaybackMonths": 58.8,
+        "assertionState": "candidate_sensitivity",
+        "verificationState": "not_verified",
+        "decisionGrade": false,
+        "model": "STATIC SIMPLE PAYBACK — DIRECTIONAL, NOT DECISION-GRADE",
+        "omissionCodes": [
+          "first_fill_vacancy",
+          "rent_escalation",
+          "exit_painting",
+          "central_operating_costs"
+        ],
+        "note": "Candidate sensitivity if the 2.5-month tenant-deposit assumption moves with revenue."
+      }
+    ]
+  },
+  "evidenceResolutionQueue": [
+    {
+      "id": "written_owner_terms",
+      "issue": "Written ₹54k landlord alternative",
+      "owner": "Supply",
+      "status": "open",
+      "consequence": "Owner-cost scenario remains unconfirmed.",
+      "requiredProof": "Written landlord confirmation with validity date."
+    },
+    {
+      "id": "vendor_boq",
+      "issue": "Vendor BOQ and technical checks",
+      "owner": "Property",
+      "status": "open",
+      "consequence": "₹1.60L capex and payback remain provisional.",
+      "requiredProof": "Costed BOQ plus inspection sign-off."
+    },
+    {
+      "id": "tenant_price",
+      "issue": "Room-price and fill evidence",
+      "owner": "Demand / Pricing",
+      "status": "open",
+      "consequence": "₹72k tenant revenue and vacancy assumptions are estimates.",
+      "requiredProof": "Signed booking or cited comparable enquiry cohort."
+    },
+    {
+      "id": "maintenance_basis",
+      "issue": "Listing maintenance basis",
+      "owner": "Market Operations",
+      "status": "blocked",
+      "consequence": "Market-to-owner comparison is not decision-grade.",
+      "requiredProof": "Source-level maintenance inclusion evidence or explicit abstention."
+    },
+    {
+      "id": "sharing_rules",
+      "issue": "Society sharing rules",
+      "owner": "Supply / Property",
+      "status": "open",
+      "consequence": "Could force PASS regardless of market evidence.",
+      "requiredProof": "Written society rule confirmation."
+    },
+    {
+      "id": "economics_review",
+      "issue": "Static economics review",
+      "owner": "Finance",
+      "status": "open",
+      "consequence": "Deposit dependency and omitted costs remain unresolved.",
+      "requiredProof": "Reviewed assumptions and time-based cash-flow treatment."
+    }
+  ],
+  "failureStates": [
+    {
+      "id": "rent_basis_unresolved",
+      "claim": "Decision-grade comparison of market evidence with owner cost",
+      "state": "INSUFFICIENT",
+      "reasons": [
+        "maintenance_basis_unresolved",
+        "asking_rent_is_not_achieved_rent"
+      ],
+      "nextAction": "Resolve source basis or retain the abstention."
+    }
+  ],
+  "limitations": [
+    "Single-case demonstrator; not a validated production trust layer.",
+    "Society-family normalization uses candidate-authored prefix aliases.",
+    "Duplicate candidates are exact material-field matches and are not ground truth.",
+    "CP-0081 is a packet-grounded manual annotation, not general algorithmic detection.",
+    "Review-pending records receive zero active weight until resolved."
+  ]
+}
