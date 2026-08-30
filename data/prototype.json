@@ -5,7 +5,7 @@
     "evidenceCutoff": "2026-08-18",
     "snapshotTime": "2026-08-18T17:00:00+05:30",
     "policyVersion": "0.1.0",
-    "calculationVersion": "e5883a11d58d",
+    "calculationVersion": "1400cccca56c",
     "inputHash": "561c4abbf7ae",
     "outputHash": "9d964232ffc4",
     "isLive": false,
