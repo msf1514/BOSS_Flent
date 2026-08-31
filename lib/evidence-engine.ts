@@ -15,6 +15,8 @@ export type RunConfig = {
   furnishing: string;
   landlordBaseRent: number;
   landlordMaintenance: number;
+  landlordDeposit: number;
+  improvementCapex: number;
   areaToleranceSqft: number;
   maxLastSeenAgeDays: number;
   sampleAnnotation?: boolean;

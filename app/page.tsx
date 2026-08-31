@@ -2,62 +2,1266 @@
 /* oxlint-disable react/react-compiler */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertCircle, ArrowRight, Check, CheckCircle2, ChevronRight, CircleDot, Download, FileCheck2, FileUp, History, Loader2, RefreshCw, Search, ShieldCheck, UserRoundCheck, XCircle } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  CircleDot,
+  Download,
+  FileCheck2,
+  FileUp,
+  History,
+  Loader2,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  UserRoundCheck,
+  XCircle,
+} from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import type { AuditRow, RunConfig, ValidationIssue } from '@/lib/evidence-engine';
+import type {
+  AuditRow,
+  RunConfig,
+  ValidationIssue,
+} from '@/lib/evidence-engine';
 import type { AuditEvent, EvidenceRequest, StoredRun } from '@/lib/storage';
 
-type Notice={kind:'error'|'success';text:string}|null;
-const money=(value:number|null)=>value===null?'—':new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(value);
-const dateTime=(value:string)=>new Intl.DateTimeFormat('en-IN',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value));
-const stateLabel:Record<string,string>={include:'Included',exclude:'Excluded',duplicate_collapsed:'Duplicate collapsed',needs_human_review:'Needs review'};
-const defaults:RunConfig={dealName:'Anonymised Lakeview deal',evidenceCutoff:'2026-08-18',societyPrefix:'Lakeview',bhk:2,areaSqft:1175,furnishing:'semi-furnished',landlordBaseRent:56000,landlordMaintenance:5000,areaToleranceSqft:100,maxLastSeenAgeDays:30,sampleAnnotation:false};
-const Field=({label,wide,children}:{label:string;wide?:boolean;children:React.ReactNode})=><div className={wide?'sm:col-span-2':''}><Label className="mb-1.5 block">{label}</Label>{children}</div>;
-const Fact=({label,value}:{label:string;value:string})=><div className="min-w-0 rounded-lg border bg-white p-3"><dt className="text-xs text-muted-foreground">{label}</dt><dd className="mt-1 break-words font-medium">{value}</dd></div>;
-function StateBadge({state}:{state:string}){const tone=state==='include'?'border-emerald-200 bg-emerald-50 text-emerald-800':state==='needs_human_review'?'border-amber-200 bg-amber-50 text-amber-900':state==='duplicate_collapsed'?'border-sky-200 bg-sky-50 text-sky-800':'border-slate-200 bg-slate-50 text-slate-700';return <Badge variant="outline" className={tone}>{stateLabel[state]??state}</Badge>}
-
-function Intake({onCreated}:{onCreated:(run:StoredRun)=>void}){
-  const [config,setConfig]=useState(defaults),[file,setFile]=useState<File|null>(null),[busy,setBusy]=useState(false),[notice,setNotice]=useState<Notice>(null),[issues,setIssues]=useState<ValidationIssue[]>([]);const inputRef=useRef<HTMLInputElement>(null);
-  const update=(key:keyof RunConfig,value:string|number|boolean)=>setConfig(current=>({...current,[key]:value}));
-  async function sample(){const response=await fetch('/anonymised-deal-sample.csv');const blob=await response.blob();setFile(new File([blob],'anonymised-deal-sample.csv',{type:'text/csv'}));setConfig({...defaults,sampleAnnotation:true});setNotice({kind:'success',text:'Sample loaded. Its packet-grounded CP-0081 annotation will be disclosed in the run.'})}
-  async function submit(event:React.SyntheticEvent<HTMLFormElement>){event.preventDefault();setNotice(null);setIssues([]);if(!file){setNotice({kind:'error',text:'Select a CSV or load the anonymised sample.'});return}setBusy(true);try{const body=new FormData();body.set('file',file);body.set('config',JSON.stringify(config));body.set('actor','Pilot reviewer');const response=await fetch('/api/runs',{method:'POST',body});const payload=await response.json() as {run?:StoredRun;error?:string;validation?:{issues:ValidationIssue[]}};if(!response.ok||!payload.run){setIssues(payload.validation?.issues??[]);throw new Error(payload.error??'Run failed.')}onCreated(payload.run)}catch(error){setNotice({kind:'error',text:error instanceof Error?error.message:'Run failed.'})}finally{setBusy(false)}}
-  return <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12"><div className="mb-8 max-w-3xl"><Badge variant="outline" className="mb-4 border-blue-200 bg-blue-50 text-blue-800">Working pilot · uploaded evidence only</Badge><h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Turn a listing file into reviewable market evidence.</h1><p className="mt-3 max-w-2xl leading-7 text-muted-foreground">Validate the source, preserve its lineage, apply a declared comparison policy and move exceptions through human review. The system deliberately does not make an investment decision.</p></div>
-    <ol className="mb-6 grid gap-2 sm:grid-cols-4">{[['1','Upload','Raw evidence'],['2','Validate','Schema and rows'],['3','Configure','Subject and policy'],['4','Run','Versioned result']].map(([n,title,sub],i)=><li key={n} className="flex items-center gap-3 rounded-lg border bg-card p-3"><span className={`grid size-8 place-items-center rounded-full text-sm font-semibold ${i===0?'bg-blue-700 text-white':'bg-muted text-muted-foreground'}`}>{n}</span><span><strong className="block text-sm">{title}</strong><span className="text-xs text-muted-foreground">{sub}</span></span></li>)}</ol>
-    <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[1.05fr_.95fr]"><Card><CardHeader><CardTitle>1. Supply evidence</CardTitle><CardDescription>CSV only, maximum 2 MB. Original bytes are retained with a SHA-256 fingerprint.</CardDescription></CardHeader><CardContent className="space-y-4"><button type="button" onClick={()=>inputRef.current?.click()} className="flex min-h-48 w-full flex-col items-center justify-center rounded-lg border border-dashed bg-slate-50/60 p-6 text-center hover:border-blue-400 hover:bg-blue-50/40 focus-visible:ring-2 focus-visible:ring-ring"><FileUp className="mb-3 size-8 text-blue-700"/><span className="font-semibold">{file?.name??'Choose a comparable-listings CSV'}</span><span className="mt-1 text-sm text-muted-foreground">{file?`${Math.ceil(file.size/1024)} KB ready for validation`:'Required contract: 13 named columns'}</span></button><input ref={inputRef} className="sr-only" type="file" accept=".csv,text/csv" aria-label="Choose comparable-listings CSV" onChange={e=>{setFile(e.target.files?.[0]??null);update('sampleAnnotation',false)}}/><div className="flex flex-wrap gap-2"><Button type="button" variant="outline" className="min-h-11" onClick={sample}><FileCheck2/>Use anonymised sample</Button><a href="/anonymised-deal-sample.csv" download className="inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-sm font-medium hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"><Download className="size-4"/>Download sample</a></div><div className="rounded-lg border bg-muted/35 p-3 text-xs leading-5 text-muted-foreground"><strong className="text-foreground">Required columns:</strong> listing_id, source, posted_date, last_seen_date, society, locality, bhk, furnishing, area_sqft, rent, deposit, photo_count, poster_type.</div></CardContent></Card>
-      <Card><CardHeader><CardTitle>2. Configure the run</CardTitle><CardDescription>Explicit policy inputs—not hidden defaults.</CardDescription></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2"><Field label="Deal name" wide><Input value={config.dealName} onChange={e=>update('dealName',e.target.value)} required/></Field><Field label="Evidence cutoff"><Input type="date" value={config.evidenceCutoff} onChange={e=>update('evidenceCutoff',e.target.value)} required/></Field><Field label="Society match prefix"><Input value={config.societyPrefix} onChange={e=>update('societyPrefix',e.target.value)} required/></Field><Field label="BHK"><Input type="number" min="1" value={config.bhk} onChange={e=>update('bhk',Number(e.target.value))}/></Field><Field label="Subject area (sq ft)"><Input type="number" min="1" value={config.areaSqft} onChange={e=>update('areaSqft',Number(e.target.value))}/></Field><Field label="Furnishing"><select className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={config.furnishing} onChange={e=>update('furnishing',e.target.value)}><option value="semi-furnished">Semi-furnished</option><option value="fully-furnished">Fully furnished</option><option value="unfurnished">Unfurnished</option></select></Field><Field label="Landlord base rent"><Input type="number" min="1" value={config.landlordBaseRent} onChange={e=>update('landlordBaseRent',Number(e.target.value))}/></Field><Field label="Monthly maintenance"><Input type="number" min="0" value={config.landlordMaintenance} onChange={e=>update('landlordMaintenance',Number(e.target.value))}/></Field><Field label="Area tolerance (± sq ft)"><Input type="number" min="0" value={config.areaToleranceSqft} onChange={e=>update('areaToleranceSqft',Number(e.target.value))}/></Field><Field label="Maximum age (days)"><Input type="number" min="1" value={config.maxLastSeenAgeDays} onChange={e=>update('maxLastSeenAgeDays',Number(e.target.value))}/></Field><div className="sm:col-span-2 border-t pt-4"><Button disabled={busy} className="min-h-11 w-full sm:w-auto">{busy?<Loader2 className="animate-spin"/>:<ArrowRight/>}{busy?'Validating and analysing…':'Validate and create run'}</Button><p className="mt-2 text-xs text-muted-foreground">Bad rows are rejected and disclosed. Missing schema blocks the run.</p></div></CardContent></Card></form>
-    {notice&&<Alert className={`mt-5 ${notice.kind==='error'?'border-red-200 bg-red-50':'border-emerald-200 bg-emerald-50'}`}><AlertCircle/><AlertTitle>{notice.kind==='error'?'Action required':'Ready'}</AlertTitle><AlertDescription>{notice.text}</AlertDescription></Alert>}{issues.length>0&&<Card className="mt-5"><CardHeader><CardTitle>Validation report</CardTitle><CardDescription>{issues.length} issues found.</CardDescription></CardHeader><CardContent className="space-y-2">{issues.slice(0,30).map((issue,i)=><div key={`${issue.code}-${i}`} className="flex gap-3 rounded-lg border p-3 text-sm"><Badge variant="outline">{issue.severity}</Badge><div><strong>{issue.code.replaceAll('_',' ')}</strong><p className="text-muted-foreground">{issue.rowNumber?`Row ${issue.rowNumber}: `:''}{issue.message}</p></div></div>)}</CardContent></Card>}</main>
-}
-
-function Workbench({initialRun,onNew}:{initialRun:StoredRun;onNew:()=>void}){
-  const [run,setRun]=useState(initialRun),[tab,setTab]=useState('overview'),[query,setQuery]=useState(''),[filter,setFilter]=useState('material'),[selected,setSelected]=useState<AuditRow|null>(null),[reason,setReason]=useState(''),[decision,setDecision]=useState<'include'|'exclude'|'defer'>('defer'),[busy,setBusy]=useState(false),[notice,setNotice]=useState<Notice>(null);
-  const unresolved=run.requests.filter(item=>item.status!=='resolved').length,pending=run.rows.filter(item=>item.b2State==='needs_human_review'&&!run.reviews.some(review=>review.listingId===item.listingId)).length,ready=unresolved===0&&pending===0;
-  const rows=useMemo(()=>run.rows.filter(row=>`${row.listingId} ${row.observed.source} ${row.observed.society} ${row.reasons.join(' ')}`.toLowerCase().includes(query.toLowerCase())&&(filter==='all'||filter==='material'&&row.b2State!=='exclude'||row.b2State===filter)),[run.rows,query,filter]);
-  async function action(body:Record<string,unknown>){setBusy(true);setNotice(null);try{const response=await fetch('/api/actions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:run.id,actor:'Pilot reviewer',...body})});const payload=await response.json() as {run?:StoredRun;error?:string};if(!response.ok||!payload.run)throw new Error(payload.error??'Action failed.');setRun(payload.run);setNotice({kind:'success',text:body.action==='rerun'?`Version ${payload.run.versionNumber} created from the preserved source and recorded decisions.`:'Change saved to audit history.'});return true}catch(error){setNotice({kind:'error',text:error instanceof Error?error.message:'Action failed.'});return false}finally{setBusy(false)}}
-  async function saveReview(){if(selected&&await action({action:'review',listingId:selected.listingId,decision,reason})){setSelected(null);setReason('')}}
-  return <div className="min-h-screen bg-slate-50/70"><header className="sticky top-0 z-30 border-b bg-white/95 backdrop-blur"><div className="mx-auto flex min-h-16 max-w-[1500px] items-center justify-between gap-4 px-4 sm:px-6"><div><strong className="text-sm">BOSS Evidence Workbench</strong><span className="ml-3 hidden text-xs text-muted-foreground sm:inline">Pilot workspace · no live scraping</span></div><div className="flex items-center gap-2"><Badge variant="outline">v{run.versionNumber}</Badge><Button variant="outline" size="sm" className="min-h-10" onClick={onNew}><FileUp/>New upload</Button></div></div></header><main className="mx-auto max-w-[1500px] px-4 py-5 sm:px-6">
-    <div className="mb-4 flex flex-col gap-4 rounded-xl border bg-white p-4 lg:flex-row lg:items-center lg:justify-between"><div><div className="flex flex-wrap items-center gap-2"><Badge variant="outline" className={ready?'border-emerald-200 bg-emerald-50 text-emerald-800':'border-amber-200 bg-amber-50 text-amber-900'}>{ready?'Decision-ready evidence':'Not decision-ready'}</Badge><span className="text-xs text-muted-foreground">Run {run.id.slice(-8)} · {dateTime(run.createdAt)}</span></div><h1 className="mt-2 text-xl font-semibold sm:text-2xl">{run.dealName}</h1><p className="mt-1 text-sm text-muted-foreground">{unresolved} evidence requests unresolved · {pending} rows awaiting review · {run.filename}</p></div><Button className="min-h-11" onClick={()=>setTab(pending?'review':'evidence')}>{pending?'Review highest-risk rows':'Resolve evidence requests'}<ChevronRight/></Button></div>
-    <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">{[['Captured',true],['Validated',run.validation.errorCount===0],['Normalized',true],['Analysed',true],['Reviewed',pending===0],['Decision-ready',ready]].map(([label,done])=><div key={String(label)} className={`flex items-center gap-2 rounded-lg border p-3 text-sm font-medium ${done?'border-emerald-200 bg-emerald-50/70 text-emerald-900':'bg-white text-muted-foreground'}`}>{done?<CheckCircle2 className="size-4"/>:<CircleDot className="size-4"/>}{label}</div>)}</div>
-    {notice&&<Alert className={`mt-4 ${notice.kind==='error'?'border-red-200 bg-red-50':'border-emerald-200 bg-emerald-50'}`}><AlertCircle/><AlertTitle>{notice.kind==='error'?'Could not save':'Saved'}</AlertTitle><AlertDescription>{notice.text}</AlertDescription></Alert>}
-    <Tabs value={tab} onValueChange={setTab} className="mt-5"><div className="overflow-x-auto"><TabsList><TabsTrigger value="overview">Overview</TabsTrigger><TabsTrigger value="comparables">Comparables</TabsTrigger><TabsTrigger value="review">Review queue · {pending}</TabsTrigger><TabsTrigger value="evidence">Evidence requests · {unresolved}</TabsTrigger><TabsTrigger value="audit">Audit history</TabsTrigger></TabsList></div><TabsContent value="overview" className="pt-4"><Overview run={run} pending={pending} unresolved={unresolved}/></TabsContent><TabsContent value="comparables" className="pt-4"><Comparables run={run} rows={rows} query={query} setQuery={setQuery} filter={filter} setFilter={setFilter} setSelected={setSelected}/></TabsContent><TabsContent value="review" className="pt-4"><Review run={run} onSelect={setSelected}/></TabsContent><TabsContent value="evidence" className="pt-4"><Requests key={run.id} items={run.requests} busy={busy} save={item=>action({action:'request',requestId:item.id,status:item.status,owner:item.owner,evidenceNote:item.evidenceNote})}/></TabsContent><TabsContent value="audit" className="pt-4"><Audit events={run.audit}/></TabsContent></Tabs>
-    <div className="my-6 flex flex-col gap-3 rounded-xl border border-blue-200 bg-blue-50/60 p-4 sm:flex-row sm:items-center sm:justify-between"><div><strong className="text-sm text-blue-950">Completed versions are immutable.</strong><p className="mt-1 text-xs text-blue-900">Decisions affect estimates only in a child run created from the preserved raw source.</p></div><Button disabled={busy||run.reviews.length===0} className="min-h-11" onClick={()=>action({action:'rerun'})}>{busy?<Loader2 className="animate-spin"/>:<RefreshCw/>}Create version {run.versionNumber+1}</Button></div></main>
-    {selected&&<div role="presentation" className="fixed inset-0 z-50 bg-slate-950/35 p-0 sm:p-6" onMouseDown={e=>{if(e.target===e.currentTarget)setSelected(null)}} onKeyDown={e=>{if(e.key==='Escape')setSelected(null)}}><dialog open aria-label={`Review ${selected.listingId}`} className="ml-auto flex h-full w-full max-w-xl flex-col overflow-y-auto bg-white p-5 text-foreground shadow-xl sm:rounded-xl"><div className="flex items-start justify-between"><div><Badge variant="outline">Human adjudication</Badge><h2 className="mt-2 text-xl font-semibold">{selected.listingId}</h2><p className="mt-1 text-sm text-muted-foreground">System recommendation: <strong className="text-foreground">{stateLabel[selected.b2State]}</strong>. Human decisions are stored separately.</p></div><Button variant="ghost" size="icon" onClick={()=>setSelected(null)} aria-label="Close"><XCircle/></Button></div><div className="mt-5 grid grid-cols-2 gap-3 text-sm"><Fact label="Asking rent" value={money(Number(selected.observed.rent))}/><Fact label="Observed source" value={String(selected.observed.source)}/><Fact label="Attributes" value={`${selected.observed.bhk} BHK · ${selected.observed.areaSqft??'missing'} sq ft`}/><Fact label="Last seen age" value={`${selected.normalized.lastSeenAgeDays} days`}/></div><div className="mt-4 rounded-lg border bg-muted/30 p-3 text-sm"><strong className="text-xs uppercase text-muted-foreground">System reasons</strong><p className="mt-2">{selected.reasons.join(' · ').replaceAll('_',' ')||'Meets policy'}</p></div><div className="mt-5 space-y-4 border-t pt-5"><Field label="Human decision"><div className="grid grid-cols-3 gap-2">{(['include','exclude','defer'] as const).map(item=><Button key={item} variant={decision===item?'default':'outline'} className="min-h-11 capitalize" onClick={()=>setDecision(item)}>{item}</Button>)}</div></Field><Field label="Reason required"><Textarea value={reason} onChange={e=>setReason(e.target.value)} placeholder="Record the evidence and rationale."/></Field><Button className="min-h-11 w-full" disabled={busy||reason.trim().length<4} onClick={saveReview}>{busy?<Loader2 className="animate-spin"/>:<UserRoundCheck/>}Save review decision</Button></div></dialog></div>}
+type Notice = { kind: 'error' | 'success'; text: string } | null;
+const money = (value: number | null) =>
+  value === null
+    ? '—'
+    : new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0,
+      }).format(value);
+const dateTime = (value: string) =>
+  new Intl.DateTimeFormat('en-IN', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value));
+const stateLabel: Record<string, string> = {
+  include: 'Included',
+  exclude: 'Excluded',
+  duplicate_collapsed: 'Duplicate collapsed',
+  needs_human_review: 'Needs review',
+};
+const defaults: RunConfig = {
+  dealName: 'Anonymised Lakeview deal',
+  evidenceCutoff: '2026-08-18',
+  societyPrefix: 'Lakeview',
+  bhk: 2,
+  areaSqft: 1175,
+  furnishing: 'semi-furnished',
+  landlordBaseRent: 56000,
+  landlordMaintenance: 5000,
+  landlordDeposit: 280000,
+  improvementCapex: 160000,
+  areaToleranceSqft: 100,
+  maxLastSeenAgeDays: 30,
+  sampleAnnotation: false,
+};
+const Field = ({
+  label,
+  wide,
+  children,
+}: {
+  label: string;
+  wide?: boolean;
+  children: React.ReactNode;
+}) => (
+  <div className={wide ? 'sm:col-span-2' : ''}>
+    <Label className="mb-1.5 block">{label}</Label>
+    {children}
   </div>
+);
+const Fact = ({ label, value }: { label: string; value: string }) => (
+  <div className="min-w-0 rounded-lg border bg-white p-3">
+    <dt className="text-xs text-muted-foreground">{label}</dt>
+    <dd className="mt-1 break-words font-medium">{value}</dd>
+  </div>
+);
+function StateBadge({ state }: { state: string }) {
+  const tone =
+    state === 'include'
+      ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+      : state === 'needs_human_review'
+        ? 'border-amber-200 bg-amber-50 text-amber-900'
+        : state === 'duplicate_collapsed'
+          ? 'border-sky-200 bg-sky-50 text-sky-800'
+          : 'border-slate-200 bg-slate-50 text-slate-700';
+  return (
+    <Badge variant="outline" className={tone}>
+      {stateLabel[state] ?? state}
+    </Badge>
+  );
 }
 
-function Overview({run,pending,unresolved}:{run:StoredRun;pending:number;unresolved:number}){const b2=run.summary.baselines.B2,ask=run.config.landlordBaseRent+run.config.landlordMaintenance;return <div className="space-y-4"><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><Metric label="Defensible asking median" value={money(b2.estimate)} note={`${b2.count} effective comparables`}/><Metric label="Observed asking band" value={`${money(run.summary.band.p25)}–${money(run.summary.band.p75)}`} note="25th–75th percentile"/><Metric label="Owner monthly cost" value={money(ask)} note={`${money(run.config.landlordBaseRent)} rent + ${money(run.config.landlordMaintenance)} maintenance`}/><Metric label="Evidence confidence" value={run.summary.askingEvidenceConfidence} note={`Achievable rent remains ${run.summary.achievableBaseRentConfidence}`}/></div><div className="grid gap-4 lg:grid-cols-2"><Card><CardHeader><CardTitle>What the evidence supports</CardTitle><CardDescription>Bounded to this upload and policy.</CardDescription></CardHeader><CardContent className="space-y-3 text-sm"><Line text={`B0: ${run.summary.baselines.B0.count} same-BHK rows → ${money(run.summary.baselines.B0.estimate)}`}/><Line text={`B1: ${run.summary.baselines.B1.count} policy-comparable rows → ${money(run.summary.baselines.B1.estimate)}`}/><Line text={`B2: ${b2.count} reviewed-weight rows → ${money(b2.estimate)}`}/><p className="flex gap-2 leading-6"><ShieldCheck className="mt-1 size-4 shrink-0 text-blue-700"/>{run.summary.decisionBoundary}</p></CardContent></Card><Card className="border-amber-200"><CardHeader><CardTitle>Current blockers</CardTitle><CardDescription>Readiness is a workflow state, not a confidence badge.</CardDescription></CardHeader><CardContent className="space-y-3"><div className="flex justify-between rounded-lg border p-3 text-sm"><span>Rows needing adjudication</span><strong>{pending}</strong></div><div className="flex justify-between rounded-lg border p-3 text-sm"><span>Evidence requests unresolved</span><strong>{unresolved}</strong></div>{run.summary.limitations.map(item=><p key={item} className="flex gap-2 text-xs leading-5 text-muted-foreground"><AlertCircle className="mt-0.5 size-4 shrink-0 text-amber-700"/>{item}</p>)}</CardContent></Card></div><Card><CardContent className="grid gap-3 py-4 text-xs sm:grid-cols-3"><Fact label="Input SHA-256" value={run.inputHash}/><Fact label="Engine" value={run.engineVersion}/><Fact label="Validation" value={`${run.validation.acceptedRows} accepted · ${run.validation.rejectedRows} rejected · ${run.validation.warningCount} warnings`}/></CardContent></Card></div>}
-const Metric=({label,value,note}:{label:string;value:string;note:string})=><Card><CardContent className="py-5"><p className="text-xs font-medium text-muted-foreground">{label}</p><p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p><p className="mt-1 text-xs text-muted-foreground">{note}</p></CardContent></Card>;
-const Line=({text}:{text:string})=><p className="flex gap-2 leading-6"><Check className="mt-1 size-4 shrink-0 text-emerald-700"/>{text}</p>;
+function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
+  const [config, setConfig] = useState(defaults),
+    [file, setFile] = useState<File | null>(null),
+    [busy, setBusy] = useState(false),
+    [notice, setNotice] = useState<Notice>(null),
+    [issues, setIssues] = useState<ValidationIssue[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const update = (key: keyof RunConfig, value: string | number | boolean) =>
+    setConfig((current) => ({ ...current, [key]: value }));
+  async function sample() {
+    const response = await fetch('/anonymised-deal-sample.csv');
+    const blob = await response.blob();
+    setFile(
+      new File([blob], 'anonymised-deal-sample.csv', { type: 'text/csv' }),
+    );
+    setConfig({ ...defaults, sampleAnnotation: true });
+    setNotice({
+      kind: 'success',
+      text: 'Sample loaded. Its packet-grounded CP-0081 annotation will be disclosed in the run.',
+    });
+  }
+  async function submit(event: React.SyntheticEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setNotice(null);
+    setIssues([]);
+    if (!file) {
+      setNotice({
+        kind: 'error',
+        text: 'Select a CSV or load the anonymised sample.',
+      });
+      return;
+    }
+    setBusy(true);
+    try {
+      const body = new FormData();
+      body.set('file', file);
+      body.set('config', JSON.stringify(config));
+      body.set('actor', 'Pilot reviewer');
+      const response = await fetch('/api/runs', { method: 'POST', body });
+      const payload = (await response.json()) as {
+        run?: StoredRun;
+        error?: string;
+        validation?: { issues: ValidationIssue[] };
+      };
+      if (!response.ok || !payload.run) {
+        setIssues(payload.validation?.issues ?? []);
+        throw new Error(payload.error ?? 'Run failed.');
+      }
+      onCreated(payload.run);
+    } catch (error) {
+      setNotice({
+        kind: 'error',
+        text: error instanceof Error ? error.message : 'Run failed.',
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
+      <div className="mb-8 max-w-3xl">
+        <Badge
+          variant="outline"
+          className="mb-4 border-blue-200 bg-blue-50 text-blue-800"
+        >
+          Working pilot · uploaded evidence only
+        </Badge>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          Turn a listing file into reviewable market evidence.
+        </h1>
+        <p className="mt-3 max-w-2xl leading-7 text-muted-foreground">
+          Validate the source, preserve its lineage, apply a declared comparison
+          policy and move exceptions through human review. The system
+          deliberately does not make an investment decision.
+        </p>
+      </div>
+      <ol className="mb-6 grid gap-2 sm:grid-cols-4">
+        {[
+          ['1', 'Upload', 'Raw evidence'],
+          ['2', 'Validate', 'Schema and rows'],
+          ['3', 'Configure', 'Subject and policy'],
+          ['4', 'Run', 'Versioned result'],
+        ].map(([n, title, sub], i) => (
+          <li
+            key={n}
+            className="flex items-center gap-3 rounded-lg border bg-card p-3"
+          >
+            <span
+              className={`grid size-8 place-items-center rounded-full text-sm font-semibold ${i === 0 ? 'bg-blue-700 text-white' : 'bg-muted text-muted-foreground'}`}
+            >
+              {n}
+            </span>
+            <span>
+              <strong className="block text-sm">{title}</strong>
+              <span className="text-xs text-muted-foreground">{sub}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+      <form
+        onSubmit={submit}
+        className="grid gap-5 lg:grid-cols-[1.05fr_.95fr]"
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>1. Supply evidence</CardTitle>
+            <CardDescription>
+              CSV only, maximum 2 MB. Original bytes are retained with a SHA-256
+              fingerprint.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="flex min-h-48 w-full flex-col items-center justify-center rounded-lg border border-dashed bg-slate-50/60 p-6 text-center hover:border-blue-400 hover:bg-blue-50/40 focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <FileUp className="mb-3 size-8 text-blue-700" />
+              <span className="font-semibold">
+                {file?.name ?? 'Choose a comparable-listings CSV'}
+              </span>
+              <span className="mt-1 text-sm text-muted-foreground">
+                {file
+                  ? `${Math.ceil(file.size / 1024)} KB ready for validation`
+                  : 'Required contract: 13 named columns'}
+              </span>
+            </button>
+            <input
+              ref={inputRef}
+              className="sr-only"
+              type="file"
+              accept=".csv,text/csv"
+              aria-label="Choose comparable-listings CSV"
+              onChange={(e) => {
+                setFile(e.target.files?.[0] ?? null);
+                update('sampleAnnotation', false);
+              }}
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="min-h-11"
+                onClick={sample}
+              >
+                <FileCheck2 />
+                Use anonymised sample
+              </Button>
+              <a
+                href="/anonymised-deal-sample.csv"
+                download
+                className="inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-sm font-medium hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Download className="size-4" />
+                Download sample
+              </a>
+            </div>
+            <div className="rounded-lg border bg-muted/35 p-3 text-xs leading-5 text-muted-foreground">
+              <strong className="text-foreground">
+                Required columns:
+              </strong>{' '}
+              listing_id, source, posted_date, last_seen_date, society,
+              locality, bhk, furnishing, area_sqft, rent, deposit, photo_count,
+              poster_type.
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>2. Configure the run</CardTitle>
+            <CardDescription>
+              Explicit policy and deal inputs—not hidden defaults.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2">
+            <Field label="Deal name" wide>
+              <Input
+                value={config.dealName}
+                onChange={(e) => update('dealName', e.target.value)}
+                required
+              />
+            </Field>
+            <Field label="Evidence cutoff">
+              <Input
+                type="date"
+                value={config.evidenceCutoff}
+                onChange={(e) => update('evidenceCutoff', e.target.value)}
+                required
+              />
+            </Field>
+            <Field label="Society match prefix">
+              <Input
+                value={config.societyPrefix}
+                onChange={(e) => update('societyPrefix', e.target.value)}
+                required
+              />
+            </Field>
+            <Field label="BHK">
+              <Input
+                type="number"
+                min="1"
+                value={config.bhk}
+                onChange={(e) => update('bhk', Number(e.target.value))}
+              />
+            </Field>
+            <Field label="Subject area (sq ft)">
+              <Input
+                type="number"
+                min="1"
+                value={config.areaSqft}
+                onChange={(e) => update('areaSqft', Number(e.target.value))}
+              />
+            </Field>
+            <Field label="Furnishing">
+              <select
+                className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                value={config.furnishing}
+                onChange={(e) => update('furnishing', e.target.value)}
+              >
+                <option value="semi-furnished">Semi-furnished</option>
+                <option value="fully-furnished">Fully furnished</option>
+                <option value="unfurnished">Unfurnished</option>
+              </select>
+            </Field>
+            <Field label="Landlord base rent">
+              <Input
+                type="number"
+                min="1"
+                value={config.landlordBaseRent}
+                onChange={(e) =>
+                  update('landlordBaseRent', Number(e.target.value))
+                }
+              />
+            </Field>
+            <Field label="Monthly maintenance">
+              <Input
+                type="number"
+                min="0"
+                value={config.landlordMaintenance}
+                onChange={(e) =>
+                  update('landlordMaintenance', Number(e.target.value))
+                }
+              />
+            </Field>
+            <Field label="Security deposit">
+              <Input
+                type="number"
+                min="0"
+                value={config.landlordDeposit}
+                onChange={(e) =>
+                  update('landlordDeposit', Number(e.target.value))
+                }
+              />
+            </Field>
+            <Field label="Improvement capex">
+              <Input
+                type="number"
+                min="0"
+                value={config.improvementCapex}
+                onChange={(e) =>
+                  update('improvementCapex', Number(e.target.value))
+                }
+              />
+            </Field>
+            <Field label="Area tolerance (± sq ft)">
+              <Input
+                type="number"
+                min="0"
+                value={config.areaToleranceSqft}
+                onChange={(e) =>
+                  update('areaToleranceSqft', Number(e.target.value))
+                }
+              />
+            </Field>
+            <Field label="Maximum age (days)">
+              <Input
+                type="number"
+                min="1"
+                value={config.maxLastSeenAgeDays}
+                onChange={(e) =>
+                  update('maxLastSeenAgeDays', Number(e.target.value))
+                }
+              />
+            </Field>
+            <div className="sm:col-span-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs leading-5 text-blue-950">
+              <strong>Calculation boundary:</strong> deposit and capex are
+              versioned decision context. They do not change the comparable-rent
+              median.
+            </div>
+            <div className="sm:col-span-2 border-t pt-4">
+              <Button disabled={busy} className="min-h-11 w-full sm:w-auto">
+                {busy ? <Loader2 className="animate-spin" /> : <ArrowRight />}
+                {busy ? 'Validating and analysing…' : 'Validate and create run'}
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Bad rows are rejected and disclosed. Missing schema blocks the
+                run.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </form>
+      {notice && (
+        <Alert
+          className={`mt-5 ${notice.kind === 'error' ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}
+        >
+          <AlertCircle />
+          <AlertTitle>
+            {notice.kind === 'error' ? 'Action required' : 'Ready'}
+          </AlertTitle>
+          <AlertDescription>{notice.text}</AlertDescription>
+        </Alert>
+      )}
+      {issues.length > 0 && (
+        <Card className="mt-5">
+          <CardHeader>
+            <CardTitle>Validation report</CardTitle>
+            <CardDescription>{issues.length} issues found.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {issues.slice(0, 30).map((issue, i) => (
+              <div
+                key={`${issue.code}-${i}`}
+                className="flex gap-3 rounded-lg border p-3 text-sm"
+              >
+                <Badge variant="outline">{issue.severity}</Badge>
+                <div>
+                  <strong>{issue.code.replaceAll('_', ' ')}</strong>
+                  <p className="text-muted-foreground">
+                    {issue.rowNumber ? `Row ${issue.rowNumber}: ` : ''}
+                    {issue.message}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+    </main>
+  );
+}
 
-function Comparables({run,rows,query,setQuery,filter,setFilter,setSelected}:{run:StoredRun;rows:AuditRow[];query:string;setQuery:(v:string)=>void;filter:string;setFilter:(v:string)=>void;setSelected:(r:AuditRow)=>void}){return <Card><CardHeader><CardTitle>Comparable ledger</CardTitle><CardDescription>Every accepted row remains inspectable; effective weight controls the estimate.</CardDescription></CardHeader><CardContent><div className="mb-4 flex flex-col gap-3 md:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-3 size-4 text-muted-foreground"/><Input className="pl-9" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search ID, source, society or reason"/></div><select className="h-10 rounded-md border bg-white px-3 text-sm" value={filter} onChange={e=>setFilter(e.target.value)}><option value="material">Material rows</option><option value="all">All rows</option><option value="include">Included</option><option value="needs_human_review">Needs review</option><option value="duplicate_collapsed">Duplicate collapsed</option><option value="exclude">Excluded</option></select></div><div className="max-h-[620px] overflow-auto rounded-lg border"><table className="w-full min-w-[760px] text-left text-sm"><thead className="sticky top-0 bg-slate-100 text-xs text-muted-foreground"><tr><th className="p-3">Listing</th><th className="p-3">Observed facts</th><th className="p-3">Asking</th><th className="p-3">System state</th><th className="p-3">Weight</th></tr></thead><tbody>{rows.map(row=><tr key={row.listingId} className="cursor-pointer border-t hover:bg-blue-50/50" onClick={()=>setSelected(row)}><td className="p-3 font-semibold">{row.listingId}<span className="block text-xs font-normal text-muted-foreground">{String(row.observed.source)}</span></td><td className="p-3">{String(row.observed.society)}<span className="block text-xs text-muted-foreground">{String(row.observed.bhk)} BHK · {String(row.observed.areaSqft??'—')} sq ft · {row.normalized.furnishing}</span></td><td className="p-3 font-medium">{money(Number(row.observed.rent))}</td><td className="p-3"><StateBadge state={row.b2State}/></td><td className="p-3">{row.effectiveWeight}</td></tr>)}</tbody></table></div><p className="mt-3 text-xs text-muted-foreground">{rows.length} of {run.rows.length} accepted rows shown. Select any row to inspect and adjudicate.</p></CardContent></Card>}
-function Review({run,onSelect}:{run:StoredRun;onSelect:(r:AuditRow)=>void}){const rows=run.rows.filter(row=>row.b2State==='needs_human_review');return <Card><CardHeader><CardTitle>Human review queue</CardTitle><CardDescription>System recommendations are never represented as reviewer decisions.</CardDescription></CardHeader><CardContent className="space-y-2">{rows.map(row=>{const review=run.reviews.find(item=>item.listingId===row.listingId);return <button key={row.listingId} className="flex min-h-16 w-full items-center justify-between gap-3 rounded-lg border p-3 text-left hover:bg-muted/40" onClick={()=>onSelect(row)}><div><div className="flex flex-wrap items-center gap-2"><strong className="text-sm">{row.listingId}</strong><StateBadge state={row.b2State}/>{review&&<Badge variant="outline" className="border-violet-200 bg-violet-50 text-violet-800">Human: {review.decision}</Badge>}</div><p className="mt-1 text-xs text-muted-foreground">{row.reasons.join(' · ').replaceAll('_',' ')}</p></div><ChevronRight className="size-4"/></button>})}</CardContent></Card>}
-function Requests({items,busy,save}:{items:EvidenceRequest[];busy:boolean;save:(item:EvidenceRequest)=>Promise<unknown>}){const [drafts,setDrafts]=useState(items);const change=(id:string,key:keyof EvidenceRequest,value:string)=>setDrafts(current=>current.map(item=>item.id===id?{...item,[key]:value}:item));return <div className="grid gap-4 lg:grid-cols-2">{drafts.map(item=><Card key={item.id}><CardHeader><CardTitle className="text-base">{item.title}</CardTitle><CardDescription>Evidence is never marked complete automatically.</CardDescription></CardHeader><CardContent className="space-y-3"><Field label="Owner"><Input value={item.owner} onChange={e=>change(item.id,'owner',e.target.value)}/></Field><Field label="Evidence note"><Textarea value={item.evidenceNote} onChange={e=>change(item.id,'evidenceNote',e.target.value)} placeholder="Reference the document, source or blocker."/></Field><div className="flex gap-2"><select className="h-11 rounded-md border bg-white px-3 text-sm" value={item.status} onChange={e=>change(item.id,'status',e.target.value)}><option value="open">Open</option><option value="blocked">Blocked</option><option value="resolved">Resolved</option></select><Button disabled={busy} className="min-h-11" onClick={()=>save(item)}>Save request</Button></div></CardContent></Card>)}</div>}
-function Audit({events}:{events:AuditEvent[]}){return <Card><CardHeader><CardTitle>Audit history</CardTitle><CardDescription>Append-only records reconstruct who changed what and when.</CardDescription></CardHeader><CardContent><ol>{events.map(event=><li key={event.id} className="flex gap-3 border-b py-4 last:border-0"><span className="grid size-7 shrink-0 place-items-center rounded-full border"><History className="size-3.5"/></span><div><p className="text-sm font-semibold">{event.eventType.replaceAll('_',' ')}</p><p className="mt-1 text-xs text-muted-foreground">{event.actor} · {dateTime(event.createdAt)}</p><code className="mt-2 block max-w-3xl overflow-x-auto rounded bg-muted p-2 text-[11px]">{JSON.stringify(event.payload)}</code></div></li>)}</ol></CardContent></Card>}
+function Workbench({
+  initialRun,
+  onNew,
+}: {
+  initialRun: StoredRun;
+  onNew: () => void;
+}) {
+  const [run, setRun] = useState(initialRun),
+    [tab, setTab] = useState('overview'),
+    [query, setQuery] = useState(''),
+    [filter, setFilter] = useState('material'),
+    [selected, setSelected] = useState<AuditRow | null>(null),
+    [reason, setReason] = useState(''),
+    [decision, setDecision] = useState<'include' | 'exclude' | 'defer'>(
+      'defer',
+    ),
+    [busy, setBusy] = useState(false),
+    [notice, setNotice] = useState<Notice>(null);
+  const unresolved = run.requests.filter(
+      (item) => item.status !== 'resolved',
+    ).length,
+    pending = run.rows.filter(
+      (item) =>
+        item.b2State === 'needs_human_review' &&
+        !run.reviews.some((review) => review.listingId === item.listingId),
+    ).length,
+    ready = unresolved === 0 && pending === 0;
+  const rows = useMemo(
+    () =>
+      run.rows.filter(
+        (row) =>
+          `${row.listingId} ${row.observed.source} ${row.observed.society} ${row.reasons.join(' ')}`
+            .toLowerCase()
+            .includes(query.toLowerCase()) &&
+          (filter === 'all' ||
+            (filter === 'material' && row.b2State !== 'exclude') ||
+            row.b2State === filter),
+      ),
+    [run.rows, query, filter],
+  );
+  async function action(body: Record<string, unknown>) {
+    setBusy(true);
+    setNotice(null);
+    try {
+      const response = await fetch('/api/actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          runId: run.id,
+          actor: 'Pilot reviewer',
+          ...body,
+        }),
+      });
+      const payload = (await response.json()) as {
+        run?: StoredRun;
+        error?: string;
+      };
+      if (!response.ok || !payload.run)
+        throw new Error(payload.error ?? 'Action failed.');
+      setRun(payload.run);
+      setNotice({
+        kind: 'success',
+        text:
+          body.action === 'rerun'
+            ? `Version ${payload.run.versionNumber} created from the preserved source and recorded decisions.`
+            : 'Change saved to audit history.',
+      });
+      return true;
+    } catch (error) {
+      setNotice({
+        kind: 'error',
+        text: error instanceof Error ? error.message : 'Action failed.',
+      });
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function saveReview() {
+    if (
+      selected &&
+      (await action({
+        action: 'review',
+        listingId: selected.listingId,
+        decision,
+        reason,
+      }))
+    ) {
+      setSelected(null);
+      setReason('');
+    }
+  }
+  return (
+    <div className="min-h-screen bg-slate-50/70">
+      <header className="sticky top-0 z-30 border-b bg-white/95 backdrop-blur">
+        <div className="mx-auto flex min-h-16 max-w-[1500px] items-center justify-between gap-4 px-4 sm:px-6">
+          <div>
+            <strong className="text-sm">BOSS Evidence Workbench</strong>
+            <span className="ml-3 hidden text-xs text-muted-foreground sm:inline">
+              Pilot workspace · no live scraping
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">v{run.versionNumber}</Badge>
+            <Button
+              variant="outline"
+              size="sm"
+              className="min-h-10"
+              onClick={onNew}
+            >
+              <FileUp />
+              New upload
+            </Button>
+          </div>
+        </div>
+      </header>
+      <main className="mx-auto max-w-[1500px] px-4 py-5 sm:px-6">
+        <div className="mb-4 flex flex-col gap-4 rounded-xl border bg-white p-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge
+                variant="outline"
+                className={
+                  ready
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                    : 'border-amber-200 bg-amber-50 text-amber-900'
+                }
+              >
+                {ready ? 'Decision-ready evidence' : 'Not decision-ready'}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                Run {run.id.slice(-8)} · {dateTime(run.createdAt)}
+              </span>
+            </div>
+            <h1 className="mt-2 text-xl font-semibold sm:text-2xl">
+              {run.dealName}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {unresolved} evidence requests unresolved · {pending} rows
+              awaiting review · {run.filename}
+            </p>
+          </div>
+          <Button
+            className="min-h-11"
+            onClick={() => setTab(pending ? 'review' : 'evidence')}
+          >
+            {pending ? 'Review highest-risk rows' : 'Resolve evidence requests'}
+            <ChevronRight />
+          </Button>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          {[
+            ['Captured', true],
+            ['Validated', run.validation.errorCount === 0],
+            ['Normalized', true],
+            ['Analysed', true],
+            ['Reviewed', pending === 0],
+            ['Decision-ready', ready],
+          ].map(([label, done]) => (
+            <div
+              key={String(label)}
+              className={`flex items-center gap-2 rounded-lg border p-3 text-sm font-medium ${done ? 'border-emerald-200 bg-emerald-50/70 text-emerald-900' : 'bg-white text-muted-foreground'}`}
+            >
+              {done ? (
+                <CheckCircle2 className="size-4" />
+              ) : (
+                <CircleDot className="size-4" />
+              )}
+              {label}
+            </div>
+          ))}
+        </div>
+        {notice && (
+          <Alert
+            className={`mt-4 ${notice.kind === 'error' ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}
+          >
+            <AlertCircle />
+            <AlertTitle>
+              {notice.kind === 'error' ? 'Could not save' : 'Saved'}
+            </AlertTitle>
+            <AlertDescription>{notice.text}</AlertDescription>
+          </Alert>
+        )}
+        <Tabs value={tab} onValueChange={setTab} className="mt-5">
+          <div className="overflow-x-auto">
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="comparables">Comparables</TabsTrigger>
+              <TabsTrigger value="review">Review queue · {pending}</TabsTrigger>
+              <TabsTrigger value="evidence">
+                Evidence requests · {unresolved}
+              </TabsTrigger>
+              <TabsTrigger value="audit">Audit history</TabsTrigger>
+            </TabsList>
+          </div>
+          <TabsContent value="overview" className="pt-4">
+            <Overview run={run} pending={pending} unresolved={unresolved} />
+          </TabsContent>
+          <TabsContent value="comparables" className="pt-4">
+            <Comparables
+              run={run}
+              rows={rows}
+              query={query}
+              setQuery={setQuery}
+              filter={filter}
+              setFilter={setFilter}
+              setSelected={setSelected}
+            />
+          </TabsContent>
+          <TabsContent value="review" className="pt-4">
+            <Review run={run} onSelect={setSelected} />
+          </TabsContent>
+          <TabsContent value="evidence" className="pt-4">
+            <Requests
+              key={run.id}
+              items={run.requests}
+              busy={busy}
+              save={(item) =>
+                action({
+                  action: 'request',
+                  requestId: item.id,
+                  status: item.status,
+                  owner: item.owner,
+                  evidenceNote: item.evidenceNote,
+                })
+              }
+            />
+          </TabsContent>
+          <TabsContent value="audit" className="pt-4">
+            <Audit events={run.audit} />
+          </TabsContent>
+        </Tabs>
+        <div className="my-6 flex flex-col gap-3 rounded-xl border border-blue-200 bg-blue-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <strong className="text-sm text-blue-950">
+              Completed versions are immutable.
+            </strong>
+            <p className="mt-1 text-xs text-blue-900">
+              Decisions affect estimates only in a child run created from the
+              preserved raw source.
+            </p>
+          </div>
+          <Button
+            disabled={busy || run.reviews.length === 0}
+            className="min-h-11"
+            onClick={() => action({ action: 'rerun' })}
+          >
+            {busy ? <Loader2 className="animate-spin" /> : <RefreshCw />}Create
+            version {run.versionNumber + 1}
+          </Button>
+        </div>
+      </main>
+      {selected && (
+        <div
+          role="presentation"
+          className="fixed inset-0 z-50 bg-slate-950/35 p-0 sm:p-6"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setSelected(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setSelected(null);
+          }}
+        >
+          <dialog
+            open
+            aria-label={`Review ${selected.listingId}`}
+            className="ml-auto flex h-full w-full max-w-xl flex-col overflow-y-auto bg-white p-5 text-foreground shadow-xl sm:rounded-xl"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <Badge variant="outline">Human adjudication</Badge>
+                <h2 className="mt-2 text-xl font-semibold">
+                  {selected.listingId}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  System recommendation:{' '}
+                  <strong className="text-foreground">
+                    {stateLabel[selected.b2State]}
+                  </strong>
+                  . Human decisions are stored separately.
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSelected(null)}
+                aria-label="Close"
+              >
+                <XCircle />
+              </Button>
+            </div>
+            <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
+              <Fact
+                label="Asking rent"
+                value={money(Number(selected.observed.rent))}
+              />
+              <Fact
+                label="Observed source"
+                value={String(selected.observed.source)}
+              />
+              <Fact
+                label="Attributes"
+                value={`${selected.observed.bhk} BHK · ${selected.observed.areaSqft ?? 'missing'} sq ft`}
+              />
+              <Fact
+                label="Last seen age"
+                value={`${selected.normalized.lastSeenAgeDays} days`}
+              />
+            </div>
+            <div className="mt-4 rounded-lg border bg-muted/30 p-3 text-sm">
+              <strong className="text-xs uppercase text-muted-foreground">
+                System reasons
+              </strong>
+              <p className="mt-2">
+                {selected.reasons.join(' · ').replaceAll('_', ' ') ||
+                  'Meets policy'}
+              </p>
+            </div>
+            <div className="mt-5 space-y-4 border-t pt-5">
+              <Field label="Human decision">
+                <div className="grid grid-cols-3 gap-2">
+                  {(['include', 'exclude', 'defer'] as const).map((item) => (
+                    <Button
+                      key={item}
+                      variant={decision === item ? 'default' : 'outline'}
+                      className="min-h-11 capitalize"
+                      onClick={() => setDecision(item)}
+                    >
+                      {item}
+                    </Button>
+                  ))}
+                </div>
+              </Field>
+              <Field label="Reason required">
+                <Textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Record the evidence and rationale."
+                />
+              </Field>
+              <Button
+                className="min-h-11 w-full"
+                disabled={busy || reason.trim().length < 4}
+                onClick={saveReview}
+              >
+                {busy ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <UserRoundCheck />
+                )}
+                Save review decision
+              </Button>
+            </div>
+          </dialog>
+        </div>
+      )}
+    </div>
+  );
+}
 
-export default function Page(){const [run,setRun]=useState<StoredRun|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState('');async function load(){setLoading(true);try{const response=await fetch('/api/runs',{cache:'no-store'}),payload=await response.json() as {runs?:Array<{id:string}>;error?:string};if(!response.ok)throw new Error(payload.error);if(payload.runs?.[0]){const detail=await fetch(`/api/runs?id=${payload.runs[0].id}`,{cache:'no-store'}),data=await detail.json() as {run?:StoredRun};if(detail.ok&&data.run)setRun(data.run)}}catch(e){setError(e instanceof Error?e.message:'Could not load workspace.')}finally{setLoading(false)}}useEffect(()=>{void load()},[]);if(loading)return <main className="grid min-h-screen place-items-center"><Loader2 className="size-7 animate-spin text-blue-700"/></main>;if(error&&!run)return <main className="mx-auto max-w-2xl p-8"><Alert className="border-red-200 bg-red-50"><AlertCircle/><AlertTitle>Workspace unavailable</AlertTitle><AlertDescription>{error}</AlertDescription></Alert><Button className="mt-4" onClick={load}>Retry</Button></main>;return run?<Workbench initialRun={run} onNew={()=>setRun(null)}/>:<Intake onCreated={setRun}/>}
+function Overview({
+  run,
+  pending,
+  unresolved,
+}: {
+  run: StoredRun;
+  pending: number;
+  unresolved: number;
+}) {
+  const b2 = run.summary.baselines.B2,
+    ask = run.config.landlordBaseRent + run.config.landlordMaintenance,
+    deposit = run.config.landlordDeposit ?? 0,
+    capex = run.config.improvementCapex ?? 0;
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Metric
+          label="Defensible asking median"
+          value={money(b2.estimate)}
+          note={`${b2.count} effective comparables`}
+        />
+        <Metric
+          label="Observed asking band"
+          value={`${money(run.summary.band.p25)}–${money(run.summary.band.p75)}`}
+          note="25th–75th percentile"
+        />
+        <Metric
+          label="Owner monthly cost"
+          value={money(ask)}
+          note={`${money(run.config.landlordBaseRent)} rent + ${money(run.config.landlordMaintenance)} maintenance`}
+        />
+        <Metric
+          label="Evidence confidence"
+          value={run.summary.askingEvidenceConfidence}
+          note={`Achievable rent remains ${run.summary.achievableBaseRentConfidence}`}
+        />
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>What the evidence supports</CardTitle>
+            <CardDescription>
+              Bounded to this upload and policy.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <Line
+              text={`B0: ${run.summary.baselines.B0.count} same-BHK rows → ${money(run.summary.baselines.B0.estimate)}`}
+            />
+            <Line
+              text={`B1: ${run.summary.baselines.B1.count} policy-comparable rows → ${money(run.summary.baselines.B1.estimate)}`}
+            />
+            <Line
+              text={`B2: ${b2.count} reviewed-weight rows → ${money(b2.estimate)}`}
+            />
+            <p className="flex gap-2 leading-6">
+              <ShieldCheck className="mt-1 size-4 shrink-0 text-blue-700" />
+              {run.summary.decisionBoundary}
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="border-amber-200">
+          <CardHeader>
+            <CardTitle>Current blockers</CardTitle>
+            <CardDescription>
+              Readiness is a workflow state, not a confidence badge.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between rounded-lg border p-3 text-sm">
+              <span>Rows needing adjudication</span>
+              <strong>{pending}</strong>
+            </div>
+            <div className="flex justify-between rounded-lg border p-3 text-sm">
+              <span>Evidence requests unresolved</span>
+              <strong>{unresolved}</strong>
+            </div>
+            {run.summary.limitations.map((item) => (
+              <p
+                key={item}
+                className="flex gap-2 text-xs leading-5 text-muted-foreground"
+              >
+                <AlertCircle className="mt-0.5 size-4 shrink-0 text-amber-700" />
+                {item}
+              </p>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Deal economics context</CardTitle>
+          <CardDescription>
+            Captured and versioned, but intentionally excluded from the comparable-rent median.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3 text-sm sm:grid-cols-3">
+          <Fact label="Security deposit" value={money(deposit)} />
+          <Fact label="Improvement capex" value={money(capex)} />
+          <Fact label="Capital committed before operations" value={money(deposit + capex)} />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="grid gap-3 py-4 text-xs sm:grid-cols-3">
+          <Fact label="Input SHA-256" value={run.inputHash} />
+          <Fact label="Engine" value={run.engineVersion} />
+          <Fact
+            label="Validation"
+            value={`${run.validation.acceptedRows} accepted · ${run.validation.rejectedRows} rejected · ${run.validation.warningCount} warnings`}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+const Metric = ({
+  label,
+  value,
+  note,
+}: {
+  label: string;
+  value: string;
+  note: string;
+}) => (
+  <Card>
+    <CardContent className="py-5">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{note}</p>
+    </CardContent>
+  </Card>
+);
+const Line = ({ text }: { text: string }) => (
+  <p className="flex gap-2 leading-6">
+    <Check className="mt-1 size-4 shrink-0 text-emerald-700" />
+    {text}
+  </p>
+);
+
+function Comparables({
+  run,
+  rows,
+  query,
+  setQuery,
+  filter,
+  setFilter,
+  setSelected,
+}: {
+  run: StoredRun;
+  rows: AuditRow[];
+  query: string;
+  setQuery: (v: string) => void;
+  filter: string;
+  setFilter: (v: string) => void;
+  setSelected: (r: AuditRow) => void;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Comparable ledger</CardTitle>
+        <CardDescription>
+          Every accepted row remains inspectable; effective weight controls the
+          estimate.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-4 flex flex-col gap-3 md:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
+            <Input
+              className="pl-9"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search ID, source, society or reason"
+            />
+          </div>
+          <select
+            className="h-10 rounded-md border bg-white px-3 text-sm"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          >
+            <option value="material">Material rows</option>
+            <option value="all">All rows</option>
+            <option value="include">Included</option>
+            <option value="needs_human_review">Needs review</option>
+            <option value="duplicate_collapsed">Duplicate collapsed</option>
+            <option value="exclude">Excluded</option>
+          </select>
+        </div>
+        <div className="max-h-[620px] overflow-auto rounded-lg border">
+          <table className="w-full min-w-[760px] text-left text-sm">
+            <thead className="sticky top-0 bg-slate-100 text-xs text-muted-foreground">
+              <tr>
+                <th className="p-3">Listing</th>
+                <th className="p-3">Observed facts</th>
+                <th className="p-3">Asking</th>
+                <th className="p-3">System state</th>
+                <th className="p-3">Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr
+                  key={row.listingId}
+                  className="cursor-pointer border-t hover:bg-blue-50/50"
+                  onClick={() => setSelected(row)}
+                >
+                  <td className="p-3 font-semibold">
+                    {row.listingId}
+                    <span className="block text-xs font-normal text-muted-foreground">
+                      {String(row.observed.source)}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    {String(row.observed.society)}
+                    <span className="block text-xs text-muted-foreground">
+                      {String(row.observed.bhk)} BHK ·{' '}
+                      {String(row.observed.areaSqft ?? '—')} sq ft ·{' '}
+                      {row.normalized.furnishing}
+                    </span>
+                  </td>
+                  <td className="p-3 font-medium">
+                    {money(Number(row.observed.rent))}
+                  </td>
+                  <td className="p-3">
+                    <StateBadge state={row.b2State} />
+                  </td>
+                  <td className="p-3">{row.effectiveWeight}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          {rows.length} of {run.rows.length} accepted rows shown. Select any row
+          to inspect and adjudicate.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+function Review({
+  run,
+  onSelect,
+}: {
+  run: StoredRun;
+  onSelect: (r: AuditRow) => void;
+}) {
+  const rows = run.rows.filter((row) => row.b2State === 'needs_human_review');
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Human review queue</CardTitle>
+        <CardDescription>
+          System recommendations are never represented as reviewer decisions.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {rows.map((row) => {
+          const review = run.reviews.find(
+            (item) => item.listingId === row.listingId,
+          );
+          return (
+            <button
+              key={row.listingId}
+              className="flex min-h-16 w-full items-center justify-between gap-3 rounded-lg border p-3 text-left hover:bg-muted/40"
+              onClick={() => onSelect(row)}
+            >
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <strong className="text-sm">{row.listingId}</strong>
+                  <StateBadge state={row.b2State} />
+                  {review && (
+                    <Badge
+                      variant="outline"
+                      className="border-violet-200 bg-violet-50 text-violet-800"
+                    >
+                      Human: {review.decision}
+                    </Badge>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {row.reasons.join(' · ').replaceAll('_', ' ')}
+                </p>
+              </div>
+              <ChevronRight className="size-4" />
+            </button>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+}
+function Requests({
+  items,
+  busy,
+  save,
+}: {
+  items: EvidenceRequest[];
+  busy: boolean;
+  save: (item: EvidenceRequest) => Promise<unknown>;
+}) {
+  const [drafts, setDrafts] = useState(items);
+  const change = (id: string, key: keyof EvidenceRequest, value: string) =>
+    setDrafts((current) =>
+      current.map((item) =>
+        item.id === id ? { ...item, [key]: value } : item,
+      ),
+    );
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      {drafts.map((item) => (
+        <Card key={item.id}>
+          <CardHeader>
+            <CardTitle className="text-base">{item.title}</CardTitle>
+            <CardDescription>
+              Evidence is never marked complete automatically.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Field label="Owner">
+              <Input
+                value={item.owner}
+                onChange={(e) => change(item.id, 'owner', e.target.value)}
+              />
+            </Field>
+            <Field label="Evidence note">
+              <Textarea
+                value={item.evidenceNote}
+                onChange={(e) =>
+                  change(item.id, 'evidenceNote', e.target.value)
+                }
+                placeholder="Reference the document, source or blocker."
+              />
+            </Field>
+            <div className="flex gap-2">
+              <select
+                className="h-11 rounded-md border bg-white px-3 text-sm"
+                value={item.status}
+                onChange={(e) => change(item.id, 'status', e.target.value)}
+              >
+                <option value="open">Open</option>
+                <option value="blocked">Blocked</option>
+                <option value="resolved">Resolved</option>
+              </select>
+              <Button
+                disabled={busy}
+                className="min-h-11"
+                onClick={() => save(item)}
+              >
+                Save request
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+function Audit({ events }: { events: AuditEvent[] }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Audit history</CardTitle>
+        <CardDescription>
+          Append-only records reconstruct who changed what and when.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ol>
+          {events.map((event) => (
+            <li
+              key={event.id}
+              className="flex gap-3 border-b py-4 last:border-0"
+            >
+              <span className="grid size-7 shrink-0 place-items-center rounded-full border">
+                <History className="size-3.5" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold">
+                  {event.eventType.replaceAll('_', ' ')}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {event.actor} · {dateTime(event.createdAt)}
+                </p>
+                <code className="mt-2 block max-w-3xl overflow-x-auto rounded bg-muted p-2 text-[11px]">
+                  {JSON.stringify(event.payload)}
+                </code>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Page() {
+  const [run, setRun] = useState<StoredRun | null>(null),
+    [loading, setLoading] = useState(true),
+    [error, setError] = useState('');
+  async function load() {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/runs', { cache: 'no-store' }),
+        payload = (await response.json()) as {
+          runs?: Array<{ id: string }>;
+          error?: string;
+        };
+      if (!response.ok) throw new Error(payload.error);
+      if (payload.runs?.[0]) {
+        const detail = await fetch(`/api/runs?id=${payload.runs[0].id}`, {
+            cache: 'no-store',
+          }),
+          data = (await detail.json()) as { run?: StoredRun };
+        if (detail.ok && data.run) setRun(data.run);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not load workspace.');
+    } finally {
+      setLoading(false);
+    }
+  }
+  useEffect(() => {
+    void load();
+  }, []);
+  if (loading)
+    return (
+      <main className="grid min-h-screen place-items-center">
+        <Loader2 className="size-7 animate-spin text-blue-700" />
+      </main>
+    );
+  if (error && !run)
+    return (
+      <main className="mx-auto max-w-2xl p-8">
+        <Alert className="border-red-200 bg-red-50">
+          <AlertCircle />
+          <AlertTitle>Workspace unavailable</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <Button className="mt-4" onClick={load}>
+          Retry
+        </Button>
+      </main>
+    );
+  return run ? (
+    <Workbench initialRun={run} onNew={() => setRun(null)} />
+  ) : (
+    <Intake onCreated={setRun} />
+  );
+}

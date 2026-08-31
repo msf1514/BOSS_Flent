@@ -6,7 +6,8 @@ const csv = await readFile(new URL('../public/anonymised-deal-sample.csv', impor
 const config = {
   dealName: 'Anonymised Lakeview deal', evidenceCutoff: '2026-08-18', societyPrefix: 'Lakeview',
   bhk: 2, areaSqft: 1175, furnishing: 'semi-furnished', landlordBaseRent: 56000,
-  landlordMaintenance: 5000, areaToleranceSqft: 100, maxLastSeenAgeDays: 30, sampleAnnotation: true,
+  landlordMaintenance: 5000, landlordDeposit: 280000, improvementCapex: 160000,
+  areaToleranceSqft: 100, maxLastSeenAgeDays: 30, sampleAnnotation: true,
 };
 const result = await runEvidenceEngine(csv, config);
 assert.deepEqual(result.summary.baselines, { B0:{count:84,estimate:59000}, B1:{count:9,estimate:58000}, B2:{count:8,estimate:58250} });
