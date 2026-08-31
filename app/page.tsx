@@ -283,25 +283,24 @@ function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
         </header>
         <main
           id="main-content"
-          className="workbench-grid min-h-[calc(100vh-4rem)] py-8 lg:py-11"
+          className="workbench-grid min-h-[calc(100vh-4rem)] py-6 lg:py-7"
         >
           <div className="app-shell">
-            <div className="mb-8 grid gap-6 border-b border-slate-300/80 pb-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end">
+            <div className="mb-5 flex flex-col gap-4 border-b border-slate-300/80 pb-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <p className="eyebrow mb-3">New evidence run</p>
-                <h1 className="max-w-2xl text-3xl font-semibold leading-[1.12] tracking-[-0.035em] sm:text-[2.6rem]">
+                <p className="eyebrow mb-2">New evidence run</p>
+                <h1 className="max-w-3xl text-3xl font-semibold leading-[1.12] tracking-[-0.035em] lg:text-[2rem]">
                   Build a defensible market view from source evidence.
                 </h1>
-                <p className="mt-4 max-w-2xl text-[1.0625rem] leading-7 text-muted-foreground">
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
                   Validate the source, preserve lineage, apply a declared
                   comparison policy and route exceptions to a human reviewer.
                 </p>
               </div>
-              <div className="rounded-xl border bg-white/90 p-4 shadow-[0_1px_2px_rgba(21,16,47,0.03)]">
+              <div className="max-w-md rounded-xl border bg-white/90 px-4 py-3 shadow-[0_1px_2px_rgba(21,16,47,0.03)] lg:max-w-xs">
                 <p className="data-label">Decision boundary</p>
-                <p className="mt-2 text-sm leading-6 text-slate-700">
-                  This workbench evaluates evidence quality. It does not make
-                  the investment decision.
+                <p className="mt-1 text-xs leading-5 text-slate-700">
+                  Evidence quality only—not the investment decision.
                 </p>
               </div>
             </div>
@@ -317,7 +316,7 @@ function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
               ].map(([n, title, sub], i) => (
                 <li
                   key={n}
-                  className="relative flex items-center gap-3 border-b p-3.5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0"
+                  className="relative flex items-center gap-2.5 border-b px-3 py-2.5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0"
                 >
                   <span
                     className={`data-value grid size-7 place-items-center rounded-full text-xs font-semibold ${i === 0 ? 'bg-primary text-primary-foreground' : 'border bg-slate-50 text-muted-foreground'}`}
@@ -337,10 +336,10 @@ function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
             </ol>
             <form
               onSubmit={submit}
-              className="grid gap-5 lg:grid-cols-[0.86fr_1.14fr]"
+              className="grid gap-5 lg:grid-cols-[minmax(19rem,0.64fr)_minmax(0,1.36fr)]"
             >
               <Card className="self-start">
-                <CardHeader className="border-b">
+                <CardHeader className="border-b px-5 py-4">
                   <p className="eyebrow">Source</p>
                   <CardTitle>1. Supply evidence</CardTitle>
                   <CardDescription>
@@ -348,13 +347,13 @@ function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
                     SHA-256 fingerprint.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3.5 p-5">
                   <button
                     type="button"
                     onClick={() => inputRef.current?.click()}
-                    className="group flex min-h-52 w-full cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-400 bg-[var(--warm-canvas)] p-6 text-center transition-colors hover:border-[var(--flent-teal)] hover:bg-[var(--flent-mint)] focus-visible:ring-3 focus-visible:ring-ring/30"
+                    className="group flex min-h-36 w-full cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-400 bg-[var(--warm-canvas)] p-5 text-center transition-colors hover:border-[var(--flent-teal)] hover:bg-[var(--flent-mint)] focus-visible:ring-3 focus-visible:ring-ring/30"
                   >
-                    <span className="mb-4 grid size-11 place-items-center rounded-md border bg-white text-primary shadow-sm transition-colors group-hover:border-primary/40">
+                    <span className="mb-3 grid size-10 place-items-center rounded-md border bg-white text-primary shadow-sm transition-colors group-hover:border-primary/40">
                       <FileUp aria-hidden="true" className="size-5" />
                     </span>
                     <span className="font-semibold tracking-[-0.01em]">
@@ -406,14 +405,14 @@ function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader className="border-b">
+                <CardHeader className="border-b px-5 py-4">
                   <p className="eyebrow">Policy</p>
                   <CardTitle>2. Configure the run</CardTitle>
                   <CardDescription>
                     Explicit policy and deal inputs—not hidden defaults.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="grid gap-4 sm:grid-cols-2">
+                <CardContent className="grid gap-3.5 p-5 sm:grid-cols-2 xl:grid-cols-3">
                   <Field label="Deal name" htmlFor="deal-name" wide>
                     <Input
                       id="deal-name"
@@ -540,15 +539,16 @@ function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
                       }
                     />
                   </Field>
-                  <div className="sm:col-span-2 rounded-xl border border-emerald-200 bg-[var(--flent-mint)] p-3.5 text-xs leading-5 text-emerald-950">
+                  <div className="sm:col-span-2 rounded-xl border border-emerald-200 bg-[var(--flent-mint)] p-3 text-xs leading-5 text-emerald-950">
                     <strong className="font-semibold">
                       Calculation boundary:
                     </strong>{' '}
                     deposit and capex are versioned decision context. They do
                     not change the comparable-rent median.
                   </div>
-                  <div className="sm:col-span-2 border-t pt-4">
+                  <div className="sm:col-span-2 xl:col-span-3 border-t pt-3">
                     <Button
+                      type="submit"
                       disabled={busy}
                       size="lg"
                       className="w-full sm:w-auto"
@@ -774,15 +774,19 @@ function Workbench({
                   {run.readiness.deferredReviewCount} deferred · {run.filename}
                 </p>
               </div>
-              <Button
-                size="lg"
-                onClick={() => setTab(pending ? 'review' : 'evidence')}
-              >
-                {pending
-                  ? 'Review highest-risk rows'
-                  : 'Resolve evidence requests'}
-                <ChevronRight />
-              </Button>
+            <Button
+              size="lg"
+              onClick={() =>
+                setTab(pending ? 'review' : unresolved ? 'evidence' : 'audit')
+              }
+            >
+              {pending
+                ? 'Review highest-risk rows'
+                : unresolved
+                  ? 'Resolve evidence requests'
+                  : 'Review audit trail'}
+              <ChevronRight />
+            </Button>
             </div>
             <div
               aria-label="Evidence workflow status"

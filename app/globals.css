@@ -144,7 +144,7 @@
 
 @layer components {
   .app-shell {
-    @apply mx-auto w-full max-w-[1480px] px-4 sm:px-6 lg:px-8;
+    @apply w-full px-4 sm:px-6 lg:px-8;
   }
   .eyebrow {
     @apply text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
