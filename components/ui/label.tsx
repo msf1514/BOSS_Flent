@@ -1,4 +1,5 @@
 'use client';
+/* oxlint-disable jsx-a11y/label-has-associated-control -- Association is supplied by each consumer through htmlFor or nesting. */
 
 import * as React from 'react';
 

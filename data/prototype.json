@@ -277,9 +277,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -307,9 +305,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -369,9 +365,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -399,10 +393,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "furnishing_mismatch"
-        ],
+        "reasonCodes": ["area_outside_band", "furnishing_mismatch"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -430,10 +421,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "furnishing_mismatch"
-        ],
+        "reasonCodes": ["area_outside_band", "furnishing_mismatch"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -461,9 +449,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch"
-        ],
+        "reasonCodes": ["furnishing_mismatch"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -519,9 +505,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -605,10 +589,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "furnishing_mismatch"
-        ],
+        "reasonCodes": ["area_outside_band", "furnishing_mismatch"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -636,9 +617,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -666,9 +645,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch"
-        ],
+        "reasonCodes": ["furnishing_mismatch"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -724,10 +701,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "furnishing_mismatch"
-        ],
+        "reasonCodes": ["area_outside_band", "furnishing_mismatch"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -755,9 +729,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -813,9 +785,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -843,9 +813,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -873,10 +841,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "furnishing_mismatch"
-        ],
+        "reasonCodes": ["area_outside_band", "furnishing_mismatch"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -960,10 +925,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "old_last_seen"
-        ],
+        "reasonCodes": ["area_outside_band", "old_last_seen"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -991,9 +953,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1021,9 +981,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1051,9 +1009,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch"
-        ],
+        "reasonCodes": ["furnishing_mismatch"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1081,9 +1037,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1111,9 +1065,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch"
-        ],
+        "reasonCodes": ["furnishing_mismatch"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1141,9 +1093,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1171,9 +1121,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch"
-        ],
+        "reasonCodes": ["furnishing_mismatch"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1229,9 +1177,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1259,10 +1205,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "society_not_target_family",
-          "old_last_seen"
-        ],
+        "reasonCodes": ["society_not_target_family", "old_last_seen"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1290,9 +1233,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1320,9 +1261,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1350,10 +1289,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["area_outside_band", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1381,9 +1317,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1411,9 +1345,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1441,10 +1373,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["area_outside_band", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1472,10 +1401,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["furnishing_mismatch", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1503,10 +1429,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["area_outside_band", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1534,10 +1457,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["furnishing_mismatch", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1597,9 +1517,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1660,10 +1578,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["area_outside_band", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1691,9 +1606,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1785,10 +1698,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["furnishing_mismatch", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1816,10 +1726,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["area_outside_band", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1847,10 +1754,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["area_outside_band", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -1942,10 +1846,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["area_outside_band", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2005,10 +1906,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["furnishing_mismatch", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2068,10 +1966,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["furnishing_mismatch", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2099,10 +1994,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["area_outside_band", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2162,10 +2054,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["area_outside_band", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2257,10 +2146,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["area_outside_band", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2288,9 +2174,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2318,10 +2202,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["area_outside_band", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2349,9 +2230,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2379,9 +2258,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2409,9 +2286,7 @@
         "duplicateGroup": "DUP-F727609D",
         "representativeListingId": "CP-0008",
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "possible_duplicate"
-        ],
+        "reasonCodes": ["possible_duplicate"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2439,10 +2314,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "furnishing_mismatch"
-        ],
+        "reasonCodes": ["area_outside_band", "furnishing_mismatch"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2470,9 +2342,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band"
-        ],
+        "reasonCodes": ["area_outside_band"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2500,10 +2370,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "area_outside_band",
-          "old_last_seen"
-        ],
+        "reasonCodes": ["area_outside_band", "old_last_seen"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2531,9 +2398,7 @@
         "duplicateGroup": "DUP-4C4083B9",
         "representativeListingId": "CP-0032",
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "possible_duplicate"
-        ],
+        "reasonCodes": ["possible_duplicate"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2561,9 +2426,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2655,10 +2518,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["furnishing_mismatch", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2718,10 +2578,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "bhk_mismatch",
-          "attribute_conflict_candidate"
-        ],
+        "reasonCodes": ["bhk_mismatch", "attribute_conflict_candidate"],
         "annotationType": "attribute_conflict_candidate",
         "annotationSource": "input/comments.md"
       }
@@ -2749,9 +2606,7 @@
         "duplicateGroup": null,
         "representativeListingId": "CP-0082",
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "extreme_value_review"
-        ],
+        "reasonCodes": ["extreme_value_review"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2779,9 +2634,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch"
-        ],
+        "reasonCodes": ["furnishing_mismatch"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2809,10 +2662,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "furnishing_mismatch",
-          "society_not_target_family"
-        ],
+        "reasonCodes": ["furnishing_mismatch", "society_not_target_family"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2840,11 +2690,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "bhk_mismatch",
-          "area_outside_band",
-          "old_last_seen"
-        ],
+        "reasonCodes": ["bhk_mismatch", "area_outside_band", "old_last_seen"],
         "annotationType": null,
         "annotationSource": null
       }
@@ -2872,9 +2718,7 @@
         "duplicateGroup": null,
         "representativeListingId": null,
         "effectiveWeight": 0,
-        "reasonCodes": [
-          "missing_required_field"
-        ],
+        "reasonCodes": ["missing_required_field"],
         "annotationType": null,
         "annotationSource": null
       }

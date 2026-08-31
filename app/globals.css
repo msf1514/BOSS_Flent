@@ -47,38 +47,42 @@
 }
 
 :root {
-  --background: oklch(0.975 0.004 250);
-  --foreground: oklch(0.245 0.032 252);
+  --background: oklch(0.986 0.006 88);
+  --foreground: oklch(0.205 0.045 285);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.245 0.032 252);
+  --card-foreground: oklch(0.205 0.045 285);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.245 0.032 252);
-  --primary: oklch(0.405 0.105 247);
-  --primary-foreground: oklch(0.99 0.002 250);
-  --secondary: oklch(0.946 0.012 248);
-  --secondary-foreground: oklch(0.31 0.055 247);
-  --muted: oklch(0.956 0.008 250);
-  --muted-foreground: oklch(0.47 0.027 252);
-  --accent: oklch(0.925 0.032 244);
-  --accent-foreground: oklch(0.31 0.085 247);
+  --popover-foreground: oklch(0.205 0.045 285);
+  --primary: oklch(0.205 0.07 285);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.955 0.01 90);
+  --secondary-foreground: oklch(0.29 0.035 285);
+  --muted: oklch(0.965 0.009 88);
+  --muted-foreground: oklch(0.51 0.025 285);
+  --accent: oklch(0.94 0.032 174);
+  --accent-foreground: oklch(0.46 0.115 174);
   --destructive: oklch(0.58 0.21 28);
-  --border: oklch(0.885 0.012 250);
-  --input: oklch(0.855 0.015 250);
-  --ring: oklch(0.52 0.135 247);
-  --chart-1: oklch(0.47 0.12 247);
+  --border: oklch(0.91 0.008 88);
+  --input: oklch(0.875 0.012 88);
+  --ring: oklch(0.58 0.135 174);
+  --chart-1: oklch(0.58 0.135 174);
   --chart-2: oklch(0.64 0.12 82);
   --chart-3: oklch(0.48 0.08 250);
   --chart-4: oklch(0.7 0.1 42);
   --chart-5: oklch(0.42 0.07 300);
-  --radius: 0.5rem;
-  --sidebar: oklch(0.955 0.012 248);
-  --sidebar-foreground: oklch(0.245 0.032 252);
-  --sidebar-primary: oklch(0.405 0.105 247);
-  --sidebar-primary-foreground: oklch(0.99 0.002 250);
-  --sidebar-accent: oklch(0.92 0.03 244);
-  --sidebar-accent-foreground: oklch(0.31 0.085 247);
-  --sidebar-border: oklch(0.87 0.016 248);
-  --sidebar-ring: oklch(0.52 0.135 247);
+  --radius: 0.85rem;
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.205 0.045 285);
+  --sidebar-primary: oklch(0.58 0.135 174);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.94 0.032 174);
+  --sidebar-accent-foreground: oklch(0.46 0.115 174);
+  --sidebar-border: oklch(0.91 0.008 88);
+  --sidebar-ring: oklch(0.58 0.135 174);
+  --boss-ink: #15102f;
+  --flent-teal: #008f76;
+  --flent-mint: #e3f3ef;
+  --warm-canvas: #fbfaf7;
 }
 
 @layer base {
@@ -87,11 +91,27 @@
   }
   html {
     @apply font-sans;
+    font-family:
+      var(--font-interface),
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      sans-serif;
     scroll-behavior: smooth;
   }
   body {
     @apply bg-background text-foreground;
     min-width: 320px;
+    font-family:
+      var(--font-interface),
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      sans-serif;
     font-feature-settings:
       'ss01' 1,
       'cv02' 1;
@@ -134,24 +154,26 @@
   }
   .data-value {
     @apply font-mono tabular-nums tracking-[-0.025em];
+    font-family:
+      var(--font-mono-face), 'IBM Plex Mono', ui-monospace, SFMono-Regular,
+      Consolas, monospace;
   }
   .control-select {
     @apply h-10 w-full cursor-pointer rounded-md border border-input bg-white px-3 text-sm font-medium shadow-[inset_0_1px_1px_rgba(15,23,42,0.025)] transition-[border-color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20;
   }
   .workbench-grid {
-    background-image:
-      linear-gradient(
-        to right,
-        color-mix(in oklch, var(--border) 45%, transparent) 1px,
-        transparent 1px
-      ),
-      linear-gradient(
-        to bottom,
-        color-mix(in oklch, var(--border) 35%, transparent) 1px,
-        transparent 1px
-      );
-    background-size: 32px 32px;
-    background-position: center top;
+    background: var(--warm-canvas);
+  }
+  .brand-wordmark {
+    color: var(--boss-ink);
+    letter-spacing: 0.075em;
+  }
+  .brand-accent {
+    color: var(--flent-teal);
+  }
+  .rail-active {
+    background: var(--flent-mint);
+    color: var(--flent-teal);
   }
   .skip-link {
     @apply fixed left-4 top-3 z-[100] -translate-y-20 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition-transform focus:translate-y-0;

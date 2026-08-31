@@ -1,89 +1,370 @@
 import { env } from 'cloudflare:workers';
-import { ENGINE_VERSION, type EngineResult, type RunConfig } from '@/lib/evidence-engine';
-
-const schema = [
-  `CREATE TABLE IF NOT EXISTS deals (id TEXT PRIMARY KEY, name TEXT NOT NULL, created_at TEXT NOT NULL)`,
-  `CREATE TABLE IF NOT EXISTS uploads (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL, filename TEXT NOT NULL, object_key TEXT NOT NULL, sha256 TEXT NOT NULL, byte_size INTEGER NOT NULL, row_count INTEGER NOT NULL, validation_json TEXT NOT NULL, created_at TEXT NOT NULL)`,
-  `CREATE TABLE IF NOT EXISTS runs (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL, upload_id TEXT NOT NULL, parent_run_id TEXT, version_number INTEGER NOT NULL, engine_version TEXT NOT NULL, config_json TEXT NOT NULL, summary_json TEXT NOT NULL, validation_json TEXT NOT NULL, created_by TEXT NOT NULL, created_at TEXT NOT NULL)`,
-  `CREATE TABLE IF NOT EXISTS run_rows (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, listing_id TEXT NOT NULL, payload_json TEXT NOT NULL, created_at TEXT NOT NULL)`,
-  `CREATE TABLE IF NOT EXISTS review_actions (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, listing_id TEXT NOT NULL, decision TEXT NOT NULL, reason TEXT NOT NULL, actor TEXT NOT NULL, created_at TEXT NOT NULL)`,
-  `CREATE TABLE IF NOT EXISTS evidence_requests (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, title TEXT NOT NULL, owner TEXT NOT NULL, status TEXT NOT NULL, evidence_note TEXT NOT NULL, updated_at TEXT NOT NULL, created_at TEXT NOT NULL)`,
-  `CREATE TABLE IF NOT EXISTS audit_events (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL, run_id TEXT, event_type TEXT NOT NULL, entity_id TEXT, actor TEXT NOT NULL, payload_json TEXT NOT NULL, created_at TEXT NOT NULL)`,
-  `CREATE INDEX IF NOT EXISTS idx_runs_deal ON runs(deal_id, version_number DESC)`,
-  `CREATE INDEX IF NOT EXISTS idx_rows_run ON run_rows(run_id)`,
-  `CREATE INDEX IF NOT EXISTS idx_reviews_run ON review_actions(run_id, listing_id, created_at DESC)`,
-  `CREATE INDEX IF NOT EXISTS idx_requests_run ON evidence_requests(run_id)`,
-  `CREATE INDEX IF NOT EXISTS idx_audit_deal ON audit_events(deal_id, created_at DESC)`,
-];
+import { schemaStatements } from '@/db/schema';
+import type { RequestActor } from '@/lib/auth';
+import {
+  ENGINE_VERSION,
+  type EngineResult,
+  type RunConfig,
+} from '@/lib/evidence-engine';
+import { calculateReadiness, type WorkflowReadiness } from '@/lib/workflow';
 
 export type StoredRun = {
-  id: string; dealId: string; dealName: string; uploadId: string; parentRunId: string | null;
-  versionNumber: number; engineVersion: string; config: RunConfig; summary: EngineResult['summary'];
-  validation: EngineResult['validation']; createdBy: string; createdAt: string; filename: string;
-  inputHash: string; rows: EngineResult['rows']; reviews: ReviewRecord[]; requests: EvidenceRequest[]; audit: AuditEvent[];
+  id: string;
+  dealId: string;
+  dealName: string;
+  uploadId: string;
+  parentRunId: string | null;
+  versionNumber: number;
+  engineVersion: string;
+  config: RunConfig;
+  summary: EngineResult['summary'];
+  validation: EngineResult['validation'];
+  createdBy: string;
+  createdAt: string;
+  filename: string;
+  inputHash: string;
+  rows: EngineResult['rows'];
+  reviews: ReviewRecord[];
+  requests: EvidenceRequest[];
+  audit: AuditEvent[];
+  readiness: WorkflowReadiness;
 };
-export type ReviewRecord = { id: string; listingId: string; decision: 'include'|'exclude'|'defer'; reason: string; actor: string; createdAt: string };
-export type EvidenceRequest = { id: string; title: string; owner: string; status: 'open'|'blocked'|'resolved'; evidenceNote: string; updatedAt: string; createdAt: string };
-export type AuditEvent = { id: string; eventType: string; entityId: string|null; actor: string; payload: Record<string, unknown>; createdAt: string };
+export type ReviewRecord = {
+  id: string;
+  listingId: string;
+  decision: 'include' | 'exclude' | 'defer';
+  reason: string;
+  actor: string;
+  createdAt: string;
+};
+export type EvidenceRequest = {
+  id: string;
+  title: string;
+  owner: string;
+  status: 'open' | 'blocked' | 'resolved';
+  evidenceNote: string;
+  updatedAt: string;
+  createdAt: string;
+};
+export type AuditEvent = {
+  id: string;
+  eventType: string;
+  entityId: string | null;
+  actor: string;
+  payload: Record<string, unknown>;
+  createdAt: string;
+};
 
 const bindings = env as unknown as { DB: D1Database; EVIDENCE: R2Bucket };
 export const db = () => bindings.DB;
 export const evidence = () => bindings.EVIDENCE;
 export const id = (prefix: string) => `${prefix}_${crypto.randomUUID()}`;
 export const now = () => new Date().toISOString();
-export async function ensureSchema() { await db().batch(schema.map((sql) => db().prepare(sql))); }
+let schemaReady: Promise<unknown> | null = null;
+export async function ensureSchema() {
+  schemaReady ??= db()
+    .batch(schemaStatements.map((sql) => db().prepare(sql)))
+    .catch((error) => {
+      schemaReady = null;
+      throw error;
+    });
+  await schemaReady;
+}
 const parsed = <T>(value: unknown) => JSON.parse(String(value)) as T;
 
 export async function getRun(runId: string): Promise<StoredRun | null> {
   await ensureSchema();
-  const run = await db().prepare(`SELECT r.*, d.name deal_name, u.filename, u.sha256 input_hash FROM runs r JOIN deals d ON d.id=r.deal_id JOIN uploads u ON u.id=r.upload_id WHERE r.id=?`).bind(runId).first<Record<string, unknown>>();
+  const run = await db()
+    .prepare(
+      `SELECT r.*, d.name deal_name, u.filename, u.sha256 input_hash FROM runs r JOIN deals d ON d.id=r.deal_id JOIN uploads u ON u.id=r.upload_id WHERE r.id=?`,
+    )
+    .bind(runId)
+    .first<Record<string, unknown>>();
   if (!run) return null;
-  const [rowResult, reviewResult, requestResult, auditResult] = await Promise.all([
-    db().prepare(`SELECT payload_json FROM run_rows WHERE run_id=? ORDER BY listing_id`).bind(runId).all<Record<string, unknown>>(),
-    db().prepare(`SELECT * FROM review_actions WHERE run_id=? ORDER BY created_at DESC`).bind(runId).all<Record<string, unknown>>(),
-    db().prepare(`SELECT * FROM evidence_requests WHERE run_id=? ORDER BY created_at`).bind(runId).all<Record<string, unknown>>(),
-    db().prepare(`SELECT * FROM audit_events WHERE deal_id=? ORDER BY created_at DESC`).bind(run.deal_id).all<Record<string, unknown>>(),
-  ]);
+  const [rowResult, reviewResult, requestResult, auditResult] =
+    await Promise.all([
+      db()
+        .prepare(
+          `SELECT payload_json FROM run_rows WHERE run_id=? ORDER BY listing_id`,
+        )
+        .bind(runId)
+        .all<Record<string, unknown>>(),
+      db()
+        .prepare(
+          `SELECT * FROM review_actions WHERE run_id=? ORDER BY created_at DESC`,
+        )
+        .bind(runId)
+        .all<Record<string, unknown>>(),
+      db()
+        .prepare(
+          `SELECT * FROM evidence_requests WHERE run_id=? ORDER BY created_at`,
+        )
+        .bind(runId)
+        .all<Record<string, unknown>>(),
+      db()
+        .prepare(
+          `SELECT * FROM audit_events WHERE deal_id=? ORDER BY created_at DESC`,
+        )
+        .bind(run.deal_id)
+        .all<Record<string, unknown>>(),
+    ]);
   const latest = new Map<string, ReviewRecord>();
-  for (const item of reviewResult.results) if (!latest.has(String(item.listing_id))) latest.set(String(item.listing_id), { id:String(item.id), listingId:String(item.listing_id), decision:item.decision as ReviewRecord['decision'], reason:String(item.reason), actor:String(item.actor), createdAt:String(item.created_at) });
+  for (const item of reviewResult.results)
+    if (!latest.has(String(item.listing_id)))
+      latest.set(String(item.listing_id), {
+        id: String(item.id),
+        listingId: String(item.listing_id),
+        decision: item.decision as ReviewRecord['decision'],
+        reason: String(item.reason),
+        actor: String(item.actor),
+        createdAt: String(item.created_at),
+      });
+  const rows = rowResult.results.map((item) =>
+    parsed<EngineResult['rows'][number]>(item.payload_json),
+  );
+  const reviews = [...latest.values()];
+  const requests = requestResult.results.map((item) => ({
+    id: String(item.id),
+    title: String(item.title),
+    owner: String(item.owner),
+    status: item.status as EvidenceRequest['status'],
+    evidenceNote: String(item.evidence_note),
+    updatedAt: String(item.updated_at),
+    createdAt: String(item.created_at),
+  }));
   return {
-    id:String(run.id), dealId:String(run.deal_id), dealName:String(run.deal_name), uploadId:String(run.upload_id), parentRunId:typeof run.parent_run_id === 'string' ? run.parent_run_id : null,
-    versionNumber:Number(run.version_number), engineVersion:String(run.engine_version), config:parsed(run.config_json), summary:parsed(run.summary_json), validation:parsed(run.validation_json), createdBy:String(run.created_by), createdAt:String(run.created_at), filename:String(run.filename), inputHash:String(run.input_hash),
-    rows:rowResult.results.map((item) => parsed(item.payload_json)), reviews:[...latest.values()],
-    requests:requestResult.results.map((item) => ({ id:String(item.id), title:String(item.title), owner:String(item.owner), status:item.status as EvidenceRequest['status'], evidenceNote:String(item.evidence_note), updatedAt:String(item.updated_at), createdAt:String(item.created_at) })),
-    audit:auditResult.results.map((item) => ({ id:String(item.id), eventType:String(item.event_type), entityId:typeof item.entity_id === 'string' ? item.entity_id : null, actor:String(item.actor), payload:parsed(item.payload_json), createdAt:String(item.created_at) })),
+    id: String(run.id),
+    dealId: String(run.deal_id),
+    dealName: String(run.deal_name),
+    uploadId: String(run.upload_id),
+    parentRunId:
+      typeof run.parent_run_id === 'string' ? run.parent_run_id : null,
+    versionNumber: Number(run.version_number),
+    engineVersion: String(run.engine_version),
+    config: parsed(run.config_json),
+    summary: parsed(run.summary_json),
+    validation: parsed(run.validation_json),
+    createdBy: String(run.created_by),
+    createdAt: String(run.created_at),
+    filename: String(run.filename),
+    inputHash: String(run.input_hash),
+    rows,
+    reviews,
+    requests,
+    audit: auditResult.results.map((item) => ({
+      id: String(item.id),
+      eventType: String(item.event_type),
+      entityId: typeof item.entity_id === 'string' ? item.entity_id : null,
+      actor: String(item.actor),
+      payload: parsed(item.payload_json),
+      createdAt: String(item.created_at),
+    })),
+    readiness: calculateReadiness(rows, reviews, requests),
   };
 }
 
 export async function listRuns() {
   await ensureSchema();
-  const result = await db().prepare(`SELECT r.id, r.deal_id, d.name deal_name, r.version_number, r.created_at, r.engine_version FROM runs r JOIN deals d ON d.id=r.deal_id ORDER BY r.created_at DESC LIMIT 30`).all<Record<string, unknown>>();
-  return result.results.map((run) => ({ id:String(run.id), dealId:String(run.deal_id), dealName:String(run.deal_name), versionNumber:Number(run.version_number), createdAt:String(run.created_at), engineVersion:String(run.engine_version) }));
+  const result = await db()
+    .prepare(
+      `SELECT r.id, r.deal_id, d.name deal_name, r.version_number, r.created_at, r.engine_version FROM runs r JOIN deals d ON d.id=r.deal_id ORDER BY r.created_at DESC LIMIT 30`,
+    )
+    .all<Record<string, unknown>>();
+  return result.results.map((run) => ({
+    id: String(run.id),
+    dealId: String(run.deal_id),
+    dealName: String(run.deal_name),
+    versionNumber: Number(run.version_number),
+    createdAt: String(run.created_at),
+    engineVersion: String(run.engine_version),
+  }));
 }
 
-export async function persistRun(input: { dealId: string; dealName: string; uploadId: string; parentRunId?: string|null; versionNumber: number; actor: string; filename: string; csv: string; inputHash: string; config: RunConfig; result: EngineResult; createUpload: boolean }) {
+export async function persistRun(input: {
+  dealId: string;
+  dealName: string;
+  uploadId: string;
+  parentRunId?: string | null;
+  versionNumber: number;
+  actor: RequestActor;
+  filename: string;
+  csv: string;
+  inputHash: string;
+  config: RunConfig;
+  result: EngineResult;
+  createUpload: boolean;
+  operationKey?: string;
+  requests?: EvidenceRequest[];
+}) {
   await ensureSchema();
   const createdAt = now();
   const runId = id('run');
   const objectKey = `uploads/${input.dealId}/${input.uploadId}.csv`;
   const statements: D1PreparedStatement[] = [];
+  let rawObjectWritten = false;
   if (input.createUpload) {
-    await evidence().put(objectKey, input.csv, { httpMetadata: { contentType: 'text/csv; charset=utf-8' }, customMetadata: { sha256: input.inputHash, filename: input.filename } });
-    statements.push(db().prepare(`INSERT INTO deals(id,name,created_at) VALUES(?,?,?)`).bind(input.dealId,input.dealName,createdAt));
-    statements.push(db().prepare(`INSERT INTO uploads(id,deal_id,filename,object_key,sha256,byte_size,row_count,validation_json,created_at) VALUES(?,?,?,?,?,?,?,?,?)`).bind(input.uploadId,input.dealId,input.filename,objectKey,input.inputHash,new TextEncoder().encode(input.csv).byteLength,input.result.validation.rawRows,JSON.stringify(input.result.validation),createdAt));
+    await evidence().put(objectKey, input.csv, {
+      httpMetadata: { contentType: 'text/csv; charset=utf-8' },
+      customMetadata: { sha256: input.inputHash, filename: input.filename },
+    });
+    rawObjectWritten = true;
+    statements.push(
+      db()
+        .prepare(`INSERT INTO deals(id,name,created_at) VALUES(?,?,?)`)
+        .bind(input.dealId, input.dealName, createdAt),
+    );
+    statements.push(
+      db()
+        .prepare(
+          `INSERT INTO uploads(id,deal_id,filename,object_key,sha256,byte_size,row_count,validation_json,created_at) VALUES(?,?,?,?,?,?,?,?,?)`,
+        )
+        .bind(
+          input.uploadId,
+          input.dealId,
+          input.filename,
+          objectKey,
+          input.inputHash,
+          new TextEncoder().encode(input.csv).byteLength,
+          input.result.validation.rawRows,
+          JSON.stringify(input.result.validation),
+          createdAt,
+        ),
+    );
   }
-  statements.push(db().prepare(`INSERT INTO runs(id,deal_id,upload_id,parent_run_id,version_number,engine_version,config_json,summary_json,validation_json,created_by,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)`).bind(runId,input.dealId,input.uploadId,input.parentRunId ?? null,input.versionNumber,`engine-${ENGINE_VERSION}`,JSON.stringify(input.config),JSON.stringify(input.result.summary),JSON.stringify(input.result.validation),input.actor,createdAt));
-  for (const row of input.result.rows) statements.push(db().prepare(`INSERT INTO run_rows(id,run_id,listing_id,payload_json,created_at) VALUES(?,?,?,?,?)`).bind(id('row'),runId,row.listingId,JSON.stringify(row),createdAt));
-  statements.push(db().prepare(`INSERT INTO audit_events(id,deal_id,run_id,event_type,entity_id,actor,payload_json,created_at) VALUES(?,?,?,?,?,?,?,?)`).bind(id('evt'),input.dealId,runId,input.parentRunId ? 'run_recomputed' : 'run_created',runId,input.actor,JSON.stringify({ version: input.versionNumber, inputHash: input.inputHash, acceptedRows: input.result.validation.acceptedRows, rejectedRows: input.result.validation.rejectedRows }),createdAt));
+  statements.push(
+    db()
+      .prepare(
+        `INSERT INTO runs(id,deal_id,upload_id,parent_run_id,version_number,engine_version,config_json,summary_json,validation_json,created_by,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
+      )
+      .bind(
+        runId,
+        input.dealId,
+        input.uploadId,
+        input.parentRunId ?? null,
+        input.versionNumber,
+        `engine-${ENGINE_VERSION}`,
+        JSON.stringify(input.config),
+        JSON.stringify(input.result.summary),
+        JSON.stringify(input.result.validation),
+        input.actor.label,
+        createdAt,
+      ),
+  );
+  for (const row of input.result.rows)
+    statements.push(
+      db()
+        .prepare(
+          `INSERT INTO run_rows(id,run_id,listing_id,payload_json,created_at) VALUES(?,?,?,?,?)`,
+        )
+        .bind(id('row'), runId, row.listingId, JSON.stringify(row), createdAt),
+    );
+  statements.push(
+    db()
+      .prepare(
+        `INSERT INTO audit_events(id,deal_id,run_id,event_type,entity_id,actor,payload_json,created_at) VALUES(?,?,?,?,?,?,?,?)`,
+      )
+      .bind(
+        id('evt'),
+        input.dealId,
+        runId,
+        input.parentRunId ? 'run_recomputed' : 'run_created',
+        runId,
+        input.actor.label,
+        JSON.stringify({
+          actorId: input.actor.id,
+          version: input.versionNumber,
+          inputHash: input.inputHash,
+          acceptedRows: input.result.validation.acceptedRows,
+          rejectedRows: input.result.validation.rejectedRows,
+        }),
+        createdAt,
+      ),
+  );
+  if (input.operationKey)
+    statements.push(
+      db()
+        .prepare(
+          `INSERT INTO run_operations(operation_key,deal_id,run_id,created_at) VALUES(?,?,?,?)`,
+        )
+        .bind(input.operationKey, input.dealId, runId, createdAt),
+    );
   if (!input.parentRunId) {
-    for (const title of ['Confirm whether maintenance is included in asking rents', 'Obtain achieved-rent or signed-lease evidence']) statements.push(db().prepare(`INSERT INTO evidence_requests(id,run_id,title,owner,status,evidence_note,updated_at,created_at) VALUES(?,?,?,?,?,?,?,?)`).bind(id('req'),runId,title,'Unassigned','open','',createdAt,createdAt));
+    for (const title of [
+      'Confirm whether maintenance is included in asking rents',
+      'Obtain achieved-rent or signed-lease evidence',
+    ])
+      statements.push(
+        db()
+          .prepare(
+            `INSERT INTO evidence_requests(id,run_id,title,owner,status,evidence_note,updated_at,created_at) VALUES(?,?,?,?,?,?,?,?)`,
+          )
+          .bind(
+            id('req'),
+            runId,
+            title,
+            'Unassigned',
+            'open',
+            '',
+            createdAt,
+            createdAt,
+          ),
+      );
   }
-  await db().batch(statements);
+  for (const item of input.requests ?? [])
+    statements.push(
+      db()
+        .prepare(
+          `INSERT INTO evidence_requests(id,run_id,title,owner,status,evidence_note,updated_at,created_at) VALUES(?,?,?,?,?,?,?,?)`,
+        )
+        .bind(
+          id('req'),
+          runId,
+          item.title,
+          item.owner,
+          item.status,
+          item.evidenceNote,
+          createdAt,
+          createdAt,
+        ),
+    );
+  try {
+    await db().batch(statements);
+  } catch (error) {
+    if (rawObjectWritten)
+      await evidence()
+        .delete(objectKey)
+        .catch(() => undefined);
+    throw error;
+  }
   return runId;
 }
 
+export async function nextVersionForDeal(dealId: string) {
+  await ensureSchema();
+  const row = await db()
+    .prepare(
+      `SELECT COALESCE(MAX(version_number), 0) + 1 next_version FROM runs WHERE deal_id=?`,
+    )
+    .bind(dealId)
+    .first<Record<string, unknown>>();
+  return Number(row?.next_version ?? 1);
+}
+
+export async function runIdForOperation(operationKey: string) {
+  await ensureSchema();
+  const row = await db()
+    .prepare(`SELECT run_id FROM run_operations WHERE operation_key=?`)
+    .bind(operationKey)
+    .first<Record<string, unknown>>();
+  return typeof row?.run_id === 'string' ? row.run_id : null;
+}
+
 export async function rawCsvForUpload(uploadId: string) {
-  const upload = await db().prepare(`SELECT object_key FROM uploads WHERE id=?`).bind(uploadId).first<Record<string, unknown>>();
+  await ensureSchema();
+  const upload = await db()
+    .prepare(`SELECT object_key FROM uploads WHERE id=?`)
+    .bind(uploadId)
+    .first<Record<string, unknown>>();
   if (!upload) return null;
   const object = await evidence().get(String(upload.object_key));
   return object ? await object.text() : null;

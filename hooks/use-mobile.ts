@@ -1,4 +1,5 @@
 import * as React from 'react';
+/* oxlint-disable react/react-compiler -- Initial media-query synchronization is intentional. */
 
 const MOBILE_BREAKPOINT = 768;
 

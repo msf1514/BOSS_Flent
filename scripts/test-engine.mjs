@@ -1,21 +1,95 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { runEvidenceEngine } from '../lib/evidence-engine.ts';
+import { runEvidenceEngine, sha256 } from '../lib/evidence-engine.ts';
+import { parseRunConfig } from '../lib/run-config.ts';
+import { sourceAnnotationsForHash } from '../lib/source-annotations.ts';
+import { calculateReadiness } from '../lib/workflow.ts';
 
-const csv = await readFile(new URL('../public/anonymised-deal-sample.csv', import.meta.url), 'utf8');
+const csv = await readFile(
+  new URL('../public/anonymised-deal-sample.csv', import.meta.url),
+  'utf8',
+);
 const config = {
-  dealName: 'Anonymised Lakeview deal', evidenceCutoff: '2026-08-18', societyPrefix: 'Lakeview',
-  bhk: 2, areaSqft: 1175, furnishing: 'semi-furnished', landlordBaseRent: 56000,
-  landlordMaintenance: 5000, landlordDeposit: 280000, improvementCapex: 160000,
-  areaToleranceSqft: 100, maxLastSeenAgeDays: 30, sampleAnnotation: true,
+  dealName: 'Anonymised Lakeview deal',
+  evidenceCutoff: '2026-08-18',
+  societyPrefix: 'Lakeview',
+  bhk: 2,
+  areaSqft: 1175,
+  furnishing: 'semi-furnished',
+  landlordBaseRent: 56000,
+  landlordMaintenance: 5000,
+  landlordDeposit: 280000,
+  improvementCapex: 160000,
+  areaToleranceSqft: 100,
+  maxLastSeenAgeDays: 30,
 };
-const result = await runEvidenceEngine(csv, config);
-assert.deepEqual(result.summary.baselines, { B0:{count:84,estimate:59000}, B1:{count:9,estimate:58000}, B2:{count:8,estimate:58250} });
-assert.deepEqual(result.summary.stateCounts, { exclude:74, include:8, duplicate_collapsed:2, needs_human_review:2 });
+const inputHash = await sha256(csv);
+const result = await runEvidenceEngine(
+  csv,
+  config,
+  [],
+  sourceAnnotationsForHash(inputHash),
+);
+assert.deepEqual(result.summary.baselines, {
+  B0: { count: 84, estimate: 59000 },
+  B1: { count: 11, estimate: 58000 },
+  B2: { count: 10, estimate: 58250 },
+});
+assert.deepEqual(result.summary.stateCounts, {
+  exclude: 74,
+  include: 10,
+  needs_human_review: 2,
+});
 assert.equal(result.validation.acceptedRows, 86);
 assert.equal(result.validation.rejectedRows, 0);
-assert.equal(result.rows.find((row) => row.listingId === 'CP-0081')?.b2State, 'needs_human_review');
-const invalid = await runEvidenceEngine('listing_id,source,rent\nBAD-1,Portal,50000\n', config);
+assert.equal(
+  result.rows.find((row) => row.listingId === 'CP-0081')?.b2State,
+  'needs_human_review',
+);
+const unannotated = await runEvidenceEngine(csv, config);
+assert.ok(
+  !unannotated.rows
+    .find((row) => row.listingId === 'CP-0081')
+    ?.reasons.includes('attribute_conflict_candidate'),
+);
+const invalid = await runEvidenceEngine(
+  'listing_id,source,rent\nBAD-1,Portal,50000\n',
+  config,
+);
 assert.equal(invalid.rows.length, 0);
-assert.ok(invalid.validation.issues.some((issue) => issue.code === 'missing_header'));
-console.log('Engine contract passed: sample invariants and blocking-schema failure.');
+assert.ok(
+  invalid.validation.issues.some((issue) => issue.code === 'missing_header'),
+);
+const impossibleDate = await runEvidenceEngine(
+  csv.replace(/2026-\d{2}-\d{2}/, '2026-02-30'),
+  config,
+);
+assert.ok(
+  impossibleDate.validation.issues.some(
+    (issue) => issue.code === 'invalid_date',
+  ),
+);
+assert.equal(parseRunConfig({}).ok, false);
+const reviewRow = result.rows.find(
+  (row) => row.b2State === 'needs_human_review',
+);
+assert.ok(reviewRow);
+const readiness = calculateReadiness(
+  [reviewRow],
+  [
+    {
+      id: 'review-1',
+      listingId: reviewRow.listingId,
+      decision: 'defer',
+      reason: 'Needs source confirmation',
+      actor: 'Reviewer',
+      createdAt: new Date().toISOString(),
+    },
+  ],
+  [],
+);
+assert.equal(readiness.ready, false);
+assert.equal(readiness.deferredReviewCount, 1);
+console.log(
+  'Engine contract passed: sample invariants, strict dates, source-bound annotations, config validation and deferred readiness.',
+);

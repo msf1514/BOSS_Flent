@@ -49,11 +49,25 @@ function parseCsv(text) {
 
   const [headers, ...records] = rows.filter((record) => record.some(Boolean));
   return records.map((record) =>
-    Object.fromEntries(headers.map((header, index) => [header, record[index] ?? ''])),
+    Object.fromEntries(
+      headers.map((header, index) => [header, record[index] ?? '']),
+    ),
   );
 }
 
-function scenario({ id, label, plannedTenantRevenue, occupancy, baseRent, maintenance, landlordDeposit, tenantDeposits, capex, assertionState, note }) {
+function scenario({
+  id,
+  label,
+  plannedTenantRevenue,
+  occupancy,
+  baseRent,
+  maintenance,
+  landlordDeposit,
+  tenantDeposits,
+  capex,
+  assertionState,
+  note,
+}) {
   const occupancyAdjustedRevenue = plannedTenantRevenue * occupancy;
   const monthlyOwnerCost = baseRent + maintenance;
   const monthlyContribution = occupancyAdjustedRevenue - monthlyOwnerCost;
@@ -74,12 +88,20 @@ function scenario({ id, label, plannedTenantRevenue, occupancy, baseRent, mainte
     uncoveredDeposit,
     capex,
     capitalEmployed,
-    simplePaybackMonths: monthlyContribution > 0 ? round1(capitalEmployed / monthlyContribution) : null,
+    simplePaybackMonths:
+      monthlyContribution > 0
+        ? round1(capitalEmployed / monthlyContribution)
+        : null,
     assertionState,
     verificationState: 'not_verified',
     decisionGrade: false,
     model: 'STATIC SIMPLE PAYBACK — DIRECTIONAL, NOT DECISION-GRADE',
-    omissionCodes: ['first_fill_vacancy', 'rent_escalation', 'exit_painting', 'central_operating_costs'],
+    omissionCodes: [
+      'first_fill_vacancy',
+      'rent_escalation',
+      'exit_painting',
+      'central_operating_costs',
+    ],
     note,
   };
 }
@@ -183,7 +205,9 @@ const expectedPaybacks = new Map([
 ]);
 for (const item of [opening, verbal, downside, linkedDeposit]) {
   if (item.simplePaybackMonths !== expectedPaybacks.get(item.id)) {
-    throw new Error(`Economics contract mismatch for ${item.id}: ${item.simplePaybackMonths}`);
+    throw new Error(
+      `Economics contract mismatch for ${item.id}: ${item.simplePaybackMonths}`,
+    );
   }
 }
 
@@ -234,23 +258,70 @@ const contract = {
   economics: {
     source: 'boss-assessment.md',
     numericallyConsumesMarketEstimate: false,
-    marketLinkageStatus: 'unresolved_until_rent_basis_and_decision_policy_are_declared',
+    marketLinkageStatus:
+      'unresolved_until_rent_basis_and_decision_policy_are_declared',
     scenarios: [opening, verbal, downside, linkedDeposit],
   },
   evidenceResolutionQueue: [
-    { id: 'written_owner_terms', issue: 'Written ₹54k landlord alternative', owner: 'Supply', status: 'open', consequence: 'Owner-cost scenario remains unconfirmed.', requiredProof: 'Written landlord confirmation with validity date.' },
-    { id: 'vendor_boq', issue: 'Vendor BOQ and technical checks', owner: 'Property', status: 'open', consequence: '₹1.60L capex and payback remain provisional.', requiredProof: 'Costed BOQ plus inspection sign-off.' },
-    { id: 'tenant_price', issue: 'Room-price and fill evidence', owner: 'Demand / Pricing', status: 'open', consequence: '₹72k tenant revenue and vacancy assumptions are estimates.', requiredProof: 'Signed booking or cited comparable enquiry cohort.' },
-    { id: 'maintenance_basis', issue: 'Listing maintenance basis', owner: 'Market Operations', status: 'blocked', consequence: 'Market-to-owner comparison is not decision-grade.', requiredProof: 'Source-level maintenance inclusion evidence or explicit abstention.' },
-    { id: 'sharing_rules', issue: 'Society sharing rules', owner: 'Supply / Property', status: 'open', consequence: 'Could force PASS regardless of market evidence.', requiredProof: 'Written society rule confirmation.' },
-    { id: 'economics_review', issue: 'Static economics review', owner: 'Finance', status: 'open', consequence: 'Deposit dependency and omitted costs remain unresolved.', requiredProof: 'Reviewed assumptions and time-based cash-flow treatment.' },
+    {
+      id: 'written_owner_terms',
+      issue: 'Written ₹54k landlord alternative',
+      owner: 'Supply',
+      status: 'open',
+      consequence: 'Owner-cost scenario remains unconfirmed.',
+      requiredProof: 'Written landlord confirmation with validity date.',
+    },
+    {
+      id: 'vendor_boq',
+      issue: 'Vendor BOQ and technical checks',
+      owner: 'Property',
+      status: 'open',
+      consequence: '₹1.60L capex and payback remain provisional.',
+      requiredProof: 'Costed BOQ plus inspection sign-off.',
+    },
+    {
+      id: 'tenant_price',
+      issue: 'Room-price and fill evidence',
+      owner: 'Demand / Pricing',
+      status: 'open',
+      consequence: '₹72k tenant revenue and vacancy assumptions are estimates.',
+      requiredProof: 'Signed booking or cited comparable enquiry cohort.',
+    },
+    {
+      id: 'maintenance_basis',
+      issue: 'Listing maintenance basis',
+      owner: 'Market Operations',
+      status: 'blocked',
+      consequence: 'Market-to-owner comparison is not decision-grade.',
+      requiredProof:
+        'Source-level maintenance inclusion evidence or explicit abstention.',
+    },
+    {
+      id: 'sharing_rules',
+      issue: 'Society sharing rules',
+      owner: 'Supply / Property',
+      status: 'open',
+      consequence: 'Could force PASS regardless of market evidence.',
+      requiredProof: 'Written society rule confirmation.',
+    },
+    {
+      id: 'economics_review',
+      issue: 'Static economics review',
+      owner: 'Finance',
+      status: 'open',
+      consequence: 'Deposit dependency and omitted costs remain unresolved.',
+      requiredProof: 'Reviewed assumptions and time-based cash-flow treatment.',
+    },
   ],
   failureStates: [
     {
       id: 'rent_basis_unresolved',
       claim: 'Decision-grade comparison of market evidence with owner cost',
       state: 'INSUFFICIENT',
-      reasons: ['maintenance_basis_unresolved', 'asking_rent_is_not_achieved_rent'],
+      reasons: [
+        'maintenance_basis_unresolved',
+        'asking_rent_is_not_achieved_rent',
+      ],
       nextAction: 'Resolve source basis or retain the abstention.',
     },
   ],
@@ -264,5 +335,9 @@ const contract = {
 };
 
 await mkdir(join(root, 'data'), { recursive: true });
-await writeFile(join(root, 'data', 'prototype.json'), `${JSON.stringify(contract, null, 2)}\n`, 'utf8');
+await writeFile(
+  join(root, 'data', 'prototype.json'),
+  `${JSON.stringify(contract, null, 2)}\n`,
+  'utf8',
+);
 console.log(`Wrote data/prototype.json with ${listings.length} listings.`);
