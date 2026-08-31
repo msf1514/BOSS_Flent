@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
   ArrowRight,
+  Building2,
   Check,
   CheckCircle2,
   ChevronRight,
@@ -13,12 +14,12 @@ import {
   FileCheck2,
   FileUp,
   History,
+  ListChecks,
   Loader2,
   RefreshCw,
   Search,
   ShieldCheck,
   UserRoundCheck,
-  XCircle,
 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +33,13 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import type {
@@ -79,21 +87,29 @@ const defaults: RunConfig = {
 const Field = ({
   label,
   wide,
+  htmlFor,
   children,
 }: {
   label: string;
   wide?: boolean;
+  htmlFor?: string;
   children: React.ReactNode;
 }) => (
   <div className={wide ? 'sm:col-span-2' : ''}>
-    <Label className="mb-1.5 block">{label}</Label>
+    {htmlFor ? (
+      <Label htmlFor={htmlFor} className="data-label mb-2 block">
+        {label}
+      </Label>
+    ) : (
+      <div className="data-label mb-2">{label}</div>
+    )}
     {children}
   </div>
 );
 const Fact = ({ label, value }: { label: string; value: string }) => (
-  <div className="min-w-0 rounded-lg border bg-white p-3">
-    <dt className="text-xs text-muted-foreground">{label}</dt>
-    <dd className="mt-1 break-words font-medium">{value}</dd>
+  <div className="min-w-0 rounded-md border bg-white p-3.5 shadow-[0_1px_1px_rgba(15,23,42,0.02)]">
+    <dt className="data-label">{label}</dt>
+    <dd className="mt-1.5 break-words font-medium leading-5">{value}</dd>
   </div>
 );
 function StateBadge({ state }: { state: string }) {
@@ -106,7 +122,8 @@ function StateBadge({ state }: { state: string }) {
           ? 'border-sky-200 bg-sky-50 text-sky-800'
           : 'border-slate-200 bg-slate-50 text-slate-700';
   return (
-    <Badge variant="outline" className={tone}>
+    <Badge variant="outline" className={`gap-1.5 rounded-full px-2.5 ${tone}`}>
+      <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
       {stateLabel[state] ?? state}
     </Badge>
   );
@@ -171,286 +188,360 @@ function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
     }
   }
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
-      <div className="mb-8 max-w-3xl">
-        <Badge
-          variant="outline"
-          className="mb-4 border-blue-200 bg-blue-50 text-blue-800"
-        >
-          Working pilot · uploaded evidence only
-        </Badge>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Turn a listing file into reviewable market evidence.
-        </h1>
-        <p className="mt-3 max-w-2xl leading-7 text-muted-foreground">
-          Validate the source, preserve its lineage, apply a declared comparison
-          policy and move exceptions through human review. The system
-          deliberately does not make an investment decision.
-        </p>
-      </div>
-      <ol className="mb-6 grid gap-2 sm:grid-cols-4">
-        {[
-          ['1', 'Upload', 'Raw evidence'],
-          ['2', 'Validate', 'Schema and rows'],
-          ['3', 'Configure', 'Subject and policy'],
-          ['4', 'Run', 'Versioned result'],
-        ].map(([n, title, sub], i) => (
-          <li
-            key={n}
-            className="flex items-center gap-3 rounded-lg border bg-card p-3"
+    <>
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      <header className="border-b bg-white">
+        <div className="app-shell flex min-h-16 items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground shadow-sm">
+              <Building2 aria-hidden="true" className="size-4" />
+            </span>
+            <div>
+              <strong className="block text-sm font-semibold tracking-[-0.01em]">
+                BOSS Evidence
+              </strong>
+              <span className="block text-[0.6875rem] text-muted-foreground">
+                Market evidence operations
+              </span>
+            </div>
+          </div>
+          <Badge
+            variant="outline"
+            className="rounded-full border-slate-300 bg-slate-50 px-3 text-slate-700"
           >
-            <span
-              className={`grid size-8 place-items-center rounded-full text-sm font-semibold ${i === 0 ? 'bg-blue-700 text-white' : 'bg-muted text-muted-foreground'}`}
-            >
-              {n}
-            </span>
-            <span>
-              <strong className="block text-sm">{title}</strong>
-              <span className="text-xs text-muted-foreground">{sub}</span>
-            </span>
-          </li>
-        ))}
-      </ol>
-      <form
-        onSubmit={submit}
-        className="grid gap-5 lg:grid-cols-[1.05fr_.95fr]"
+            Controlled pilot
+          </Badge>
+        </div>
+      </header>
+      <main
+        id="main-content"
+        className="workbench-grid min-h-[calc(100vh-4rem)] py-8 lg:py-11"
       >
-        <Card>
-          <CardHeader>
-            <CardTitle>1. Supply evidence</CardTitle>
-            <CardDescription>
-              CSV only, maximum 2 MB. Original bytes are retained with a SHA-256
-              fingerprint.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              className="flex min-h-48 w-full flex-col items-center justify-center rounded-lg border border-dashed bg-slate-50/60 p-6 text-center hover:border-blue-400 hover:bg-blue-50/40 focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <FileUp className="mb-3 size-8 text-blue-700" />
-              <span className="font-semibold">
-                {file?.name ?? 'Choose a comparable-listings CSV'}
-              </span>
-              <span className="mt-1 text-sm text-muted-foreground">
-                {file
-                  ? `${Math.ceil(file.size / 1024)} KB ready for validation`
-                  : 'Required contract: 13 named columns'}
-              </span>
-            </button>
-            <input
-              ref={inputRef}
-              className="sr-only"
-              type="file"
-              accept=".csv,text/csv"
-              aria-label="Choose comparable-listings CSV"
-              onChange={(e) => {
-                setFile(e.target.files?.[0] ?? null);
-                update('sampleAnnotation', false);
-              }}
-            />
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="min-h-11"
-                onClick={sample}
-              >
-                <FileCheck2 />
-                Use anonymised sample
-              </Button>
-              <a
-                href="/anonymised-deal-sample.csv"
-                download
-                className="inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-sm font-medium hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <Download className="size-4" />
-                Download sample
-              </a>
-            </div>
-            <div className="rounded-lg border bg-muted/35 p-3 text-xs leading-5 text-muted-foreground">
-              <strong className="text-foreground">
-                Required columns:
-              </strong>{' '}
-              listing_id, source, posted_date, last_seen_date, society,
-              locality, bhk, furnishing, area_sqft, rent, deposit, photo_count,
-              poster_type.
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>2. Configure the run</CardTitle>
-            <CardDescription>
-              Explicit policy and deal inputs—not hidden defaults.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
-            <Field label="Deal name" wide>
-              <Input
-                value={config.dealName}
-                onChange={(e) => update('dealName', e.target.value)}
-                required
-              />
-            </Field>
-            <Field label="Evidence cutoff">
-              <Input
-                type="date"
-                value={config.evidenceCutoff}
-                onChange={(e) => update('evidenceCutoff', e.target.value)}
-                required
-              />
-            </Field>
-            <Field label="Society match prefix">
-              <Input
-                value={config.societyPrefix}
-                onChange={(e) => update('societyPrefix', e.target.value)}
-                required
-              />
-            </Field>
-            <Field label="BHK">
-              <Input
-                type="number"
-                min="1"
-                value={config.bhk}
-                onChange={(e) => update('bhk', Number(e.target.value))}
-              />
-            </Field>
-            <Field label="Subject area (sq ft)">
-              <Input
-                type="number"
-                min="1"
-                value={config.areaSqft}
-                onChange={(e) => update('areaSqft', Number(e.target.value))}
-              />
-            </Field>
-            <Field label="Furnishing">
-              <select
-                className="h-10 w-full rounded-md border bg-background px-3 text-sm"
-                value={config.furnishing}
-                onChange={(e) => update('furnishing', e.target.value)}
-              >
-                <option value="semi-furnished">Semi-furnished</option>
-                <option value="fully-furnished">Fully furnished</option>
-                <option value="unfurnished">Unfurnished</option>
-              </select>
-            </Field>
-            <Field label="Landlord base rent">
-              <Input
-                type="number"
-                min="1"
-                value={config.landlordBaseRent}
-                onChange={(e) =>
-                  update('landlordBaseRent', Number(e.target.value))
-                }
-              />
-            </Field>
-            <Field label="Monthly maintenance">
-              <Input
-                type="number"
-                min="0"
-                value={config.landlordMaintenance}
-                onChange={(e) =>
-                  update('landlordMaintenance', Number(e.target.value))
-                }
-              />
-            </Field>
-            <Field label="Security deposit">
-              <Input
-                type="number"
-                min="0"
-                value={config.landlordDeposit}
-                onChange={(e) =>
-                  update('landlordDeposit', Number(e.target.value))
-                }
-              />
-            </Field>
-            <Field label="Improvement capex">
-              <Input
-                type="number"
-                min="0"
-                value={config.improvementCapex}
-                onChange={(e) =>
-                  update('improvementCapex', Number(e.target.value))
-                }
-              />
-            </Field>
-            <Field label="Area tolerance (± sq ft)">
-              <Input
-                type="number"
-                min="0"
-                value={config.areaToleranceSqft}
-                onChange={(e) =>
-                  update('areaToleranceSqft', Number(e.target.value))
-                }
-              />
-            </Field>
-            <Field label="Maximum age (days)">
-              <Input
-                type="number"
-                min="1"
-                value={config.maxLastSeenAgeDays}
-                onChange={(e) =>
-                  update('maxLastSeenAgeDays', Number(e.target.value))
-                }
-              />
-            </Field>
-            <div className="sm:col-span-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs leading-5 text-blue-950">
-              <strong>Calculation boundary:</strong> deposit and capex are
-              versioned decision context. They do not change the comparable-rent
-              median.
-            </div>
-            <div className="sm:col-span-2 border-t pt-4">
-              <Button disabled={busy} className="min-h-11 w-full sm:w-auto">
-                {busy ? <Loader2 className="animate-spin" /> : <ArrowRight />}
-                {busy ? 'Validating and analysing…' : 'Validate and create run'}
-              </Button>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Bad rows are rejected and disclosed. Missing schema blocks the
-                run.
+        <div className="app-shell">
+          <div className="mb-8 grid gap-6 border-b border-slate-300/80 pb-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end">
+            <div className="max-w-3xl">
+              <p className="eyebrow mb-3">New evidence run</p>
+              <h1 className="max-w-2xl text-3xl font-semibold leading-[1.12] tracking-[-0.035em] sm:text-[2.6rem]">
+                Build a defensible market view from source evidence.
+              </h1>
+              <p className="mt-4 max-w-2xl text-[1.0625rem] leading-7 text-muted-foreground">
+                Validate the source, preserve lineage, apply a declared
+                comparison policy and route exceptions to a human reviewer.
               </p>
             </div>
-          </CardContent>
-        </Card>
-      </form>
-      {notice && (
-        <Alert
-          className={`mt-5 ${notice.kind === 'error' ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}
-        >
-          <AlertCircle />
-          <AlertTitle>
-            {notice.kind === 'error' ? 'Action required' : 'Ready'}
-          </AlertTitle>
-          <AlertDescription>{notice.text}</AlertDescription>
-        </Alert>
-      )}
-      {issues.length > 0 && (
-        <Card className="mt-5">
-          <CardHeader>
-            <CardTitle>Validation report</CardTitle>
-            <CardDescription>{issues.length} issues found.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {issues.slice(0, 30).map((issue, i) => (
-              <div
-                key={`${issue.code}-${i}`}
-                className="flex gap-3 rounded-lg border p-3 text-sm"
+            <div className="rounded-md border border-slate-300 bg-white/90 p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+              <p className="data-label">Decision boundary</p>
+              <p className="mt-2 text-sm leading-6 text-slate-700">
+                This workbench evaluates evidence quality. It does not make the
+                investment decision.
+              </p>
+            </div>
+          </div>
+          <ol
+            aria-label="Run creation steps"
+            className="mb-5 grid overflow-hidden rounded-md border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:grid-cols-4"
+          >
+            {[
+              ['1', 'Upload', 'Raw evidence'],
+              ['2', 'Validate', 'Schema and rows'],
+              ['3', 'Configure', 'Subject and policy'],
+              ['4', 'Run', 'Versioned result'],
+            ].map(([n, title, sub], i) => (
+              <li
+                key={n}
+                className="relative flex items-center gap-3 border-b p-3.5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0"
               >
-                <Badge variant="outline">{issue.severity}</Badge>
-                <div>
-                  <strong>{issue.code.replaceAll('_', ' ')}</strong>
-                  <p className="text-muted-foreground">
-                    {issue.rowNumber ? `Row ${issue.rowNumber}: ` : ''}
-                    {issue.message}
+                <span
+                  className={`data-value grid size-7 place-items-center rounded-full text-xs font-semibold ${i === 0 ? 'bg-primary text-primary-foreground' : 'border bg-slate-50 text-muted-foreground'}`}
+                >
+                  {n}
+                </span>
+                <span>
+                  <strong className="block text-[0.8125rem] font-semibold">
+                    {title}
+                  </strong>
+                  <span className="text-[0.6875rem] text-muted-foreground">
+                    {sub}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <form
+            onSubmit={submit}
+            className="grid gap-5 lg:grid-cols-[0.86fr_1.14fr]"
+          >
+            <Card className="self-start">
+              <CardHeader className="border-b">
+                <p className="eyebrow">Source</p>
+                <CardTitle>1. Supply evidence</CardTitle>
+                <CardDescription>
+                  CSV only, maximum 2 MB. Original bytes are retained with a
+                  SHA-256 fingerprint.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <button
+                  type="button"
+                  onClick={() => inputRef.current?.click()}
+                  className="group flex min-h-52 w-full cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-slate-400 bg-slate-50/70 p-6 text-center transition-colors hover:border-primary hover:bg-blue-50/50 focus-visible:ring-3 focus-visible:ring-ring/30"
+                >
+                  <span className="mb-4 grid size-11 place-items-center rounded-md border bg-white text-primary shadow-sm transition-colors group-hover:border-primary/40">
+                    <FileUp aria-hidden="true" className="size-5" />
+                  </span>
+                  <span className="font-semibold tracking-[-0.01em]">
+                    {file?.name ?? 'Choose a comparable-listings CSV'}
+                  </span>
+                  <span className="mt-1 text-sm text-muted-foreground">
+                    {file
+                      ? `${Math.ceil(file.size / 1024)} KB ready for validation`
+                      : 'Required contract: 13 named columns'}
+                  </span>
+                </button>
+                <input
+                  ref={inputRef}
+                  className="sr-only"
+                  type="file"
+                  accept=".csv,text/csv"
+                  aria-label="Choose comparable-listings CSV"
+                  onChange={(e) => {
+                    setFile(e.target.files?.[0] ?? null);
+                    update('sampleAnnotation', false);
+                  }}
+                />
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="min-h-11"
+                    onClick={sample}
+                  >
+                    <FileCheck2 />
+                    Use anonymised sample
+                  </Button>
+                  <a
+                    href="/anonymised-deal-sample.csv"
+                    download
+                    className="inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-sm font-medium hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Download className="size-4" />
+                    Download sample
+                  </a>
+                </div>
+                <div className="rounded-lg border bg-muted/35 p-3 text-xs leading-5 text-muted-foreground">
+                  <strong className="text-foreground">
+                    Required columns:
+                  </strong>{' '}
+                  listing_id, source, posted_date, last_seen_date, society,
+                  locality, bhk, furnishing, area_sqft, rent, deposit,
+                  photo_count, poster_type.
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="border-b">
+                <p className="eyebrow">Policy</p>
+                <CardTitle>2. Configure the run</CardTitle>
+                <CardDescription>
+                  Explicit policy and deal inputs—not hidden defaults.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <Field label="Deal name" htmlFor="deal-name" wide>
+                  <Input
+                    id="deal-name"
+                    value={config.dealName}
+                    onChange={(e) => update('dealName', e.target.value)}
+                    required
+                  />
+                </Field>
+                <Field label="Evidence cutoff" htmlFor="evidence-cutoff">
+                  <Input
+                    id="evidence-cutoff"
+                    type="date"
+                    value={config.evidenceCutoff}
+                    onChange={(e) => update('evidenceCutoff', e.target.value)}
+                    required
+                  />
+                </Field>
+                <Field label="Society match prefix" htmlFor="society-prefix">
+                  <Input
+                    id="society-prefix"
+                    value={config.societyPrefix}
+                    onChange={(e) => update('societyPrefix', e.target.value)}
+                    required
+                  />
+                </Field>
+                <Field label="BHK" htmlFor="subject-bhk">
+                  <Input
+                    id="subject-bhk"
+                    type="number"
+                    min="1"
+                    value={config.bhk}
+                    onChange={(e) => update('bhk', Number(e.target.value))}
+                  />
+                </Field>
+                <Field label="Subject area (sq ft)" htmlFor="subject-area">
+                  <Input
+                    id="subject-area"
+                    type="number"
+                    min="1"
+                    value={config.areaSqft}
+                    onChange={(e) => update('areaSqft', Number(e.target.value))}
+                  />
+                </Field>
+                <Field label="Furnishing" htmlFor="furnishing">
+                  <select
+                    id="furnishing"
+                    className="control-select"
+                    value={config.furnishing}
+                    onChange={(e) => update('furnishing', e.target.value)}
+                  >
+                    <option value="semi-furnished">Semi-furnished</option>
+                    <option value="fully-furnished">Fully furnished</option>
+                    <option value="unfurnished">Unfurnished</option>
+                  </select>
+                </Field>
+                <Field label="Landlord base rent" htmlFor="base-rent">
+                  <Input
+                    id="base-rent"
+                    type="number"
+                    min="1"
+                    value={config.landlordBaseRent}
+                    onChange={(e) =>
+                      update('landlordBaseRent', Number(e.target.value))
+                    }
+                  />
+                </Field>
+                <Field label="Monthly maintenance" htmlFor="maintenance">
+                  <Input
+                    id="maintenance"
+                    type="number"
+                    min="0"
+                    value={config.landlordMaintenance}
+                    onChange={(e) =>
+                      update('landlordMaintenance', Number(e.target.value))
+                    }
+                  />
+                </Field>
+                <Field label="Security deposit" htmlFor="deposit">
+                  <Input
+                    id="deposit"
+                    type="number"
+                    min="0"
+                    value={config.landlordDeposit}
+                    onChange={(e) =>
+                      update('landlordDeposit', Number(e.target.value))
+                    }
+                  />
+                </Field>
+                <Field label="Improvement capex" htmlFor="capex">
+                  <Input
+                    id="capex"
+                    type="number"
+                    min="0"
+                    value={config.improvementCapex}
+                    onChange={(e) =>
+                      update('improvementCapex', Number(e.target.value))
+                    }
+                  />
+                </Field>
+                <Field
+                  label="Area tolerance (± sq ft)"
+                  htmlFor="area-tolerance"
+                >
+                  <Input
+                    id="area-tolerance"
+                    type="number"
+                    min="0"
+                    value={config.areaToleranceSqft}
+                    onChange={(e) =>
+                      update('areaToleranceSqft', Number(e.target.value))
+                    }
+                  />
+                </Field>
+                <Field label="Maximum age (days)" htmlFor="max-age">
+                  <Input
+                    id="max-age"
+                    type="number"
+                    min="1"
+                    value={config.maxLastSeenAgeDays}
+                    onChange={(e) =>
+                      update('maxLastSeenAgeDays', Number(e.target.value))
+                    }
+                  />
+                </Field>
+                <div className="sm:col-span-2 rounded-md border border-blue-200 bg-blue-50/70 p-3.5 text-xs leading-5 text-blue-950">
+                  <strong className="font-semibold">
+                    Calculation boundary:
+                  </strong>{' '}
+                  deposit and capex are versioned decision context. They do not
+                  change the comparable-rent median.
+                </div>
+                <div className="sm:col-span-2 border-t pt-4">
+                  <Button
+                    disabled={busy}
+                    size="lg"
+                    className="w-full sm:w-auto"
+                  >
+                    {busy ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      <ArrowRight />
+                    )}
+                    {busy
+                      ? 'Validating and analysing…'
+                      : 'Validate and create run'}
+                  </Button>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Bad rows are rejected and disclosed. Missing schema blocks
+                    the run.
                   </p>
                 </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-    </main>
+              </CardContent>
+            </Card>
+          </form>
+          {notice && (
+            <Alert
+              className={`mt-5 ${notice.kind === 'error' ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}
+            >
+              <AlertCircle />
+              <AlertTitle>
+                {notice.kind === 'error' ? 'Action required' : 'Ready'}
+              </AlertTitle>
+              <AlertDescription>{notice.text}</AlertDescription>
+            </Alert>
+          )}
+          {issues.length > 0 && (
+            <Card className="mt-5">
+              <CardHeader>
+                <CardTitle>Validation report</CardTitle>
+                <CardDescription>{issues.length} issues found.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {issues.slice(0, 30).map((issue, i) => (
+                  <div
+                    key={`${issue.code}-${i}`}
+                    className="flex gap-3 rounded-lg border p-3 text-sm"
+                  >
+                    <Badge variant="outline">{issue.severity}</Badge>
+                    <div>
+                      <strong>{issue.code.replaceAll('_', ' ')}</strong>
+                      <p className="text-muted-foreground">
+                        {issue.rowNumber ? `Row ${issue.rowNumber}: ` : ''}
+                        {issue.message}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </main>
+    </>
   );
 }
 
@@ -547,17 +638,32 @@ function Workbench({
     }
   }
   return (
-    <div className="min-h-screen bg-slate-50/70">
-      <header className="sticky top-0 z-30 border-b bg-white/95 backdrop-blur">
-        <div className="mx-auto flex min-h-16 max-w-[1500px] items-center justify-between gap-4 px-4 sm:px-6">
-          <div>
-            <strong className="text-sm">BOSS Evidence Workbench</strong>
-            <span className="ml-3 hidden text-xs text-muted-foreground sm:inline">
-              Pilot workspace · no live scraping
+    <div className="min-h-screen bg-background">
+      <a href="#workbench-main" className="skip-link">
+        Skip to workbench
+      </a>
+      <header className="sticky top-0 z-30 border-b border-slate-300/80 bg-white/95 backdrop-blur-md">
+        <div className="app-shell flex min-h-16 items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground shadow-sm">
+              <Building2 aria-hidden="true" className="size-4" />
             </span>
+            <div className="min-w-0">
+              <strong className="block truncate text-sm font-semibold tracking-[-0.01em]">
+                BOSS Evidence Workbench
+              </strong>
+              <span className="hidden text-[0.6875rem] text-muted-foreground sm:block">
+                Controlled pilot · uploaded evidence only
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline">v{run.versionNumber}</Badge>
+            <Badge
+              variant="outline"
+              className="data-value rounded-full border-slate-300 bg-slate-50"
+            >
+              v{run.versionNumber}
+            </Badge>
             <Button
               variant="outline"
               size="sm"
@@ -570,182 +676,185 @@ function Workbench({
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-[1500px] px-4 py-5 sm:px-6">
-        <div className="mb-4 flex flex-col gap-4 rounded-xl border bg-white p-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge
-                variant="outline"
-                className={
-                  ready
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                    : 'border-amber-200 bg-amber-50 text-amber-900'
-                }
-              >
-                {ready ? 'Decision-ready evidence' : 'Not decision-ready'}
-              </Badge>
-              <span className="text-xs text-muted-foreground">
-                Run {run.id.slice(-8)} · {dateTime(run.createdAt)}
-              </span>
+      <main
+        id="workbench-main"
+        className="workbench-grid min-h-[calc(100vh-4rem)] py-6 lg:py-8"
+      >
+        <div className="app-shell">
+          <div className="mb-5 flex flex-col gap-5 rounded-lg border border-slate-300/90 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] lg:flex-row lg:items-center lg:justify-between lg:p-6">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className={`rounded-full px-2.5 ${
+                    ready
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                      : 'border-amber-200 bg-amber-50 text-amber-900'
+                  }`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="mr-1 size-1.5 rounded-full bg-current"
+                  />
+                  {ready ? 'Decision-ready evidence' : 'Not decision-ready'}
+                </Badge>
+                <span className="data-value text-[0.6875rem] text-muted-foreground">
+                  Run {run.id.slice(-8)} · {dateTime(run.createdAt)}
+                </span>
+              </div>
+              <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] sm:text-[1.75rem]">
+                {run.dealName}
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {unresolved} evidence requests unresolved · {pending} rows
+                awaiting review · {run.filename}
+              </p>
             </div>
-            <h1 className="mt-2 text-xl font-semibold sm:text-2xl">
-              {run.dealName}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {unresolved} evidence requests unresolved · {pending} rows
-              awaiting review · {run.filename}
-            </p>
-          </div>
-          <Button
-            className="min-h-11"
-            onClick={() => setTab(pending ? 'review' : 'evidence')}
-          >
-            {pending ? 'Review highest-risk rows' : 'Resolve evidence requests'}
-            <ChevronRight />
-          </Button>
-        </div>
-        <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
-          {[
-            ['Captured', true],
-            ['Validated', run.validation.errorCount === 0],
-            ['Normalized', true],
-            ['Analysed', true],
-            ['Reviewed', pending === 0],
-            ['Decision-ready', ready],
-          ].map(([label, done]) => (
-            <div
-              key={String(label)}
-              className={`flex items-center gap-2 rounded-lg border p-3 text-sm font-medium ${done ? 'border-emerald-200 bg-emerald-50/70 text-emerald-900' : 'bg-white text-muted-foreground'}`}
+            <Button
+              size="lg"
+              onClick={() => setTab(pending ? 'review' : 'evidence')}
             >
-              {done ? (
-                <CheckCircle2 className="size-4" />
-              ) : (
-                <CircleDot className="size-4" />
-              )}
-              {label}
+              {pending
+                ? 'Review highest-risk rows'
+                : 'Resolve evidence requests'}
+              <ChevronRight />
+            </Button>
+          </div>
+          <div
+            aria-label="Evidence workflow status"
+            className="grid overflow-hidden rounded-md border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.025)] sm:grid-cols-3 lg:grid-cols-6"
+          >
+            {[
+              ['Captured', true],
+              ['Validated', run.validation.errorCount === 0],
+              ['Normalized', true],
+              ['Analysed', true],
+              ['Reviewed', pending === 0],
+              ['Decision-ready', ready],
+            ].map(([label, done]) => (
+              <div
+                key={String(label)}
+                className={`flex min-h-12 items-center gap-2 border-b px-3 py-2.5 text-[0.8125rem] font-semibold last:border-b-0 sm:border-r sm:[&:nth-child(3)]:border-r-0 lg:border-b-0 lg:[&:nth-child(3)]:border-r lg:last:border-r-0 ${done ? 'bg-emerald-50/55 text-emerald-900' : 'bg-white text-muted-foreground'}`}
+              >
+                {done ? (
+                  <CheckCircle2 className="size-4" />
+                ) : (
+                  <CircleDot className="size-4" />
+                )}
+                {label}
+              </div>
+            ))}
+          </div>
+          {notice && (
+            <Alert
+              className={`mt-4 ${notice.kind === 'error' ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}
+            >
+              <AlertCircle />
+              <AlertTitle>
+                {notice.kind === 'error' ? 'Could not save' : 'Saved'}
+              </AlertTitle>
+              <AlertDescription>{notice.text}</AlertDescription>
+            </Alert>
+          )}
+          <Tabs value={tab} onValueChange={setTab} className="mt-6">
+            <div className="overflow-x-auto">
+              <TabsList aria-label="Workbench sections">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="comparables">Comparables</TabsTrigger>
+                <TabsTrigger value="review">
+                  Review queue · {pending}
+                </TabsTrigger>
+                <TabsTrigger value="evidence">
+                  Evidence requests · {unresolved}
+                </TabsTrigger>
+                <TabsTrigger value="audit">Audit history</TabsTrigger>
+              </TabsList>
             </div>
-          ))}
-        </div>
-        {notice && (
-          <Alert
-            className={`mt-4 ${notice.kind === 'error' ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}
-          >
-            <AlertCircle />
-            <AlertTitle>
-              {notice.kind === 'error' ? 'Could not save' : 'Saved'}
-            </AlertTitle>
-            <AlertDescription>{notice.text}</AlertDescription>
-          </Alert>
-        )}
-        <Tabs value={tab} onValueChange={setTab} className="mt-5">
-          <div className="overflow-x-auto">
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="comparables">Comparables</TabsTrigger>
-              <TabsTrigger value="review">Review queue · {pending}</TabsTrigger>
-              <TabsTrigger value="evidence">
-                Evidence requests · {unresolved}
-              </TabsTrigger>
-              <TabsTrigger value="audit">Audit history</TabsTrigger>
-            </TabsList>
+            <TabsContent value="overview" className="pt-4">
+              <Overview run={run} pending={pending} unresolved={unresolved} />
+            </TabsContent>
+            <TabsContent value="comparables" className="pt-4">
+              <Comparables
+                run={run}
+                rows={rows}
+                query={query}
+                setQuery={setQuery}
+                filter={filter}
+                setFilter={setFilter}
+                setSelected={setSelected}
+              />
+            </TabsContent>
+            <TabsContent value="review" className="pt-4">
+              <Review run={run} onSelect={setSelected} />
+            </TabsContent>
+            <TabsContent value="evidence" className="pt-4">
+              <Requests
+                key={run.id}
+                items={run.requests}
+                busy={busy}
+                save={(item) =>
+                  action({
+                    action: 'request',
+                    requestId: item.id,
+                    status: item.status,
+                    owner: item.owner,
+                    evidenceNote: item.evidenceNote,
+                  })
+                }
+              />
+            </TabsContent>
+            <TabsContent value="audit" className="pt-4">
+              <Audit events={run.audit} />
+            </TabsContent>
+          </Tabs>
+          <div className="my-6 flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <strong className="text-sm text-blue-950">
+                Completed versions are immutable.
+              </strong>
+              <p className="mt-1 text-xs text-blue-900">
+                Decisions affect estimates only in a child run created from the
+                preserved raw source.
+              </p>
+            </div>
+            <Button
+              disabled={busy || run.reviews.length === 0}
+              className="min-h-11"
+              onClick={() => action({ action: 'rerun' })}
+            >
+              {busy ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+              Create version {run.versionNumber + 1}
+            </Button>
           </div>
-          <TabsContent value="overview" className="pt-4">
-            <Overview run={run} pending={pending} unresolved={unresolved} />
-          </TabsContent>
-          <TabsContent value="comparables" className="pt-4">
-            <Comparables
-              run={run}
-              rows={rows}
-              query={query}
-              setQuery={setQuery}
-              filter={filter}
-              setFilter={setFilter}
-              setSelected={setSelected}
-            />
-          </TabsContent>
-          <TabsContent value="review" className="pt-4">
-            <Review run={run} onSelect={setSelected} />
-          </TabsContent>
-          <TabsContent value="evidence" className="pt-4">
-            <Requests
-              key={run.id}
-              items={run.requests}
-              busy={busy}
-              save={(item) =>
-                action({
-                  action: 'request',
-                  requestId: item.id,
-                  status: item.status,
-                  owner: item.owner,
-                  evidenceNote: item.evidenceNote,
-                })
-              }
-            />
-          </TabsContent>
-          <TabsContent value="audit" className="pt-4">
-            <Audit events={run.audit} />
-          </TabsContent>
-        </Tabs>
-        <div className="my-6 flex flex-col gap-3 rounded-xl border border-blue-200 bg-blue-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <strong className="text-sm text-blue-950">
-              Completed versions are immutable.
-            </strong>
-            <p className="mt-1 text-xs text-blue-900">
-              Decisions affect estimates only in a child run created from the
-              preserved raw source.
-            </p>
-          </div>
-          <Button
-            disabled={busy || run.reviews.length === 0}
-            className="min-h-11"
-            onClick={() => action({ action: 'rerun' })}
-          >
-            {busy ? <Loader2 className="animate-spin" /> : <RefreshCw />}Create
-            version {run.versionNumber + 1}
-          </Button>
         </div>
       </main>
-      {selected && (
-        <div
-          role="presentation"
-          className="fixed inset-0 z-50 bg-slate-950/35 p-0 sm:p-6"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setSelected(null);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setSelected(null);
-          }}
-        >
-          <dialog
-            open
-            aria-label={`Review ${selected.listingId}`}
-            className="ml-auto flex h-full w-full max-w-xl flex-col overflow-y-auto bg-white p-5 text-foreground shadow-xl sm:rounded-xl"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <Badge variant="outline">Human adjudication</Badge>
-                <h2 className="mt-2 text-xl font-semibold">
-                  {selected.listingId}
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  System recommendation:{' '}
-                  <strong className="text-foreground">
-                    {stateLabel[selected.b2State]}
-                  </strong>
-                  . Human decisions are stored separately.
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSelected(null)}
-                aria-label="Close"
+      <Dialog
+        open={Boolean(selected)}
+        onOpenChange={(open) => {
+          if (!open) setSelected(null);
+        }}
+      >
+        {selected && (
+          <DialogContent className="top-0 right-0 bottom-0 left-auto flex h-dvh w-full max-w-xl translate-x-0 translate-y-0 flex-col gap-0 overflow-y-auto rounded-none border-y-0 border-r-0 bg-white p-0 shadow-2xl sm:top-4 sm:right-4 sm:bottom-4 sm:h-[calc(100dvh-2rem)] sm:rounded-lg sm:border">
+            <DialogHeader className="border-b px-5 py-5 pr-14 sm:px-6">
+              <Badge
+                variant="outline"
+                className="mb-1 w-fit rounded-full border-slate-300 bg-slate-50"
               >
-                <XCircle />
-              </Button>
-            </div>
-            <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
+                Human adjudication
+              </Badge>
+              <DialogTitle className="text-xl font-semibold tracking-[-0.025em]">
+                Review {selected.listingId}
+              </DialogTitle>
+              <DialogDescription className="leading-6">
+                System recommendation:{' '}
+                <strong className="text-foreground">
+                  {stateLabel[selected.b2State]}
+                </strong>
+                . Human decisions are stored separately.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-3 px-5 py-5 text-sm sm:px-6">
               <Fact
                 label="Asking rent"
                 value={money(Number(selected.observed.rent))}
@@ -763,7 +872,7 @@ function Workbench({
                 value={`${selected.normalized.lastSeenAgeDays} days`}
               />
             </div>
-            <div className="mt-4 rounded-lg border bg-muted/30 p-3 text-sm">
+            <div className="mx-5 rounded-md border bg-muted/30 p-3.5 text-sm sm:mx-6">
               <strong className="text-xs uppercase text-muted-foreground">
                 System reasons
               </strong>
@@ -772,7 +881,7 @@ function Workbench({
                   'Meets policy'}
               </p>
             </div>
-            <div className="mt-5 space-y-4 border-t pt-5">
+            <div className="mt-5 space-y-5 border-t px-5 py-5 sm:px-6">
               <Field label="Human decision">
                 <div className="grid grid-cols-3 gap-2">
                   {(['include', 'exclude', 'defer'] as const).map((item) => (
@@ -787,15 +896,17 @@ function Workbench({
                   ))}
                 </div>
               </Field>
-              <Field label="Reason required">
+              <Field label="Reason required" htmlFor="review-reason">
                 <Textarea
+                  id="review-reason"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Record the evidence and rationale."
                 />
               </Field>
               <Button
-                className="min-h-11 w-full"
+                size="lg"
+                className="w-full"
                 disabled={busy || reason.trim().length < 4}
                 onClick={saveReview}
               >
@@ -807,9 +918,9 @@ function Workbench({
                 Save review decision
               </Button>
             </div>
-          </dialog>
-        </div>
-      )}
+          </DialogContent>
+        )}
+      </Dialog>
     </div>
   );
 }
@@ -853,7 +964,7 @@ function Overview({
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
-          <CardHeader>
+          <CardHeader className="border-b">
             <CardTitle>What the evidence supports</CardTitle>
             <CardDescription>
               Bounded to this upload and policy.
@@ -876,18 +987,18 @@ function Overview({
           </CardContent>
         </Card>
         <Card className="border-amber-200">
-          <CardHeader>
+          <CardHeader className="border-b border-amber-200/80">
             <CardTitle>Current blockers</CardTitle>
             <CardDescription>
               Readiness is a workflow state, not a confidence badge.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex justify-between rounded-lg border p-3 text-sm">
+            <div className="flex justify-between rounded-md border bg-white p-3 text-sm">
               <span>Rows needing adjudication</span>
               <strong>{pending}</strong>
             </div>
-            <div className="flex justify-between rounded-lg border p-3 text-sm">
+            <div className="flex justify-between rounded-md border bg-white p-3 text-sm">
               <span>Evidence requests unresolved</span>
               <strong>{unresolved}</strong>
             </div>
@@ -904,16 +1015,20 @@ function Overview({
         </Card>
       </div>
       <Card>
-        <CardHeader>
+        <CardHeader className="border-b">
           <CardTitle>Deal economics context</CardTitle>
           <CardDescription>
-            Captured and versioned, but intentionally excluded from the comparable-rent median.
+            Captured and versioned, but intentionally excluded from the
+            comparable-rent median.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 text-sm sm:grid-cols-3">
           <Fact label="Security deposit" value={money(deposit)} />
           <Fact label="Improvement capex" value={money(capex)} />
-          <Fact label="Capital committed before operations" value={money(deposit + capex)} />
+          <Fact
+            label="Capital committed before operations"
+            value={money(deposit + capex)}
+          />
         </CardContent>
       </Card>
       <Card>
@@ -941,7 +1056,7 @@ const Metric = ({
   <Card>
     <CardContent className="py-5">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
+      <p className="data-value mt-2 text-2xl font-semibold">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{note}</p>
     </CardContent>
   </Card>
@@ -972,7 +1087,7 @@ function Comparables({
 }) {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="border-b">
         <CardTitle>Comparable ledger</CardTitle>
         <CardDescription>
           Every accepted row remains inspectable; effective weight controls the
@@ -984,6 +1099,7 @@ function Comparables({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
             <Input
+              aria-label="Search comparable listings"
               className="pl-9"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -991,7 +1107,8 @@ function Comparables({
             />
           </div>
           <select
-            className="h-10 rounded-md border bg-white px-3 text-sm"
+            aria-label="Filter comparable listings"
+            className="control-select md:w-auto"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           >
@@ -1003,9 +1120,9 @@ function Comparables({
             <option value="exclude">Excluded</option>
           </select>
         </div>
-        <div className="max-h-[620px] overflow-auto rounded-lg border">
+        <div className="max-h-[620px] overflow-auto rounded-md border bg-white">
           <table className="w-full min-w-[760px] text-left text-sm">
-            <thead className="sticky top-0 bg-slate-100 text-xs text-muted-foreground">
+            <thead className="sticky top-0 z-10 border-b bg-slate-100/95 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground backdrop-blur">
               <tr>
                 <th className="p-3">Listing</th>
                 <th className="p-3">Observed facts</th>
@@ -1018,8 +1135,16 @@ function Comparables({
               {rows.map((row) => (
                 <tr
                   key={row.listingId}
-                  className="cursor-pointer border-t hover:bg-blue-50/50"
+                  tabIndex={0}
+                  aria-label={`Inspect listing ${row.listingId}`}
+                  className="cursor-pointer border-t transition-colors hover:bg-blue-50/60 focus-visible:bg-blue-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                   onClick={() => setSelected(row)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setSelected(row);
+                    }
+                  }}
                 >
                   <td className="p-3 font-semibold">
                     {row.listingId}
@@ -1035,13 +1160,13 @@ function Comparables({
                       {row.normalized.furnishing}
                     </span>
                   </td>
-                  <td className="p-3 font-medium">
+                  <td className="data-value p-3 font-medium">
                     {money(Number(row.observed.rent))}
                   </td>
                   <td className="p-3">
                     <StateBadge state={row.b2State} />
                   </td>
-                  <td className="p-3">{row.effectiveWeight}</td>
+                  <td className="data-value p-3">{row.effectiveWeight}</td>
                 </tr>
               ))}
             </tbody>
@@ -1065,13 +1190,27 @@ function Review({
   const rows = run.rows.filter((row) => row.b2State === 'needs_human_review');
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="border-b">
         <CardTitle>Human review queue</CardTitle>
         <CardDescription>
           System recommendations are never represented as reviewer decisions.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
+        {rows.length === 0 && (
+          <div className="grid min-h-48 place-items-center rounded-md border border-dashed bg-slate-50/60 p-6 text-center">
+            <div>
+              <ListChecks
+                aria-hidden="true"
+                className="mx-auto size-6 text-emerald-700"
+              />
+              <p className="mt-3 font-semibold">No rows require review</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                The current run has no unresolved adjudication candidates.
+              </p>
+            </div>
+          </div>
+        )}
         {rows.map((row) => {
           const review = run.reviews.find(
             (item) => item.listingId === row.listingId,
@@ -1079,7 +1218,7 @@ function Review({
           return (
             <button
               key={row.listingId}
-              className="flex min-h-16 w-full items-center justify-between gap-3 rounded-lg border p-3 text-left hover:bg-muted/40"
+              className="flex min-h-16 w-full cursor-pointer items-center justify-between gap-3 rounded-md border bg-white p-3.5 text-left transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:ring-3 focus-visible:ring-ring/25"
               onClick={() => onSelect(row)}
             >
               <div>
@@ -1127,21 +1266,23 @@ function Requests({
     <div className="grid gap-4 lg:grid-cols-2">
       {drafts.map((item) => (
         <Card key={item.id}>
-          <CardHeader>
+          <CardHeader className="border-b">
             <CardTitle className="text-base">{item.title}</CardTitle>
             <CardDescription>
               Evidence is never marked complete automatically.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Field label="Owner">
+            <Field label="Owner" htmlFor={`owner-${item.id}`}>
               <Input
+                id={`owner-${item.id}`}
                 value={item.owner}
                 onChange={(e) => change(item.id, 'owner', e.target.value)}
               />
             </Field>
-            <Field label="Evidence note">
+            <Field label="Evidence note" htmlFor={`note-${item.id}`}>
               <Textarea
+                id={`note-${item.id}`}
                 value={item.evidenceNote}
                 onChange={(e) =>
                   change(item.id, 'evidenceNote', e.target.value)
@@ -1151,7 +1292,8 @@ function Requests({
             </Field>
             <div className="flex gap-2">
               <select
-                className="h-11 rounded-md border bg-white px-3 text-sm"
+                aria-label={`Status for ${item.title}`}
+                className="control-select w-auto"
                 value={item.status}
                 onChange={(e) => change(item.id, 'status', e.target.value)}
               >
@@ -1176,7 +1318,7 @@ function Requests({
 function Audit({ events }: { events: AuditEvent[] }) {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="border-b">
         <CardTitle>Audit history</CardTitle>
         <CardDescription>
           Append-only records reconstruct who changed what and when.
@@ -1189,7 +1331,7 @@ function Audit({ events }: { events: AuditEvent[] }) {
               key={event.id}
               className="flex gap-3 border-b py-4 last:border-0"
             >
-              <span className="grid size-7 shrink-0 place-items-center rounded-full border">
+              <span className="grid size-7 shrink-0 place-items-center rounded-full border bg-slate-50 text-primary">
                 <History className="size-3.5" />
               </span>
               <div>
@@ -1199,7 +1341,7 @@ function Audit({ events }: { events: AuditEvent[] }) {
                 <p className="mt-1 text-xs text-muted-foreground">
                   {event.actor} · {dateTime(event.createdAt)}
                 </p>
-                <code className="mt-2 block max-w-3xl overflow-x-auto rounded bg-muted p-2 text-[11px]">
+                <code className="mt-2 block max-w-3xl overflow-x-auto rounded-md border bg-slate-50 p-2.5 text-[0.6875rem] leading-5 text-slate-700">
                   {JSON.stringify(event.payload)}
                 </code>
               </div>
@@ -1242,21 +1384,41 @@ export default function Page() {
   }, []);
   if (loading)
     return (
-      <main className="grid min-h-screen place-items-center">
-        <Loader2 className="size-7 animate-spin text-blue-700" />
+      <main
+        className="workbench-grid grid min-h-screen place-items-center p-6"
+        aria-busy="true"
+        aria-live="polite"
+      >
+        <div className="flex items-center gap-3 rounded-lg border bg-white px-5 py-4 shadow-sm">
+          <span className="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground">
+            <Building2 aria-hidden="true" className="size-4" />
+          </span>
+          <div>
+            <p className="text-sm font-semibold">Opening evidence workspace</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Loading the latest versioned run
+            </p>
+          </div>
+          <Loader2
+            aria-hidden="true"
+            className="ml-3 size-5 animate-spin text-primary"
+          />
+        </div>
       </main>
     );
   if (error && !run)
     return (
-      <main className="mx-auto max-w-2xl p-8">
-        <Alert className="border-red-200 bg-red-50">
-          <AlertCircle />
-          <AlertTitle>Workspace unavailable</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-        <Button className="mt-4" onClick={load}>
-          Retry
-        </Button>
+      <main className="workbench-grid grid min-h-screen place-items-center p-6">
+        <div className="w-full max-w-xl">
+          <Alert className="border-red-200 bg-red-50">
+            <AlertCircle />
+            <AlertTitle>Workspace unavailable</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+          <Button className="mt-4" onClick={load}>
+            Retry
+          </Button>
+        </div>
       </main>
     );
   return run ? (
