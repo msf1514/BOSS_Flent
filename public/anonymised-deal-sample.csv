@@ -1,0 +1,87 @@
+listing_id,source,posted_date,last_seen_date,society,locality,bhk,furnishing,area_sqft,rent,deposit,photo_count,poster_type
+CP-0001,CommonFloor,2026-06-21,2026-08-12,Lakeview Res.,Harlur-Sarjapur Road,2,semi-furnished,1050,60000,300000,7,broker
+CP-0002,CommonFloor,2026-05-20,2026-08-15,Lake View Residency,Harlur-Sarjapur Road,2,semi-furnished,1050,55500,166500,14,broker
+CP-0003,CommonFloor,2026-05-24,2026-06-02,Lakeview Residences,Haralur,2,fully furnished,1300,69500,208500,7,unknown
+CP-0004,CommonFloor,2026-08-13,2026-08-15,Lake View Residency,Harlur-Sarjapur Road,2,semi-furnished,1375,62500,,6,unknown
+CP-0005,Housing,2026-08-15,2026-08-16,Lakeview Residences Phase 1,Harlur-Sarjapur Road,2,fully furnished,1000,68000,204000,12,owner
+CP-0006,CommonFloor,2026-07-03,2026-08-12,Lake View Residency,Haralur,2,unfurnished,1375,54500,163500,7,unknown
+CP-0007,CommonFloor,2026-07-14,2026-08-01,Lakeview Residences Phase 1,Haralur,2,unfurnished,1200,54500,218000,10,broker
+CP-0008,NoBroker,2026-05-17,2026-08-08,Lakeview Residences Phase 1,Harlur-Sarjapur Road,2,semi-furnished,1100,58000,348000,7,broker
+CP-0009,MagicBricks,2026-06-29,2026-08-03,Lakeview Res.,Harlur Road,2,semi-furnished,975,59500,357000,7,owner
+CP-0010,NoBroker,2026-05-04,2026-08-06,Lake View Residency,Harlur Road,2,semi-furnished,1200,58500,292500,2,unknown
+CP-0011,NoBroker,2026-07-21,2026-08-15,Lakeview Res.,Harlur Road,2,semi-furnished,1125,60500,181500,9,owner
+CP-0012,MagicBricks,2026-07-02,2026-08-12,Lakeview Residences Phase 1,Harlur-Sarjapur Road,2,fully furnished,1350,68500,274000,7,unknown
+CP-0013,Housing,2026-07-26,2026-08-14,Lakeview Res.,Haralur,2,semi-furnished,1025,58000,174000,18,unknown
+CP-0014,CommonFloor,2026-07-11,2026-08-12,Lakeview Residences Phase 1,Harlur Road,2,unfurnished,1250,55000,165000,18,unknown
+CP-0015,MagicBricks,2026-07-11,2026-07-21,Lakeview Res.,Haralur,2,semi-furnished,1275,57500,,4,owner
+CP-0016,NoBroker,2026-05-30,2026-08-04,Lakeview Res.,Harlur-Sarjapur Road,2,fully furnished,1375,72000,432000,5,owner
+CP-0017,Housing,2026-06-03,2026-08-13,Lakeview Residences,Haralur,2,semi-furnished,1050,58000,348000,14,owner
+CP-0018,MagicBricks,2026-08-03,2026-08-14,Lakeview Residences Phase 1,Harlur-Sarjapur Road,2,semi-furnished,1125,59500,178500,11,owner
+CP-0019,CommonFloor,2026-07-25,2026-08-10,Lake View Residency,Harlur-Sarjapur Road,2,semi-furnished,1375,59500,,12,broker
+CP-0020,NoBroker,2026-06-06,2026-08-10,Lake View Residency,Harlur Road,2,semi-furnished,1350,61000,,5,broker
+CP-0021,NoBroker,2026-05-18,2026-08-15,Lakeview Residences Phase 1,Harlur-Sarjapur Road,2,unfurnished,1325,55000,,12,owner
+CP-0022,MagicBricks,2026-07-04,2026-08-12,Lakeview Residences,Harlur Road,2,semi-furnished,1175,56500,,10,owner
+CP-0023,NoBroker,2026-05-27,2026-08-12,Lakeview Residences Phase 1,Harlur-Sarjapur Road,2,semi-furnished,1200,57000,228000,18,unknown
+CP-0024,Housing,2026-06-27,2026-07-11,Lakeview Residences,Harlur-Sarjapur Road,2,semi-furnished,1350,61500,307500,3,broker
+CP-0025,Housing,2026-06-18,2026-08-12,Lakeview Residences,Haralur,2,semi-furnished,1350,60000,180000,3,broker
+CP-0026,NoBroker,2026-08-01,2026-08-05,Lakeview Residences,Harlur-Sarjapur Road,2,semi-furnished,1350,58500,175500,1,broker
+CP-0027,NoBroker,2026-05-24,2026-08-02,Lake View Residency,Harlur Road,2,fully furnished,1225,67000,268000,0,unknown
+CP-0028,CommonFloor,2026-05-06,2026-08-12,Lakeview Residences Phase 1,Harlur Road,2,semi-furnished,1375,62000,310000,12,owner
+CP-0029,Housing,2026-05-10,2026-08-15,Lakeview Residences,Harlur Road,2,unfurnished,1200,51000,153000,3,owner
+CP-0030,Housing,2026-04-22,2026-08-17,Lakeview Residences Phase 1,Harlur-Sarjapur Road,2,semi-furnished,1325,63000,189000,13,unknown
+CP-0031,NoBroker,2026-05-29,2026-08-05,Lakeview Residences Phase 1,Harlur-Sarjapur Road,2,unfurnished,1100,54000,324000,0,broker
+CP-0032,Housing,2026-07-28,2026-08-04,Lakeview Residences Phase 1,Harlur-Sarjapur Road,2,semi-furnished,1275,62500,187500,5,unknown
+CP-0033,CommonFloor,2026-05-14,2026-08-10,Fern Grove Residency,Harlur Road,2,semi-furnished,1105,59500,297500,17,broker
+CP-0034,NoBroker,2026-06-17,2026-07-04,Fern Grove,Harlur Road,2,semi-furnished,1255,63500,,18,broker
+CP-0035,NoBroker,2026-05-15,2026-08-13,Fern Grove,Harlur Road,2,semi-furnished,1255,65000,260000,13,unknown
+CP-0036,Housing,2026-05-21,2026-08-08,Fern Grove Residency,Harlur Road,2,semi-furnished,1155,59500,178500,3,broker
+CP-0037,MagicBricks,2026-05-16,2026-08-11,FernGrove Apartments,Harlur Road,2,semi-furnished,1005,59000,,11,broker
+CP-0038,CommonFloor,2026-07-04,2026-08-12,FernGrove Apartments,Haralur,2,semi-furnished,1155,60000,300000,9,owner
+CP-0039,NoBroker,2026-05-24,2026-08-11,Fern Grove,Harlur Road,2,semi-furnished,1155,60500,302500,9,broker
+CP-0040,NoBroker,2026-06-23,2026-08-03,FernGrove Apartments,Haralur,2,semi-furnished,955,62000,186000,9,unknown
+CP-0041,CommonFloor,2026-05-22,2026-08-13,Fern Grove,Haralur,2,unfurnished,1155,59000,,18,broker
+CP-0042,MagicBricks,2026-06-20,2026-08-11,Fern Grove,Haralur,2,semi-furnished,980,59000,236000,2,unknown
+CP-0043,MagicBricks,2026-08-03,2026-08-18,Fern Grove Residency,Harlur Road,2,unfurnished,1080,56000,224000,0,unknown
+CP-0044,Housing,2026-06-10,2026-06-13,FernGrove Apartments,Haralur,2,semi-furnished,930,60500,181500,14,broker
+CP-0045,Housing,2026-07-07,2026-08-12,Blue Water Hts,Kasavanahalli,2,semi-furnished,1245,58000,290000,17,unknown
+CP-0046,Housing,2026-06-19,2026-06-24,Bluewater Heights,Kasavanahalli,2,fully furnished,1020,65000,,9,broker
+CP-0047,MagicBricks,2026-05-14,2026-08-10,Bluewater Height,Kasavanahalli,2,semi-furnished,1020,54000,,11,broker
+CP-0048,MagicBricks,2026-06-29,2026-08-08,Blue Water Hts,Harlur-Sarjapur Road,2,semi-furnished,1270,59000,,18,unknown
+CP-0049,Housing,2026-05-11,2026-05-26,Blue Water Hts,Kasavanahalli,2,semi-furnished,1020,56000,224000,14,broker
+CP-0050,MagicBricks,2026-06-20,2026-06-26,Bluewater Height,Kasavanahalli,2,fully furnished,1220,65500,,5,owner
+CP-0051,NoBroker,2026-04-21,2026-08-14,Bluewater Heights,Kasavanahalli,2,fully furnished,1145,65500,196500,18,broker
+CP-0052,NoBroker,2026-04-25,2026-08-07,Bluewater Height,Harlur-Sarjapur Road,2,semi-furnished,1045,54000,216000,6,broker
+CP-0053,CommonFloor,2026-08-01,2026-08-06,Bluewater Heights,Kasavanahalli,2,semi-furnished,1370,58000,348000,6,broker
+CP-0054,NoBroker,2026-07-08,2026-08-15,Bluewater Height,Kasavanahalli,2,unfurnished,1020,47500,237500,10,broker
+CP-0055,Housing,2026-07-16,2026-08-02,Maple Courtyard,Kasavanahalli,2,unfurnished,1455,47500,237500,10,unknown
+CP-0056,Housing,2026-06-16,2026-08-11,Maple Court Yard,Haralur,2,semi-furnished,1430,54500,163500,11,broker
+CP-0057,MagicBricks,2026-07-06,2026-08-07,Maple Ctyard,Haralur,2,unfurnished,1455,51000,204000,11,broker
+CP-0058,NoBroker,2026-05-10,2026-08-10,Maple Courtyard,Haralur,2,unfurnished,1130,45500,273000,12,unknown
+CP-0059,MagicBricks,2026-06-13,2026-08-12,Maple Ctyard,Haralur,2,unfurnished,1405,50500,,12,broker
+CP-0060,MagicBricks,2026-05-11,2026-08-15,Maple Courtyard,Kasavanahalli,2,fully furnished,1130,58500,175500,9,owner
+CP-0061,MagicBricks,2026-07-01,2026-08-07,Maple Courtyard,Kasavanahalli,2,semi-furnished,1480,56500,169500,0,owner
+CP-0062,Housing,2026-07-27,2026-08-10,Maple Courtyard,Kasavanahalli,2,fully furnished,1330,61500,307500,6,broker
+CP-0063,MagicBricks,2026-06-22,2026-08-15,Park Side Terrace,Sarjapur Road,2,semi-furnished,1015,55500,277500,0,broker
+CP-0064,MagicBricks,2026-07-18,2026-08-12,Parkside Terrace,Harlur-Sarjapur Road,2,unfurnished,1290,49500,247500,2,owner
+CP-0065,NoBroker,2026-07-29,2026-08-10,Parkside Terraces,Harlur-Sarjapur Road,2,fully furnished,1040,62000,186000,8,owner
+CP-0066,CommonFloor,2026-08-08,2026-08-11,Park Side Terrace,Harlur-Sarjapur Road,2,semi-furnished,1290,57000,171000,14,owner
+CP-0067,Housing,2026-07-27,2026-08-17,Parkside Terraces,Sarjapur Road,2,semi-furnished,1140,56500,226000,0,broker
+CP-0068,NoBroker,2026-06-24,2026-08-08,Parkside Terraces,Sarjapur Road,2,semi-furnished,1040,56500,282500,0,broker
+CP-0069,Housing,2026-06-21,2026-08-12,Lake View Residency,Harlur-Sarjapur Road,2,semi-furnished,1050,60500,300000,6,broker
+CP-0070,NoBroker,2026-08-13,2026-08-15,Lake View Residency,Harlur-Sarjapur Road,2,semi-furnished,1375,63000,,5,unknown
+CP-0071,MagicBricks,2026-05-17,2026-08-08,Lake View Residency,Harlur-Sarjapur Road,2,semi-furnished,1100,58000,348000,6,broker
+CP-0072,CommonFloor,2026-07-02,2026-08-12,Lake View Residency,Harlur-Sarjapur Road,2,fully furnished,1350,68500,274000,6,unknown
+CP-0073,Housing,2026-06-03,2026-08-13,Lake View Residency,Haralur,2,semi-furnished,1050,58000,348000,13,owner
+CP-0074,NoBroker,2026-06-27,2026-07-11,Lake View Residency,Harlur-Sarjapur Road,2,semi-furnished,1350,61500,307500,2,broker
+CP-0075,MagicBricks,2026-07-28,2026-08-04,Lake View Residency,Harlur-Sarjapur Road,2,semi-furnished,1275,62500,187500,4,unknown
+CP-0076,CommonFloor,2026-05-21,2026-08-08,Fern Grove Residency,Harlur Road,2,semi-furnished,1155,59500,178500,2,broker
+CP-0077,Housing,2026-06-10,2026-06-13,FernGrove Apartments,Haralur,2,semi-furnished,930,60500,181500,13,broker
+CP-0078,NoBroker,2026-06-20,2026-06-26,Bluewater Height,Kasavanahalli,2,fully furnished,1220,65500,,4,owner
+CP-0079,MagicBricks,2026-05-10,2026-08-10,Maple Courtyard,Haralur,2,unfurnished,1130,46000,273000,11,unknown
+CP-0080,CommonFloor,2026-07-18,2026-08-12,Parkside Terrace,Harlur-Sarjapur Road,2,unfurnished,1290,50000,247500,1,owner
+CP-0081,MagicBricks,2026-08-14,2026-08-18,Lakeview Residences,Harlur Road,3,semi-furnished,1175,58000,280000,11,broker
+CP-0082,NoBroker,2026-08-09,2026-08-18,Lake View Residency,Haralur,2,semi furnished,1100,12000,50000,2,owner
+CP-0083,Housing,2026-08-01,2026-08-17,Lakeview Res.,Harlur Road,2,fully furnished,1180,185000,600000,17,broker
+CP-0084,CommonFloor,2026-08-16,2026-08-11,Blue Water Hts,Kasavanahalli,2,unfurnished,1210,52000,,0,unknown
+CP-0085,MagicBricks,2026-05-02,2026-05-04,Lakeview Residences Phase 1,Harlur-Sarjapur Road,1,semi-furnished,2100,60000,300000,8,broker
+CP-0086,NoBroker,2026-07-21,2026-08-18,Lake View Residency,Haralur,2,semi-furnished,,57000,,6,owner

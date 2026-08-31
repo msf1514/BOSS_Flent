@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS deals (id TEXT PRIMARY KEY, name TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS uploads (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL, filename TEXT NOT NULL, object_key TEXT NOT NULL, sha256 TEXT NOT NULL, byte_size INTEGER NOT NULL, row_count INTEGER NOT NULL, validation_json TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS runs (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL, upload_id TEXT NOT NULL, parent_run_id TEXT, version_number INTEGER NOT NULL, engine_version TEXT NOT NULL, config_json TEXT NOT NULL, summary_json TEXT NOT NULL, validation_json TEXT NOT NULL, created_by TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS run_rows (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, listing_id TEXT NOT NULL, payload_json TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS review_actions (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, listing_id TEXT NOT NULL, decision TEXT NOT NULL, reason TEXT NOT NULL, actor TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS evidence_requests (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, title TEXT NOT NULL, owner TEXT NOT NULL, status TEXT NOT NULL, evidence_note TEXT NOT NULL, updated_at TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS audit_events (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL, run_id TEXT, event_type TEXT NOT NULL, entity_id TEXT, actor TEXT NOT NULL, payload_json TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_runs_deal ON runs(deal_id, version_number DESC);
+CREATE INDEX IF NOT EXISTS idx_rows_run ON run_rows(run_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_run ON review_actions(run_id, listing_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_requests_run ON evidence_requests(run_id);
+CREATE INDEX IF NOT EXISTS idx_audit_deal ON audit_events(deal_id, created_at DESC);

@@ -11,6 +11,7 @@
     "start": "wrangler dev --config dist/server/wrangler.json",
     "sync:proof": "node scripts/sync-proof-data.mjs",
     "validate:contract": "node scripts/validate-contract.mjs",
+    "test:engine": "node --experimental-strip-types scripts/test-engine.mjs",
     "lint": "oxlint",
     "format": "oxfmt"
   },
