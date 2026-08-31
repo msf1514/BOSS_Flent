@@ -11,6 +11,7 @@ const plexMono = IBM_Plex_Mono({
   variable: '--font-mono-face',
   subsets: ['latin'],
   weight: ['400', '500', '600'],
+  preload: false,
 });
 
 export const metadata: Metadata = {

@@ -74,6 +74,15 @@ export async function POST(request: Request) {
     const config = parsedConfig.value;
     const csv = await file.text();
     const inputHash = await sha256(csv);
+    const expectedHash = form.get('expectedHash');
+    if (typeof expectedHash !== 'string' || expectedHash !== inputHash)
+      return json(
+        {
+          error:
+            'The selected file changed after inspection. Inspect the current file again before creating a run.',
+        },
+        409,
+      );
     const result = await runEvidenceEngine(
       csv,
       config,

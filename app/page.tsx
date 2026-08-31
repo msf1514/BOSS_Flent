@@ -49,6 +49,7 @@ import type {
   RunConfig,
   ValidationIssue,
 } from '@/lib/evidence-engine';
+import type { SourceInspection } from '@/lib/source-inspection';
 import type { AuditEvent, EvidenceRequest, StoredRun } from '@/lib/storage';
 
 type Notice = { kind: 'error' | 'success'; text: string } | null;
@@ -84,6 +85,19 @@ const defaults: RunConfig = {
   improvementCapex: 160000,
   areaToleranceSqft: 100,
   maxLastSeenAgeDays: 30,
+};
+const blankConfig: RunConfig = {
+  ...defaults,
+  dealName: '',
+  evidenceCutoff: '',
+  societyPrefix: '',
+  bhk: 0,
+  areaSqft: 0,
+  furnishing: '',
+  landlordBaseRent: 0,
+  landlordMaintenance: -1,
+  landlordDeposit: -1,
+  improvementCapex: -1,
 };
 const Field = ({
   label,
@@ -196,42 +210,126 @@ function StateBadge({ state }: { state: string }) {
 }
 
 function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
-  const [config, setConfig] = useState(defaults),
+  const [config, setConfig] = useState(blankConfig),
     [file, setFile] = useState<File | null>(null),
-    [busy, setBusy] = useState(false),
+    [inspection, setInspection] = useState<SourceInspection | null>(null),
+    [sourceBusy, setSourceBusy] = useState(false),
+    [runBusy, setRunBusy] = useState(false),
     [notice, setNotice] = useState<Notice>(null),
     [issues, setIssues] = useState<ValidationIssue[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const update = (key: keyof RunConfig, value: string | number | boolean) =>
     setConfig((current) => ({ ...current, [key]: value }));
-  async function sample() {
-    const response = await fetch('/anonymised-deal-sample.csv');
-    const blob = await response.blob();
-    setFile(
-      new File([blob], 'anonymised-deal-sample.csv', { type: 'text/csv' }),
+  function chooseFile(selected: File | null) {
+    setFile(selected);
+    setInspection(null);
+    setIssues([]);
+    setConfig({ ...blankConfig });
+    setNotice(
+      selected
+        ? {
+            kind: 'success',
+            text: `${selected.name} selected. Inspect the source before entering deal assumptions.`,
+          }
+        : null,
     );
-    setConfig({ ...defaults });
-    setNotice({
-      kind: 'success',
-      text: 'Sample loaded. Packet annotations are applied only after the server verifies the exact source fingerprint.',
-    });
+  }
+  async function inspectSource(
+    selected: File | null = file,
+    sampleInputs = false,
+  ) {
+    if (!selected) {
+      setNotice({ kind: 'error', text: 'Choose a CSV file to inspect.' });
+      return;
+    }
+    setSourceBusy(true);
+    setNotice(null);
+    setIssues([]);
+    try {
+      const body = new FormData();
+      body.set('file', selected);
+      const response = await fetch('/api/intake', { method: 'POST', body });
+      const payload = (await response.json()) as {
+        inspection?: SourceInspection;
+        error?: string;
+      };
+      if (!response.ok || !payload.inspection)
+        throw new Error(payload.error ?? 'Source inspection failed.');
+      const result = payload.inspection;
+      setInspection(result);
+      setIssues(result.issues);
+      if (!result.validStructure) {
+        setNotice({
+          kind: 'error',
+          text: 'The CSV contract is blocked. Correct the reported structural issues and upload it again.',
+        });
+        return;
+      }
+      setConfig((current) =>
+        sampleInputs
+          ? { ...defaults }
+          : {
+              ...current,
+              evidenceCutoff: result.suggestions.evidenceCutoff ?? '',
+              societyPrefix: result.suggestions.societyPrefix ?? '',
+            },
+      );
+      setNotice({
+        kind: 'success',
+        text: `Source inspected: ${result.rowCount} rows and ${result.headerCount}/${result.requiredColumnCount} required columns. Deal and policy inputs are now unlocked.`,
+      });
+    } catch (error) {
+      setInspection(null);
+      setNotice({
+        kind: 'error',
+        text:
+          error instanceof Error ? error.message : 'Source inspection failed.',
+      });
+    } finally {
+      setSourceBusy(false);
+    }
+  }
+  async function sample() {
+    setSourceBusy(true);
+    setNotice(null);
+    try {
+      const response = await fetch('/anonymised-deal-sample.csv');
+      if (!response.ok)
+        throw new Error('The anonymised sample is unavailable.');
+      const blob = await response.blob();
+      const selected = new File([blob], 'anonymised-deal-sample.csv', {
+        type: 'text/csv',
+      });
+      setFile(selected);
+      setInspection(null);
+      setConfig({ ...defaults });
+      await inspectSource(selected, true);
+    } catch (error) {
+      setNotice({
+        kind: 'error',
+        text: error instanceof Error ? error.message : 'Sample load failed.',
+      });
+    } finally {
+      setSourceBusy(false);
+    }
   }
   async function submit(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     setNotice(null);
     setIssues([]);
-    if (!file) {
+    if (!file || !inspection?.validStructure) {
       setNotice({
         kind: 'error',
-        text: 'Select a CSV or load the anonymised sample.',
+        text: 'Inspect a structurally valid CSV before creating a run.',
       });
       return;
     }
-    setBusy(true);
+    setRunBusy(true);
     try {
       const body = new FormData();
       body.set('file', file);
       body.set('config', JSON.stringify(config));
+      body.set('expectedHash', inspection.inputHash);
       const response = await fetch('/api/runs', { method: 'POST', body });
       const payload = (await response.json()) as {
         run?: StoredRun;
@@ -260,9 +358,16 @@ function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
         text: error instanceof Error ? error.message : 'Run failed.',
       });
     } finally {
-      setBusy(false);
+      setRunBusy(false);
     }
   }
+  const currentStep = runBusy
+    ? 3
+    : inspection?.validStructure
+      ? 2
+      : file
+        ? 1
+        : 0;
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
       <a href="#main-content" className="skip-link">
@@ -313,26 +418,35 @@ function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
                 ['2', 'Validate', 'Schema and rows'],
                 ['3', 'Configure', 'Subject and policy'],
                 ['4', 'Run', 'Versioned result'],
-              ].map(([n, title, sub], i) => (
-                <li
-                  key={n}
-                  className="relative flex items-center gap-2.5 border-b px-3 py-2.5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0"
-                >
-                  <span
-                    className={`data-value grid size-7 place-items-center rounded-full text-xs font-semibold ${i === 0 ? 'bg-primary text-primary-foreground' : 'border bg-slate-50 text-muted-foreground'}`}
+              ].map(([n, title, sub], i) => {
+                const complete = i < currentStep;
+                const current = i === currentStep;
+                return (
+                  <li
+                    key={n}
+                    aria-current={current ? 'step' : undefined}
+                    className={`relative flex items-center gap-2.5 border-b px-3 py-2.5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0 ${current ? 'bg-[var(--flent-mint)]' : ''}`}
                   >
-                    {n}
-                  </span>
-                  <span>
-                    <strong className="block text-[0.8125rem] font-semibold">
-                      {title}
-                    </strong>
-                    <span className="text-[0.6875rem] text-muted-foreground">
-                      {sub}
+                    <span
+                      className={`data-value grid size-7 place-items-center rounded-full text-xs font-semibold ${current ? 'bg-primary text-primary-foreground' : complete ? 'bg-emerald-100 text-emerald-800' : 'border bg-slate-50 text-muted-foreground'}`}
+                    >
+                      {complete ? (
+                        <Check aria-hidden="true" className="size-4" />
+                      ) : (
+                        n
+                      )}
                     </span>
-                  </span>
-                </li>
-              ))}
+                    <span>
+                      <strong className="block text-[0.8125rem] font-semibold">
+                        {title}
+                      </strong>
+                      <span className="text-[0.6875rem] text-muted-foreground">
+                        {complete ? 'Complete' : current ? sub : 'Pending'}
+                      </span>
+                    </span>
+                  </li>
+                );
+              })}
             </ol>
             <form
               onSubmit={submit}
@@ -343,8 +457,8 @@ function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
                   <p className="eyebrow">Source</p>
                   <CardTitle>1. Supply evidence</CardTitle>
                   <CardDescription>
-                    CSV only, maximum 2 MB. Original bytes are retained with a
-                    SHA-256 fingerprint.
+                    CSV only, maximum 2 MB. The source snapshot is retained with
+                    a SHA-256 fingerprint.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3.5 p-5">
@@ -372,18 +486,36 @@ function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
                     accept=".csv,text/csv"
                     aria-label="Choose comparable-listings CSV"
                     onChange={(e) => {
-                      setFile(e.target.files?.[0] ?? null);
+                      chooseFile(e.target.files?.[0] ?? null);
                     }}
                   />
                   <div className="flex flex-wrap gap-2">
                     <Button
                       type="button"
+                      disabled={!file || sourceBusy}
+                      className="min-h-11"
+                      onClick={() => inspectSource()}
+                    >
+                      {sourceBusy ? (
+                        <Loader2 aria-hidden="true" className="animate-spin" />
+                      ) : (
+                        <ListChecks aria-hidden="true" />
+                      )}
+                      {sourceBusy ? 'Inspecting source…' : 'Inspect source'}
+                    </Button>
+                    <Button
+                      type="button"
                       variant="outline"
                       className="min-h-11"
+                      disabled={sourceBusy}
                       onClick={sample}
                     >
-                      <FileCheck2 />
-                      Use anonymised sample
+                      {sourceBusy ? (
+                        <Loader2 aria-hidden="true" className="animate-spin" />
+                      ) : (
+                        <FileCheck2 aria-hidden="true" />
+                      )}
+                      Load & inspect sample
                     </Button>
                     <a
                       href="/anonymised-deal-sample.csv"
@@ -402,179 +534,310 @@ function Intake({ onCreated }: { onCreated: (run: StoredRun) => void }) {
                     locality, bhk, furnishing, area_sqft, rent, deposit,
                     photo_count, poster_type.
                   </div>
+                  {inspection && (
+                    <div
+                      className={`rounded-xl border p-4 ${inspection.validStructure ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        {inspection.validStructure ? (
+                          <CheckCircle2
+                            aria-hidden="true"
+                            className="mt-0.5 size-5 shrink-0 text-emerald-700"
+                          />
+                        ) : (
+                          <AlertCircle
+                            aria-hidden="true"
+                            className="mt-0.5 size-5 shrink-0 text-red-700"
+                          />
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-semibold">
+                            {inspection.validStructure
+                              ? 'Source structure passed'
+                              : 'Source structure blocked'}
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                            {inspection.rowCount} rows ·{' '}
+                            {inspection.headerCount}/
+                            {inspection.requiredColumnCount} required columns
+                          </p>
+                          <p className="data-value mt-2 break-all text-[0.6875rem] text-muted-foreground">
+                            SHA-256 {inspection.inputHash}
+                          </p>
+                        </div>
+                      </div>
+                      {inspection.validStructure && (
+                        <dl className="mt-3 grid grid-cols-2 gap-2 border-t border-emerald-200 pt-3 text-xs">
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Latest evidence
+                            </dt>
+                            <dd className="mt-0.5 font-semibold">
+                              {inspection.dateRange.lastSeenTo ??
+                                'Not detected'}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Top society
+                            </dt>
+                            <dd className="mt-0.5 font-semibold">
+                              {inspection.societies[0]?.value ?? 'Not detected'}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Observed area
+                            </dt>
+                            <dd className="mt-0.5 font-semibold">
+                              {inspection.areaRange.minimum ?? '—'}–
+                              {inspection.areaRange.maximum ?? '—'} sq ft
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Observed rent
+                            </dt>
+                            <dd className="mt-0.5 font-semibold">
+                              {money(inspection.rentRange.minimum)}–
+                              {money(inspection.rentRange.maximum)}
+                            </dd>
+                          </div>
+                        </dl>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="border-b px-5 py-4">
-                  <p className="eyebrow">Policy</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="eyebrow">Subject & policy</p>
+                    <Badge
+                      variant="outline"
+                      className={
+                        inspection?.validStructure
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                          : 'border-slate-300 bg-slate-50 text-slate-600'
+                      }
+                    >
+                      {inspection?.validStructure
+                        ? 'Unlocked'
+                        : 'Inspect CSV first'}
+                    </Badge>
+                  </div>
                   <CardTitle>2. Configure the run</CardTitle>
                   <CardDescription>
-                    Explicit policy and deal inputs—not hidden defaults.
+                    {inspection?.validStructure
+                      ? 'Confirm suggestions from the CSV, then enter subject-deal facts the comparable file cannot provide.'
+                      : 'Configuration unlocks after the source contract passes inspection.'}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="grid gap-3.5 p-5 sm:grid-cols-2 xl:grid-cols-3">
-                  <Field label="Deal name" htmlFor="deal-name" wide>
-                    <Input
-                      id="deal-name"
-                      value={config.dealName}
-                      onChange={(e) => update('dealName', e.target.value)}
-                      required
-                    />
-                  </Field>
-                  <Field label="Evidence cutoff" htmlFor="evidence-cutoff">
-                    <Input
-                      id="evidence-cutoff"
-                      type="date"
-                      value={config.evidenceCutoff}
-                      onChange={(e) => update('evidenceCutoff', e.target.value)}
-                      required
-                    />
-                  </Field>
-                  <Field label="Society match prefix" htmlFor="society-prefix">
-                    <Input
-                      id="society-prefix"
-                      value={config.societyPrefix}
-                      onChange={(e) => update('societyPrefix', e.target.value)}
-                      required
-                    />
-                  </Field>
-                  <Field label="BHK" htmlFor="subject-bhk">
-                    <Input
-                      id="subject-bhk"
-                      type="number"
-                      min="1"
-                      value={config.bhk}
-                      onChange={(e) => update('bhk', Number(e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Subject area (sq ft)" htmlFor="subject-area">
-                    <Input
-                      id="subject-area"
-                      type="number"
-                      min="1"
-                      value={config.areaSqft}
-                      onChange={(e) =>
-                        update('areaSqft', Number(e.target.value))
-                      }
-                    />
-                  </Field>
-                  <Field label="Furnishing" htmlFor="furnishing">
-                    <select
-                      id="furnishing"
-                      className="control-select"
-                      value={config.furnishing}
-                      onChange={(e) => update('furnishing', e.target.value)}
-                    >
-                      <option value="semi-furnished">Semi-furnished</option>
-                      <option value="fully-furnished">Fully furnished</option>
-                      <option value="unfurnished">Unfurnished</option>
-                    </select>
-                  </Field>
-                  <Field label="Landlord base rent" htmlFor="base-rent">
-                    <Input
-                      id="base-rent"
-                      type="number"
-                      min="1"
-                      value={config.landlordBaseRent}
-                      onChange={(e) =>
-                        update('landlordBaseRent', Number(e.target.value))
-                      }
-                    />
-                  </Field>
-                  <Field label="Monthly maintenance" htmlFor="maintenance">
-                    <Input
-                      id="maintenance"
-                      type="number"
-                      min="0"
-                      value={config.landlordMaintenance}
-                      onChange={(e) =>
-                        update('landlordMaintenance', Number(e.target.value))
-                      }
-                    />
-                  </Field>
-                  <Field label="Security deposit" htmlFor="deposit">
-                    <Input
-                      id="deposit"
-                      type="number"
-                      min="0"
-                      value={config.landlordDeposit}
-                      onChange={(e) =>
-                        update('landlordDeposit', Number(e.target.value))
-                      }
-                    />
-                  </Field>
-                  <Field label="Improvement capex" htmlFor="capex">
-                    <Input
-                      id="capex"
-                      type="number"
-                      min="0"
-                      value={config.improvementCapex}
-                      onChange={(e) =>
-                        update('improvementCapex', Number(e.target.value))
-                      }
-                    />
-                  </Field>
-                  <Field
-                    label="Area tolerance (± sq ft)"
-                    htmlFor="area-tolerance"
+                <CardContent className="p-0">
+                  <fieldset
+                    disabled={!inspection?.validStructure || runBusy}
+                    className="grid gap-3.5 p-5 disabled:opacity-50 sm:grid-cols-2 xl:grid-cols-3"
                   >
-                    <Input
-                      id="area-tolerance"
-                      type="number"
-                      min="0"
-                      value={config.areaToleranceSqft}
-                      onChange={(e) =>
-                        update('areaToleranceSqft', Number(e.target.value))
-                      }
-                    />
-                  </Field>
-                  <Field label="Maximum age (days)" htmlFor="max-age">
-                    <Input
-                      id="max-age"
-                      type="number"
-                      min="1"
-                      value={config.maxLastSeenAgeDays}
-                      onChange={(e) =>
-                        update('maxLastSeenAgeDays', Number(e.target.value))
-                      }
-                    />
-                  </Field>
-                  <div className="sm:col-span-2 rounded-xl border border-emerald-200 bg-[var(--flent-mint)] p-3 text-xs leading-5 text-emerald-950">
-                    <strong className="font-semibold">
-                      Calculation boundary:
-                    </strong>{' '}
-                    deposit and capex are versioned decision context. They do
-                    not change the comparable-rent median.
-                  </div>
-                  <div className="sm:col-span-2 xl:col-span-3 border-t pt-3">
-                    <Button
-                      type="submit"
-                      disabled={busy}
-                      size="lg"
-                      className="w-full sm:w-auto"
+                    <div className="sm:col-span-2 xl:col-span-3 rounded-lg border border-sky-200 bg-sky-50 p-3 text-xs leading-5 text-sky-950">
+                      <strong>Value provenance:</strong> evidence cutoff and
+                      society are CSV-derived suggestions to confirm. All
+                      property and commercial values below describe the subject
+                      deal and must come from the deal packet or operator—not
+                      from comparable rows.
+                    </div>
+                    <Field label="Deal name" htmlFor="deal-name" wide>
+                      <Input
+                        id="deal-name"
+                        value={config.dealName}
+                        onChange={(e) => update('dealName', e.target.value)}
+                        required
+                      />
+                    </Field>
+                    <Field label="Evidence cutoff" htmlFor="evidence-cutoff">
+                      <Input
+                        id="evidence-cutoff"
+                        type="date"
+                        value={config.evidenceCutoff}
+                        onChange={(e) =>
+                          update('evidenceCutoff', e.target.value)
+                        }
+                        required
+                      />
+                    </Field>
+                    <Field
+                      label="Society match prefix"
+                      htmlFor="society-prefix"
                     >
-                      {busy ? (
-                        <Loader2 className="animate-spin" />
-                      ) : (
-                        <ArrowRight />
-                      )}
-                      {busy
-                        ? 'Validating and analysing…'
-                        : 'Validate and create run'}
-                    </Button>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Bad rows are rejected and disclosed. Missing schema blocks
-                      the run.
-                    </p>
-                  </div>
+                      <Input
+                        id="society-prefix"
+                        value={config.societyPrefix}
+                        onChange={(e) =>
+                          update('societyPrefix', e.target.value)
+                        }
+                        required
+                      />
+                    </Field>
+                    <Field label="BHK" htmlFor="subject-bhk">
+                      <Input
+                        id="subject-bhk"
+                        type="number"
+                        min="1"
+                        value={config.bhk || ''}
+                        onChange={(e) => update('bhk', Number(e.target.value))}
+                        required
+                      />
+                    </Field>
+                    <Field label="Subject area (sq ft)" htmlFor="subject-area">
+                      <Input
+                        id="subject-area"
+                        type="number"
+                        min="1"
+                        value={config.areaSqft || ''}
+                        onChange={(e) =>
+                          update('areaSqft', Number(e.target.value))
+                        }
+                        required
+                      />
+                    </Field>
+                    <Field label="Furnishing" htmlFor="furnishing">
+                      <select
+                        id="furnishing"
+                        className="control-select"
+                        value={config.furnishing}
+                        onChange={(e) => update('furnishing', e.target.value)}
+                        required
+                      >
+                        <option value="">Select subject furnishing</option>
+                        <option value="semi-furnished">Semi-furnished</option>
+                        <option value="fully-furnished">Fully furnished</option>
+                        <option value="unfurnished">Unfurnished</option>
+                      </select>
+                    </Field>
+                    <Field label="Landlord base rent" htmlFor="base-rent">
+                      <Input
+                        id="base-rent"
+                        type="number"
+                        min="1"
+                        value={config.landlordBaseRent || ''}
+                        onChange={(e) =>
+                          update('landlordBaseRent', Number(e.target.value))
+                        }
+                        required
+                      />
+                    </Field>
+                    <Field label="Monthly maintenance" htmlFor="maintenance">
+                      <Input
+                        id="maintenance"
+                        type="number"
+                        min="0"
+                        value={
+                          config.landlordMaintenance < 0
+                            ? ''
+                            : config.landlordMaintenance
+                        }
+                        onChange={(e) =>
+                          update('landlordMaintenance', Number(e.target.value))
+                        }
+                        required
+                      />
+                    </Field>
+                    <Field label="Security deposit" htmlFor="deposit">
+                      <Input
+                        id="deposit"
+                        type="number"
+                        min="0"
+                        value={
+                          config.landlordDeposit < 0
+                            ? ''
+                            : config.landlordDeposit
+                        }
+                        onChange={(e) =>
+                          update('landlordDeposit', Number(e.target.value))
+                        }
+                        required
+                      />
+                    </Field>
+                    <Field label="Improvement capex" htmlFor="capex">
+                      <Input
+                        id="capex"
+                        type="number"
+                        min="0"
+                        value={
+                          config.improvementCapex < 0
+                            ? ''
+                            : config.improvementCapex
+                        }
+                        onChange={(e) =>
+                          update('improvementCapex', Number(e.target.value))
+                        }
+                        required
+                      />
+                    </Field>
+                    <Field
+                      label="Area tolerance (± sq ft)"
+                      htmlFor="area-tolerance"
+                    >
+                      <Input
+                        id="area-tolerance"
+                        type="number"
+                        min="0"
+                        value={config.areaToleranceSqft}
+                        onChange={(e) =>
+                          update('areaToleranceSqft', Number(e.target.value))
+                        }
+                      />
+                    </Field>
+                    <Field label="Maximum age (days)" htmlFor="max-age">
+                      <Input
+                        id="max-age"
+                        type="number"
+                        min="1"
+                        value={config.maxLastSeenAgeDays}
+                        onChange={(e) =>
+                          update('maxLastSeenAgeDays', Number(e.target.value))
+                        }
+                      />
+                    </Field>
+                    <div className="sm:col-span-2 rounded-xl border border-emerald-200 bg-[var(--flent-mint)] p-3 text-xs leading-5 text-emerald-950">
+                      <strong className="font-semibold">
+                        Calculation boundary:
+                      </strong>{' '}
+                      deposit and capex are versioned decision context. They do
+                      not change the comparable-rent median.
+                    </div>
+                    <div className="sm:col-span-2 xl:col-span-3 border-t pt-3">
+                      <Button
+                        type="submit"
+                        disabled={runBusy || !inspection?.validStructure}
+                        size="lg"
+                        className="w-full sm:w-auto"
+                      >
+                        {runBusy ? (
+                          <Loader2 className="animate-spin" />
+                        ) : (
+                          <ArrowRight />
+                        )}
+                        {runBusy
+                          ? 'Creating immutable run…'
+                          : 'Create versioned evidence run'}
+                      </Button>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Full row validation runs server-side. Bad rows are
+                        rejected and disclosed; the original upload remains
+                        fingerprinted.
+                      </p>
+                    </div>
+                  </fieldset>
                 </CardContent>
               </Card>
             </form>
             {notice && (
               <Alert
+                role={notice.kind === 'error' ? 'alert' : 'status'}
+                aria-live={notice.kind === 'error' ? 'assertive' : 'polite'}
                 className={`mt-5 ${notice.kind === 'error' ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}
               >
-                <AlertCircle />
+                {notice.kind === 'error' ? <AlertCircle /> : <CheckCircle2 />}
                 <AlertTitle>
                   {notice.kind === 'error' ? 'Action required' : 'Ready'}
                 </AlertTitle>
@@ -631,8 +894,9 @@ function Workbench({
     [decision, setDecision] = useState<'include' | 'exclude' | 'defer'>(
       'defer',
     ),
-    [busy, setBusy] = useState(false),
+    [busyAction, setBusyAction] = useState<string | null>(null),
     [notice, setNotice] = useState<Notice>(null);
+  const busy = busyAction !== null;
   const rerunKey = useRef<string | null>(null);
   const unresolved = run.readiness.unresolvedRequestCount,
     pending =
@@ -651,8 +915,26 @@ function Workbench({
       ),
     [run.rows, query, filter],
   );
+  useEffect(() => {
+    if (!selected) {
+      setDecision('defer');
+      setReason('');
+      return;
+    }
+    const existing = run.reviews.find(
+      (item) => item.listingId === selected.listingId,
+    );
+    setDecision(existing?.decision ?? 'defer');
+    setReason(existing?.reason ?? '');
+  }, [selected, run.reviews]);
   async function action(body: Record<string, unknown>) {
-    setBusy(true);
+    const operation =
+      body.action === 'review'
+        ? `review:${String(body.listingId)}`
+        : body.action === 'request'
+          ? `request:${String(body.requestId)}`
+          : 'rerun';
+    setBusyAction(operation);
     setNotice(null);
     try {
       const response = await fetch('/api/actions', {
@@ -675,7 +957,9 @@ function Workbench({
         text:
           body.action === 'rerun'
             ? `Version ${payload.run.versionNumber} created from the preserved source and recorded decisions.`
-            : 'Change saved to audit history.',
+            : body.action === 'review'
+              ? `${String(body.listingId)} review saved as ${String(body.decision)} and recorded in audit history.`
+              : `Evidence request ${String(body.requestId).slice(-8)} saved as ${String(body.status)}.`,
       });
       return true;
     } catch (error) {
@@ -685,7 +969,7 @@ function Workbench({
       });
       return false;
     } finally {
-      setBusy(false);
+      setBusyAction(null);
     }
   }
   async function saveReview() {
@@ -759,7 +1043,7 @@ function Workbench({
                       aria-hidden="true"
                       className="mr-1 size-1.5 rounded-full bg-current"
                     />
-                    {ready ? 'Decision-ready evidence' : 'Not decision-ready'}
+                    {ready ? 'Review gates cleared' : 'Review gates open'}
                   </Badge>
                   <span className="data-value text-[0.6875rem] text-muted-foreground">
                     Run {run.id.slice(-8)} · {dateTime(run.createdAt)}
@@ -774,19 +1058,19 @@ function Workbench({
                   {run.readiness.deferredReviewCount} deferred · {run.filename}
                 </p>
               </div>
-            <Button
-              size="lg"
-              onClick={() =>
-                setTab(pending ? 'review' : unresolved ? 'evidence' : 'audit')
-              }
-            >
-              {pending
-                ? 'Review highest-risk rows'
-                : unresolved
-                  ? 'Resolve evidence requests'
-                  : 'Review audit trail'}
-              <ChevronRight />
-            </Button>
+              <Button
+                size="lg"
+                onClick={() =>
+                  setTab(pending ? 'review' : unresolved ? 'evidence' : 'audit')
+                }
+              >
+                {pending
+                  ? 'Open review queue'
+                  : unresolved
+                    ? 'Open evidence requests'
+                    : 'Review audit trail'}
+                <ChevronRight />
+              </Button>
             </div>
             <div
               aria-label="Evidence workflow status"
@@ -798,7 +1082,7 @@ function Workbench({
                 ['Normalized', true],
                 ['Analysed', true],
                 ['Reviewed', pending === 0],
-                ['Decision-ready', ready],
+                ['Review gates', ready],
               ].map(([label, done]) => (
                 <div
                   key={String(label)}
@@ -815,9 +1099,11 @@ function Workbench({
             </div>
             {notice && (
               <Alert
+                role={notice.kind === 'error' ? 'alert' : 'status'}
+                aria-live={notice.kind === 'error' ? 'assertive' : 'polite'}
                 className={`mt-4 ${notice.kind === 'error' ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}
               >
-                <AlertCircle />
+                {notice.kind === 'error' ? <AlertCircle /> : <CheckCircle2 />}
                 <AlertTitle>
                   {notice.kind === 'error' ? 'Could not save' : 'Saved'}
                 </AlertTitle>
@@ -863,7 +1149,11 @@ function Workbench({
                 <Requests
                   key={run.id}
                   items={run.requests}
-                  busy={busy}
+                  busyId={
+                    busyAction?.startsWith('request:')
+                      ? busyAction.slice('request:'.length)
+                      : null
+                  }
                   save={(item) =>
                     action({
                       action: 'request',
@@ -894,8 +1184,14 @@ function Workbench({
                 className="min-h-11"
                 onClick={createChildRun}
               >
-                {busy ? <Loader2 className="animate-spin" /> : <RefreshCw />}
-                Create version {run.versionNumber + 1}
+                {busyAction === 'rerun' ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <RefreshCw />
+                )}
+                {busyAction === 'rerun'
+                  ? 'Creating new version…'
+                  : `Create version ${run.versionNumber + 1}`}
               </Button>
             </div>
           </div>
@@ -982,12 +1278,14 @@ function Workbench({
                   disabled={busy || reason.trim().length < 4}
                   onClick={saveReview}
                 >
-                  {busy ? (
+                  {busyAction?.startsWith('review:') ? (
                     <Loader2 className="animate-spin" />
                   ) : (
                     <UserRoundCheck />
                   )}
-                  Save review decision
+                  {busyAction?.startsWith('review:')
+                    ? 'Saving review…'
+                    : 'Save review decision'}
                 </Button>
               </div>
             </DialogContent>
@@ -1321,11 +1619,11 @@ function Review({
 }
 function Requests({
   items,
-  busy,
+  busyId,
   save,
 }: {
   items: EvidenceRequest[];
-  busy: boolean;
+  busyId: string | null;
   save: (item: EvidenceRequest) => Promise<unknown>;
 }) {
   const [drafts, setDrafts] = useState(items);
@@ -1375,11 +1673,14 @@ function Requests({
                 <option value="resolved">Resolved</option>
               </select>
               <Button
-                disabled={busy}
+                disabled={busyId !== null}
                 className="min-h-11"
                 onClick={() => save(item)}
               >
-                Save request
+                {busyId === item.id && (
+                  <Loader2 aria-hidden="true" className="animate-spin" />
+                )}
+                {busyId === item.id ? 'Saving request…' : 'Save request'}
               </Button>
             </div>
           </CardContent>

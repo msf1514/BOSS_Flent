@@ -64,9 +64,16 @@ assert.equal(
     .length,
   2,
 );
-assert.match(page, /Local demonstration only · not saved/);
-assert.match(page, /Decision-grade comparison: INSUFFICIENT/);
-assert.match(page, /do not numerically consume the ₹58,250 market estimate/);
-assert.match(page, /Nothing is assigned, sent, persisted or authorized/);
+assert.match(
+  page,
+  /Uploaded evidence only\. No live scraping or capital decision/,
+);
+assert.match(page, /Inspect source/);
+assert.match(page, /Value provenance/);
+assert.match(page, /Create versioned evidence run/);
+assert.match(page, /Completed versions are immutable/);
+assert.doesNotMatch(page, /Decision-ready evidence/);
 
-console.log('Prototype contract validated: 20 assertions passed.');
+console.log(
+  'Prototype contract validated: evidence boundaries and workflow copy passed.',
+);

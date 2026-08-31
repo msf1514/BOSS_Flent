@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { runEvidenceEngine, sha256 } from '../lib/evidence-engine.ts';
 import { parseRunConfig } from '../lib/run-config.ts';
 import { sourceAnnotationsForHash } from '../lib/source-annotations.ts';
+import { inspectEvidenceSource } from '../lib/source-inspection.ts';
 import { calculateReadiness } from '../lib/workflow.ts';
 
 const csv = await readFile(
@@ -24,6 +25,21 @@ const config = {
   maxLastSeenAgeDays: 30,
 };
 const inputHash = await sha256(csv);
+const inspection = await inspectEvidenceSource({
+  filename: 'anonymised-deal-sample.csv',
+  sizeBytes: Buffer.byteLength(csv),
+  csv,
+});
+assert.equal(inspection.validStructure, true);
+assert.equal(inspection.rowCount, 86);
+assert.equal(inspection.headerCount, 13);
+assert.equal(inspection.suggestions.evidenceCutoff, '2026-08-18');
+assert.deepEqual(inspection.bhks.slice(0, 3), [
+  { value: '2', count: 84 },
+  { value: '1', count: 1 },
+  { value: '3', count: 1 },
+]);
+assert.ok(!('landlordDeposit' in inspection.suggestions));
 const result = await runEvidenceEngine(
   csv,
   config,

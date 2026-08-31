@@ -25,13 +25,20 @@ export function calculateReadiness(
     else if (review.decision === 'defer') deferredReviewCount += 1;
   }
   const unresolvedRequestCount = requests.filter(
-    (request) => request.status !== 'resolved',
+    (request) =>
+      request.status !== 'resolved' || request.evidenceNote.trim().length < 4,
   ).length;
+  const effectiveComparableCount = rows.filter((row) => {
+    const review = latestByListing.get(row.listingId);
+    if (review) return review.decision === 'include';
+    return row.b2State === 'include';
+  }).length;
   return {
     ready:
       pendingReviewCount === 0 &&
       deferredReviewCount === 0 &&
-      unresolvedRequestCount === 0,
+      unresolvedRequestCount === 0 &&
+      effectiveComparableCount >= 3,
     pendingReviewCount,
     deferredReviewCount,
     unresolvedRequestCount,

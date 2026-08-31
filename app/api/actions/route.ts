@@ -89,6 +89,14 @@ export async function POST(request: Request) {
         !run.requests.some((item) => item.id === requestId)
       )
         return json({ error: 'Invalid evidence request update.' }, 400);
+      if (status === 'resolved' && evidenceNote.length < 4)
+        return json(
+          {
+            error:
+              'Add a specific evidence reference or resolution note before marking this request resolved.',
+          },
+          400,
+        );
       const timestamp = now();
       await db().batch([
         db()
