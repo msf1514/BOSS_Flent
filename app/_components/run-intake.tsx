@@ -126,6 +126,11 @@ export function RunIntake({
   const [issues, setIssues] = useState<ValidationIssue[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Only the facts that define the comparable set gate analysis. Commercial
+  // context (landlord ask, maintenance, deposit, capex) does NOT affect the
+  // market median — it is a decision-layer concern (Problem 3) — so it never
+  // blocks a Problem 1 run. The fields remain in the data model but are no
+  // longer collected in this intake.
   const missingConfigCount = [
     config.dealName.trim().length > 0,
     config.evidenceCutoff.length > 0,
@@ -133,10 +138,6 @@ export function RunIntake({
     config.bhk >= 1,
     config.areaSqft >= 100,
     config.furnishing.length > 0,
-    config.landlordBaseRent > 0,
-    config.landlordMaintenance >= 0,
-    config.landlordDeposit >= 0,
-    config.improvementCapex >= 0,
     config.areaToleranceSqft >= 0,
     config.maxLastSeenAgeDays >= 1,
   ].filter((ready) => !ready).length;
@@ -556,90 +557,12 @@ export function RunIntake({
                       />
                     </Field>
                   </div>
-                  <div className="mt-6 border-t pt-5">
-                    <div className="mb-4 flex flex-wrap items-center gap-2">
-                      <h2 className="text-base font-semibold">
-                        Commercial context
-                      </h2>
-                      <Badge
-                        variant="outline"
-                        className="border-sky-200 bg-sky-50 text-sky-800"
-                      >
-                        Captured, not used to calculate the median
-                      </Badge>
-                    </div>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                      <Field label="Landlord base rent" htmlFor="base-rent">
-                        <Input
-                          id="base-rent"
-                          type="number"
-                          min="1"
-                          value={
-                            config.landlordBaseRent > 0
-                              ? config.landlordBaseRent
-                              : ''
-                          }
-                          onChange={(e) =>
-                            update('landlordBaseRent', Number(e.target.value))
-                          }
-                        />
-                      </Field>
-                      <Field label="Maintenance" htmlFor="maintenance">
-                        <Input
-                          id="maintenance"
-                          type="number"
-                          min="0"
-                          value={
-                            config.landlordMaintenance >= 0
-                              ? config.landlordMaintenance
-                              : ''
-                          }
-                          onChange={(e) =>
-                            update(
-                              'landlordMaintenance',
-                              Number(e.target.value),
-                            )
-                          }
-                        />
-                      </Field>
-                      <Field label="Security deposit" htmlFor="deposit">
-                        <Input
-                          id="deposit"
-                          type="number"
-                          min="0"
-                          value={
-                            config.landlordDeposit >= 0
-                              ? config.landlordDeposit
-                              : ''
-                          }
-                          onChange={(e) =>
-                            update('landlordDeposit', Number(e.target.value))
-                          }
-                        />
-                      </Field>
-                      <Field label="Improvement capex" htmlFor="capex">
-                        <Input
-                          id="capex"
-                          type="number"
-                          min="0"
-                          value={
-                            config.improvementCapex >= 0
-                              ? config.improvementCapex
-                              : ''
-                          }
-                          onChange={(e) =>
-                            update('improvementCapex', Number(e.target.value))
-                          }
-                        />
-                      </Field>
-                    </div>
-                  </div>
                 </fieldset>
               </CardContent>
               <CardContent className="flex flex-col gap-3 border-t bg-slate-50/60 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-2xl text-xs leading-5 text-muted-foreground">
                   {missingConfigCount > 0
-                    ? `${missingConfigCount} required ${missingConfigCount === 1 ? 'field remains' : 'fields remain'}. Subject and commercial facts must be confirmed before analysis.`
+                    ? `${missingConfigCount} required ${missingConfigCount === 1 ? 'field remains' : 'fields remain'}. Confirm the home's facts before analysis.`
                     : 'Ready. The analysis will preserve the uploaded source, validate every row, and record a versioned evidence result.'}
                 </p>
                 <Button

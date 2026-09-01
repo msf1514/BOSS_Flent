@@ -505,27 +505,19 @@ function DealOverview({
       <TrustSignals rows={run.rows} />
       <div className="grid gap-3 sm:grid-cols-3">
         <Metric
-          label="Owner monthly cost"
-          value={money(assessment.ownerMonthlyCost)}
-          note={`${money(run.config.landlordBaseRent)} rent + ${money(run.config.landlordMaintenance)} maintenance`}
+          label="Trusted comparables"
+          value={String(run.summary.baselines.B2.count)}
+          note="Listings that count toward the rate"
         />
         <Metric
-          label="Difference to current median"
-          value={
-            assessment.monthlyGap === null
-              ? 'Not available'
-              : `${assessment.monthlyGap >= 0 ? '+' : '−'}${money(Math.abs(assessment.monthlyGap))}`
-          }
-          note={
-            assessment.gapPercent === null
-              ? 'No stable comparison'
-              : `${Math.abs(assessment.gapPercent)}% ${assessment.gapPercent >= 0 ? 'above' : 'below'} the asking median`
-          }
+          label="Middle 50% of asking rents"
+          value={`${money(run.summary.band.p25)} – ${money(run.summary.band.p75)}`}
+          note="Where most comparable asks sit"
         />
         <Metric
           label="Work remaining"
           value={`${pending + unresolved}`}
-          note={`${pending} comparable decisions · ${unresolved} evidence tasks`}
+          note={`${pending} listing decisions · ${unresolved} evidence tasks`}
         />
       </div>
       <div className="grid gap-4 xl:grid-cols-[minmax(300px,0.72fr)_minmax(0,1.28fr)]">
