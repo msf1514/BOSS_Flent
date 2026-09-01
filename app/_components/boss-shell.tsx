@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { FileCheck2, FilePlus2, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -64,6 +65,21 @@ export function ProductRail({
           Upload and review market listings, then freeze a market evidence
           packet for the wider BOSS decision.
         </p>
+        <div className="mt-3 space-y-1 border-t pt-3">
+          <p className="data-label">Approach previews</p>
+          <Link
+            href="/calibration"
+            className="block text-xs font-semibold text-[var(--flent-teal)] hover:underline"
+          >
+            Problem 2 · Feedback loop
+          </Link>
+          <Link
+            href="/decision"
+            className="block text-xs font-semibold text-[var(--flent-teal)] hover:underline"
+          >
+            Problem 3 · Decision page
+          </Link>
+        </div>
       </div>
     </aside>
   );
