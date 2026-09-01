@@ -26,7 +26,10 @@ export function calculateReadiness(
   }
   const unresolvedRequestCount = requests.filter(
     (request) =>
-      request.status !== 'resolved' || request.evidenceNote.trim().length < 4,
+      request.status !== 'resolved' ||
+      request.evidenceNote.trim().length < 12 ||
+      !request.owner.trim() ||
+      request.owner === 'Unassigned',
   ).length;
   const effectiveComparableCount = rows.filter((row) => {
     const review = latestByListing.get(row.listingId);

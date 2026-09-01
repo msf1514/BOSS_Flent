@@ -5,6 +5,7 @@ import { parseRunConfig } from '../lib/run-config.ts';
 import { sourceAnnotationsForHash } from '../lib/source-annotations.ts';
 import { inspectEvidenceSource } from '../lib/source-inspection.ts';
 import { calculateReadiness } from '../lib/workflow.ts';
+import { assessMarketReview } from '../lib/market-review.ts';
 
 const csv = await readFile(
   new URL('../public/anonymised-deal-sample.csv', import.meta.url),
@@ -106,6 +107,57 @@ const readiness = calculateReadiness(
 );
 assert.equal(readiness.ready, false);
 assert.equal(readiness.deferredReviewCount, 1);
+const resolvedReviews = result.rows
+  .filter((row) => row.b2State === 'needs_human_review')
+  .map((row, index) => ({
+    id: `review-${index}`,
+    listingId: row.listingId,
+    decision: 'exclude',
+    reason: 'Observable attribute conflict requires exclusion',
+    actor: 'Reviewer',
+    createdAt: new Date().toISOString(),
+  }));
+const resolvedRequests = [
+  {
+    id: 'request-1',
+    title: 'Confirm whether maintenance is included in asking rents',
+    owner: 'Market analyst',
+    status: 'resolved',
+    evidenceNote: 'Source note confirms the unresolved mixed basis.',
+    updatedAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+  },
+];
+const completeReadiness = calculateReadiness(
+  result.rows,
+  resolvedReviews,
+  resolvedRequests,
+);
+assert.equal(completeReadiness.ready, true);
+const unappliedAssessment = assessMarketReview({
+  config,
+  summary: result.summary,
+  readiness: completeReadiness,
+  closure: null,
+  hasUnappliedReviews: true,
+});
+assert.equal(unappliedAssessment.state, 'in_review');
+assert.equal(
+  unappliedAssessment.nextAction,
+  'Create the next evidence version.',
+);
+const completableAssessment = assessMarketReview({
+  config,
+  summary: result.summary,
+  readiness: completeReadiness,
+  closure: null,
+  hasUnappliedReviews: false,
+});
+assert.equal(completableAssessment.state, 'ready_to_complete');
+assert.equal(
+  completableAssessment.completionDisposition,
+  'usable_with_caveats',
+);
 console.log(
-  'Engine contract passed: sample invariants, strict dates, source-bound annotations, config validation and deferred readiness.',
+  'Engine contract passed: sample invariants, strict dates, source-bound annotations, config validation, governed handoff and deferred readiness.',
 );

@@ -7,6 +7,10 @@ import {
   type RunConfig,
 } from '@/lib/evidence-engine';
 import { calculateReadiness, type WorkflowReadiness } from '@/lib/workflow';
+import type {
+  MarketReviewClosure,
+  MarketReviewDisposition,
+} from '@/lib/market-review';
 
 export type StoredRun = {
   id: string;
@@ -28,6 +32,7 @@ export type StoredRun = {
   requests: EvidenceRequest[];
   audit: AuditEvent[];
   readiness: WorkflowReadiness;
+  reviewClosure: MarketReviewClosure | null;
 };
 export type ReviewRecord = {
   id: string;
@@ -81,7 +86,7 @@ export async function getRun(runId: string): Promise<StoredRun | null> {
     .bind(runId)
     .first<Record<string, unknown>>();
   if (!run) return null;
-  const [rowResult, reviewResult, requestResult, auditResult] =
+  const [rowResult, reviewResult, requestResult, auditResult, closureResult] =
     await Promise.all([
       db()
         .prepare(
@@ -107,6 +112,10 @@ export async function getRun(runId: string): Promise<StoredRun | null> {
         )
         .bind(run.deal_id)
         .all<Record<string, unknown>>(),
+      db()
+        .prepare(`SELECT * FROM market_review_closures WHERE deal_id=?`)
+        .bind(run.deal_id)
+        .first<Record<string, unknown>>(),
     ]);
   const latest = new Map<string, ReviewRecord>();
   for (const item of reviewResult.results)
@@ -160,7 +169,63 @@ export async function getRun(runId: string): Promise<StoredRun | null> {
       createdAt: String(item.created_at),
     })),
     readiness: calculateReadiness(rows, reviews, requests),
+    reviewClosure: closureResult
+      ? {
+          id: String(closureResult.id),
+          runId: String(closureResult.run_id),
+          disposition: closureResult.disposition as MarketReviewDisposition,
+          rationale: String(closureResult.rationale),
+          actor: String(closureResult.actor),
+          createdAt: String(closureResult.created_at),
+        }
+      : null,
   };
+}
+
+export async function completeMarketReview(input: {
+  run: StoredRun;
+  disposition: MarketReviewDisposition;
+  rationale: string;
+  actor: RequestActor;
+}) {
+  await ensureSchema();
+  const timestamp = now();
+  const closureId = id('mrc');
+  await db().batch([
+    db()
+      .prepare(
+        `INSERT INTO market_review_closures(id,deal_id,run_id,disposition,rationale,actor,created_at) VALUES(?,?,?,?,?,?,?)`,
+      )
+      .bind(
+        closureId,
+        input.run.dealId,
+        input.run.id,
+        input.disposition,
+        input.rationale,
+        input.actor.label,
+        timestamp,
+      ),
+    db()
+      .prepare(
+        `INSERT INTO audit_events(id,deal_id,run_id,event_type,entity_id,actor,payload_json,created_at) VALUES(?,?,?,?,?,?,?,?)`,
+      )
+      .bind(
+        id('evt'),
+        input.run.dealId,
+        input.run.id,
+        'market_review_completed',
+        closureId,
+        input.actor.label,
+        JSON.stringify({
+          actorId: input.actor.id,
+          disposition: input.disposition,
+          rationale: input.rationale,
+          runVersion: input.run.versionNumber,
+          inputHash: input.run.inputHash,
+        }),
+        timestamp,
+      ),
+  ]);
 }
 
 export async function listRuns() {

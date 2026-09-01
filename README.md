@@ -6,10 +6,11 @@ A working, client-facing Problem 1 pilot for converting uploaded comparable-list
 
 - Upload either the anonymised sample or another CSV that satisfies the visible 13-column contract.
 - Validate the schema and rows at runtime; rejected values return actionable issues.
-- Normalize records and calculate deterministic B0/B1/B2 evidence views.
+- Normalize records and calculate deterministic Broad reference, Policy-matched, and Current evidence views (internal stage IDs remain in the code for reproducibility).
 - Preserve source filename, SHA-256, timestamps, configuration, engine version, and immutable child-run lineage.
-- Record include, exclude, or defer decisions and evidence-request updates in an audit ledger.
+- Record comparable judgments and evidence-task updates in an audit ledger.
 - Recompute from preserved source data without overwriting the parent run.
+- Complete Problem 1 by freezing one reviewed market-evidence version for handoff into the wider BOSS deal process.
 
 Deposit and improvement capex are explicit, governed deal inputs. They are shown as economics context but are intentionally not injected into the comparable-rent median. That separation prevents a market-observation metric from silently becoming an investment-underwriting model.
 
@@ -25,7 +26,7 @@ Deposit and improvement capex are explicit, governed deal inputs. They are shown
 
 This version accepts CSV/manual uploads. Live portal scraping is not implemented and the product never claims that an upload was scraped. Scraping should be added later as an upstream ingestion adapter that produces the same raw-source contract, provenance fields, validation path, and immutable evidence snapshot. It is not coupled to authentication or audit identity.
 
-The engine supports evidence analysis; it does not issue an ACQUIRE, NEGOTIATE, HOLD, or PASS capital decision.
+The engine supports the market-evidence input to a wider BOSS decision. It shows which other decision dimensions still need owners and evidence rather than manufacturing a blended property score.
 
 ## Run locally
 
@@ -51,6 +52,6 @@ npm audit
 - D1 binding: `DB`
 - R2 binding: `EVIDENCE`
 - Schema source: `db/schema.ts`
-- Migration: `drizzle/0002_integrity.sql`
+- Latest migration: `drizzle/0003_market_review_closure.sql`
 
-The supplied BOSS screenshots informed the interface language—Inter typography, deep-ink actions, Flent teal/mint active states, warm canvas, white operational surfaces, left rail, and line tabs. Their seeded figures and hidden logic are not used as product truth.
+The supplied BOSS screenshots informed the interface language—Plus Jakarta Sans typography, deep-ink actions, Flent teal/mint active states, warm canvas, white operational surfaces, left rail, and line tabs. Their seeded figures and hidden logic are not used as product truth.

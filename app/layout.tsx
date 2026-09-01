@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
-import { IBM_Plex_Mono, Inter } from 'next/font/google';
+import { IBM_Plex_Mono, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 
-const interfaceFont = Inter({
+const interfaceFont = Plus_Jakarta_Sans({
   variable: '--font-interface',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
 });
 
 const plexMono = IBM_Plex_Mono({
@@ -18,11 +19,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_ORIGIN ?? 'http://localhost:3000'),
   title: 'BOSS Market Evidence Inspector',
   description:
-    'An inspectable, evidence-grounded Problem 1 prototype for the frozen Lakeview acquisition case.',
+    'A working BOSS market-evidence review for inspectable comparable decisions, collaboration and governed handoff.',
   openGraph: {
     title: 'BOSS Market Evidence Inspector',
     description:
-      'Inspectable evidence. Conditional confidence. Human-owned decisions.',
+      'From raw listing evidence to a reviewable, frozen market packet.',
     images: [
       {
         url: '/og.png',
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'BOSS Market Evidence Inspector',
     description:
-      'Inspectable evidence. Conditional confidence. Human-owned decisions.',
+      'From raw listing evidence to a reviewable, frozen market packet.',
     images: ['/og.png'],
   },
 };

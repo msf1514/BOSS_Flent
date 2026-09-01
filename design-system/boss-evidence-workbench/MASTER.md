@@ -11,21 +11,21 @@ This file records the design decisions actually used by the product. The supplie
 
 ## Brand tokens
 
-| Role                            | Value                       | Usage                                             |
-| ------------------------------- | --------------------------- | ------------------------------------------------- |
-| BOSS ink                        | `#15102F`                   | Wordmark, headings, primary actions               |
-| Flent teal                      | `#008F76`                   | Active navigation, links, focus/selection accents |
-| Flent mint                      | `#E3F3EF`                   | Active and informational surface fills            |
-| Warm canvas                     | `#FBFAF7`                   | Application background                            |
-| Surface                         | `#FFFFFF`                   | Rail, tables, cards, dialogs                      |
-| Border                          | neutral slate, low contrast | Structure without heavy shadow                    |
-| Semantic success/warning/danger | emerald/amber/red           | Status only; always pair colour with text or icon |
+| Role                            | Value                       | Usage                                                                                     |
+| ------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------- |
+| BOSS ink                        | `#15102F`                   | Wordmark, headings, primary actions                                                       |
+| Flent teal                      | `#008F76`                   | Active navigation, links, focus/selection accents                                         |
+| Flent mint                      | `#E3F3EF`                   | Active and informational surface fills                                                    |
+| Warm canvas                     | `#FBFAF7`                   | Application background                                                                    |
+| Surface                         | `#FFFFFF`                   | Rail, tables, cards, dialogs                                                              |
+| Border                          | neutral slate, low contrast | Structure without heavy shadow                                                            |
+| Semantic success/warning/danger | emerald/amber/red           | Completed/approved, action-needed, and blocked only; always pair colour with text or icon |
 
 Primary actions use BOSS ink. Teal communicates active/product state; it is not applied indiscriminately to every button.
 
 ## Typography
 
-- Inter for navigation, headings, body copy, labels, and data. This matches the restrained neo-grotesk character visible in the supplied product references.
+- Plus Jakarta Sans for navigation, headings and body copy. Its geometric structure echoes the supplied BOSS reference while remaining legible at operational dashboard density.
 - IBM Plex Mono only for immutable IDs and hashes.
 - Use tabular numerals for prices, counts, dates, and calculated values.
 - Page title: 28–42px depending on viewport; section title: 18–24px; body: 14–16px; never put meaningful text below 12px.
@@ -47,6 +47,9 @@ Primary actions use BOSS ink. Teal communicates active/product state; it is not 
 - Never display a result that is not derived from the uploaded source and declared policy.
 - Show source filename, timestamp, SHA-256, run version, engine version, and audit actor where relevant.
 - Deferred reviews remain unresolved. A rerun creates a child version and never edits a completed run.
+- B0/B1/B2 remain internal calculation identifiers. The product exposes Broad reference set, Policy-matched comparables, and Current evidence set.
+- Green is reserved for completed validation, resolved work and recorded approval. Teal means product selection or verified analysis; amber means unresolved judgment or conditional evidence.
+- Completing Problem 1 freezes a market-evidence packet. It does not authorize acquisition or close the lease transaction.
 - Uploaded evidence is the present ingestion boundary. Do not imply that live scraping occurred.
 
 ## Accessibility and interaction

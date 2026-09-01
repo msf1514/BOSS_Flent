@@ -7,6 +7,7 @@ export const schemaStatements = [
   `CREATE TABLE IF NOT EXISTS evidence_requests (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, title TEXT NOT NULL, owner TEXT NOT NULL, status TEXT NOT NULL CHECK(status IN ('open','blocked','resolved')), evidence_note TEXT NOT NULL, updated_at TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS audit_events (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL, run_id TEXT, event_type TEXT NOT NULL, entity_id TEXT, actor TEXT NOT NULL, payload_json TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS run_operations (operation_key TEXT PRIMARY KEY, deal_id TEXT NOT NULL, run_id TEXT NOT NULL, created_at TEXT NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS market_review_closures (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL UNIQUE, run_id TEXT NOT NULL, disposition TEXT NOT NULL CHECK(disposition IN ('usable_with_caveats','insufficient_evidence')), rationale TEXT NOT NULL, actor TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_runs_deal_version ON runs(deal_id, version_number)`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_rows_run_listing ON run_rows(run_id, listing_id)`,
   `CREATE INDEX IF NOT EXISTS idx_runs_deal ON runs(deal_id, version_number DESC)`,
@@ -14,4 +15,5 @@ export const schemaStatements = [
   `CREATE INDEX IF NOT EXISTS idx_reviews_run ON review_actions(run_id, listing_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_requests_run ON evidence_requests(run_id)`,
   `CREATE INDEX IF NOT EXISTS idx_audit_deal ON audit_events(deal_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_market_review_closures_run ON market_review_closures(run_id)`,
 ] as const;

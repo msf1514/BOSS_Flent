@@ -635,7 +635,7 @@ export async function runEvidenceEngine(
         'Duplicate candidates are observable-field inferences, not ground truth.',
       ],
       decisionBoundary:
-        'This engine estimates market evidence. It does not recommend ACQUIRE, NEGOTIATE, HOLD or PASS.',
+        'Use this asking-rent evidence with demand, economics and property diligence before an acquisition decision.',
     },
   };
 }

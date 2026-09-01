@@ -83,6 +83,10 @@
   --flent-teal: #008f76;
   --flent-mint: #e3f3ef;
   --warm-canvas: #fbfaf7;
+  --status-success: #087a55;
+  --status-warning: #9a5a08;
+  --status-danger: #b42318;
+  --status-info: #075985;
 }
 
 @layer base {
@@ -93,7 +97,7 @@
     @apply font-sans;
     font-family:
       var(--font-interface),
-      Inter,
+      'Plus Jakarta Sans',
       ui-sans-serif,
       system-ui,
       -apple-system,
@@ -106,7 +110,7 @@
     min-width: 320px;
     font-family:
       var(--font-interface),
-      Inter,
+      'Plus Jakarta Sans',
       ui-sans-serif,
       system-ui,
       -apple-system,
@@ -144,7 +148,7 @@
 
 @layer components {
   .app-shell {
-    @apply w-full px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full px-4 sm:px-6 lg:px-8;
   }
   .eyebrow {
     @apply text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
@@ -163,6 +167,10 @@
   }
   .workbench-grid {
     background: var(--warm-canvas);
+  }
+  .table-scroll {
+    max-height: min(620px, 68dvh);
+    overflow: auto;
   }
   .brand-wordmark {
     color: var(--boss-ink);
