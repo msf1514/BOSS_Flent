@@ -47,7 +47,7 @@ import {
   ScopeNote,
   TrustSignals,
 } from './problem-one-overview';
-import { ConfidenceDerivation, ReasonChips } from './trust-vocabulary';
+import { ConfidenceDerivation, ReasonChips, RemediationGuide } from './trust-vocabulary';
 
 type Notice = { kind: 'error' | 'success'; text: string } | null;
 type ReviewDecision = 'include' | 'exclude' | 'defer';
@@ -187,7 +187,7 @@ export function MarketWorkbench({
   }
 
   async function saveReview() {
-    if (!selected || selected.b2State !== 'needs_human_review') return;
+    if (!selected) return;
     if (
       await action({
         action: 'review',
@@ -198,6 +198,15 @@ export function MarketWorkbench({
     ) {
       setSelected(null);
     }
+  }
+
+  async function raiseTaskForListing(title: string, note: string) {
+    return action({
+      action: 'create_request',
+      title,
+      owner: 'Unassigned',
+      evidenceNote: note,
+    });
   }
 
   async function createChildRun() {
@@ -384,6 +393,17 @@ export function MarketWorkbench({
           busy={busy}
           onSave={saveReview}
           onClose={() => setSelected(null)}
+          onRaiseTask={async (title) => {
+            const listingRef = selected ? ` (${selected.listingId})` : '';
+            if (await raiseTaskForListing(`${title}${listingRef}`, '')) {
+              setSelected(null);
+              setSection('tasks');
+            }
+          }}
+          onReupload={() => {
+            setSelected(null);
+            onNew();
+          }}
         />
 
         <Dialog open={completionOpen} onOpenChange={setCompletionOpen}>
@@ -1349,6 +1369,8 @@ function ReviewDialog({
   busy,
   onSave,
   onClose,
+  onRaiseTask,
+  onReupload,
 }: {
   row: AuditRow | null;
   existing?: StoredRun['reviews'][number];
@@ -1359,6 +1381,8 @@ function ReviewDialog({
   busy: boolean;
   onSave: () => Promise<void>;
   onClose: () => void;
+  onRaiseTask: (title: string) => void;
+  onReupload: () => void;
 }) {
   const reviewable = Boolean(row);
   return (
@@ -1403,10 +1427,16 @@ function ReviewDialog({
           </div>
           <div className="mx-5 rounded-md border bg-slate-50 p-4 text-sm sm:mx-6">
             <p className="data-label">Why we handled it this way</p>
-            <p className="mt-2 leading-6">
-              {row.reasons.join(' · ').replaceAll('_', ' ') ||
-                'Matches the home on every comparison rule.'}
-            </p>
+            <div className="mt-2">
+              <ReasonChips reasons={row.reasons} showMeaning />
+            </div>
+          </div>
+          <div className="mx-5 mt-4 sm:mx-6">
+            <RemediationGuide
+              reasons={row.reasons}
+              onRaiseTask={onRaiseTask}
+              onReupload={onReupload}
+            />
           </div>
           {reviewable && (
             <div className="mt-5 space-y-5 border-t px-5 py-5 sm:px-6">

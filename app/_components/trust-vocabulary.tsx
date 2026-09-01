@@ -165,8 +165,125 @@ export function ReasonChips({
   );
 }
 
-// Why the confidence tier is what it is — the derivation shown on screen, so the
-// number is defensible instead of asserted. Each factor shows pass/attention.
+// How to legitimately resolve each flag. Deliberately NO "trust it anyway"
+// action: distrust is only ever resolved by documented judgment, new evidence,
+// or a corrected source — never by a naked toggle that would let someone game
+// the rate greener. `lane` tells the UI which action to surface.
+type Remedy = {
+  headline: string;
+  detail: string;
+  lane: 'override' | 'task' | 'reupload';
+  taskTitle?: string;
+};
+
+export const REMEDY: Record<string, Remedy> = {
+  cross_post_duplicate: {
+    headline: 'Confirm whether it’s really the same flat',
+    detail:
+      'If it’s a genuine re-post, leave it collapsed. If you’ve confirmed it’s a distinct unit, re-include it with that evidence recorded.',
+    lane: 'override',
+  },
+  suspected_bait_price: {
+    headline: 'Verify the price at source before trusting it',
+    detail:
+      'Bait prices harvest enquiries. Raise a task to confirm the rent with the poster/broker. Only include it if verified — never to lift the sample.',
+    lane: 'task',
+    taskTitle: 'Verify suspected bait price with source',
+  },
+  suspected_aspirational_ask: {
+    headline: 'Check whether this ask ever transacts',
+    detail:
+      'An optimistic ask rarely rents at that number. Raise a task to check comparable closes before letting it influence the rate.',
+    lane: 'task',
+    taskTitle: 'Check aspirational ask against actual closes',
+  },
+  suspected_mislabel_configuration: {
+    headline: 'Correct the label at the source',
+    detail:
+      'If the BHK/attributes are wrong, fix them in the source data and re-upload — editing evidence in-app would break its provenance.',
+    lane: 'reupload',
+  },
+  implausible_area_for_bhk: {
+    headline: 'Fix the area at the source',
+    detail:
+      'The floor area looks like a data error. Correct it in the CSV and re-upload as a new version rather than overriding a bad number.',
+    lane: 'reupload',
+  },
+  old_last_seen: {
+    headline: 'Check whether it re-listed',
+    detail:
+      'Stale listings have usually rented. Raise a task to confirm current availability before trusting it as live evidence.',
+    lane: 'task',
+    taskTitle: 'Confirm stale listing is still available',
+  },
+  missing_required_field: {
+    headline: 'Supply the missing value at the source',
+    detail:
+      'A required field is blank, so it can’t be trusted. Fill it in the source data and re-upload — don’t invent the value.',
+    lane: 'reupload',
+  },
+};
+
+const LANE_LABEL: Record<Remedy['lane'], string> = {
+  override: 'Record a human judgment (with evidence)',
+  task: 'Raise an evidence task',
+  reupload: 'Re-upload a corrected source',
+};
+
+export function RemediationGuide({
+  reasons,
+  onRaiseTask,
+  onReupload,
+}: {
+  reasons: string[];
+  onRaiseTask: (title: string) => void;
+  onReupload: () => void;
+}) {
+  const remedies = reasons
+    .map((code) => ({ code, remedy: REMEDY[code] }))
+    .filter((r) => r.remedy);
+  if (remedies.length === 0) return null;
+  return (
+    <div className="rounded-lg border border-sky-200 bg-sky-50/50 p-4">
+      <p className="data-label text-sky-900">How to resolve this</p>
+      <ul className="mt-3 space-y-3">
+        {remedies.map(({ code, remedy }) => (
+          <li key={code} className="text-sm">
+            <p className="font-semibold">{remedy.headline}</p>
+            <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+              {remedy.detail}
+            </p>
+            <div className="mt-2">
+              {remedy.lane === 'task' && (
+                <button
+                  type="button"
+                  onClick={() => onRaiseTask(remedy.taskTitle ?? 'Verify listing')}
+                  className="rounded-md border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-900 hover:bg-sky-100"
+                >
+                  {LANE_LABEL.task}
+                </button>
+              )}
+              {remedy.lane === 'reupload' && (
+                <button
+                  type="button"
+                  onClick={onReupload}
+                  className="rounded-md border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-900 hover:bg-sky-100"
+                >
+                  {LANE_LABEL.reupload}
+                </button>
+              )}
+              {remedy.lane === 'override' && (
+                <span className="text-xs font-medium text-sky-900">
+                  ↓ {LANE_LABEL.override} below
+                </span>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 type Confidence = 'HIGH' | 'MEDIUM' | 'LOW' | 'INSUFFICIENT';
 
 export function ConfidenceDerivation({

@@ -153,6 +153,49 @@ export async function POST(request: Request) {
       ]);
       return json({ run: await getRun(runId) });
     }
+    if (body.action === 'create_request') {
+      // Raise a new evidence task — the honest path to resolving distrust that
+      // needs evidence we don't yet have (verify a price, confirm a duplicate).
+      const title = value('title').trim().slice(0, 200);
+      const owner =
+        value('owner', 'Unassigned').trim().slice(0, 80) || 'Unassigned';
+      const evidenceNote = value('evidenceNote').trim().slice(0, 2000);
+      if (title.length < 6)
+        return json({ error: 'Give the task a clear, specific title.' }, 400);
+      const timestamp = now();
+      const requestId = id('req');
+      await db().batch([
+        db()
+          .prepare(
+            `INSERT INTO evidence_requests(id,run_id,title,owner,status,evidence_note,updated_at,created_at) VALUES(?,?,?,?,?,?,?,?)`,
+          )
+          .bind(
+            requestId,
+            runId,
+            title,
+            owner,
+            'open',
+            evidenceNote,
+            timestamp,
+            timestamp,
+          ),
+        db()
+          .prepare(
+            `INSERT INTO audit_events(id,deal_id,run_id,event_type,entity_id,actor,payload_json,created_at) VALUES(?,?,?,?,?,?,?,?)`,
+          )
+          .bind(
+            id('evt'),
+            run.dealId,
+            runId,
+            'evidence_request_created',
+            requestId,
+            actor.label,
+            JSON.stringify({ actorId: actor.id, title, owner }),
+            timestamp,
+          ),
+      ]);
+      return json({ run: await getRun(runId) });
+    }
     if (body.action === 'complete_review') {
       if (run.reviewClosure)
         return json({ run, message: 'Market review is already complete.' });
