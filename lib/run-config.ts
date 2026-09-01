@@ -61,6 +61,20 @@ export function parseRunConfig(input: unknown): ConfigParseResult {
     return value;
   };
 
+  // Commercial-context fields are retained in the model but no longer collected
+  // in the Problem 1 intake (they don't affect the market median — see the
+  // Problem 1 vs Problem 3 split). Accept whatever is present without ever
+  // raising a validation issue, so their absence can't block a market run.
+  const optionalInteger = (field: keyof RunConfig, maximum: number) => {
+    const value = raw[field];
+    return typeof value === 'number' &&
+      Number.isSafeInteger(value) &&
+      value >= 0 &&
+      value <= maximum
+      ? value
+      : 0;
+  };
+
   const dealName = text('dealName', 120);
   const evidenceCutoff = text('evidenceCutoff', 10);
   const societyPrefix = text('societyPrefix', 100);
@@ -88,10 +102,10 @@ export function parseRunConfig(input: unknown): ConfigParseResult {
     furnishing,
     bhk: integer('bhk', 1, 10),
     areaSqft: integer('areaSqft', 100, 10_000),
-    landlordBaseRent: integer('landlordBaseRent', 1, 10_000_000),
-    landlordMaintenance: integer('landlordMaintenance', 0, 1_000_000),
-    landlordDeposit: integer('landlordDeposit', 0, 100_000_000),
-    improvementCapex: integer('improvementCapex', 0, 100_000_000),
+    landlordBaseRent: optionalInteger('landlordBaseRent', 10_000_000),
+    landlordMaintenance: optionalInteger('landlordMaintenance', 1_000_000),
+    landlordDeposit: optionalInteger('landlordDeposit', 100_000_000),
+    improvementCapex: optionalInteger('improvementCapex', 100_000_000),
     areaToleranceSqft: integer('areaToleranceSqft', 0, 2_000),
     maxLastSeenAgeDays: integer('maxLastSeenAgeDays', 1, 365),
   };
