@@ -52,14 +52,11 @@ export async function POST(request: Request) {
       const row = run.rows.find((item) => item.listingId === listingId);
       if (!row)
         return json({ error: 'Listing does not belong to this run.' }, 400);
-      if (row.b2State !== 'needs_human_review')
-        return json(
-          {
-            error:
-              'Only listings flagged for human judgment can be overridden in this pilot. Policy exclusions and collapsed duplicates require a changed policy or supported correction.',
-          },
-          409,
-        );
+      // A reviewer may disagree with ANY engine decision — re-include a row the
+      // engine auto-excluded (stale, duplicate, mislabel) or exclude one it kept
+      // — provided they give a specific reason. The prior engine state is
+      // recorded so every override is a traceable, auditable disagreement rather
+      // than a silent edit. (Brief: "inspect listing by listing and disagree".)
       if (
         !['include', 'exclude', 'defer'].includes(decision) ||
         reason.length < 12
@@ -94,7 +91,12 @@ export async function POST(request: Request) {
             'review_recorded',
             listingId,
             actor.label,
-            JSON.stringify({ actorId: actor.id, decision, reason }),
+            JSON.stringify({
+              actorId: actor.id,
+              decision,
+              reason,
+              priorEngineState: row.b2State,
+            }),
             timestamp,
           ),
       ]);

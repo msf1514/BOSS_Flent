@@ -270,13 +270,14 @@ export function RunIntake({
           >
             <div className="flex flex-col gap-3 border-b pb-5 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="eyebrow">Market evidence</p>
+                <p className="eyebrow">Problem 1 · Market trust</p>
                 <h1 className="mt-2 text-3xl font-bold tracking-[-0.04em]">
                   Add listing evidence
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                  Upload a raw listing pull, confirm the subject facts, and
-                  create a reproducible market review.
+                  Upload a raw listing export, confirm a few facts about the
+                  home you&apos;re pricing, and get a market rate you can defend
+                  line by line.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 text-xs font-semibold">
@@ -318,10 +319,10 @@ export function RunIntake({
               <CardHeader className="border-b">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <CardTitle>1. Upload and inspect the source</CardTitle>
+                    <CardTitle>1. Upload your listings</CardTitle>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Required fields and raw bytes are checked before any
-                      policy is applied.
+                      We check the file&apos;s columns and rows before anything is
+                      calculated.
                     </p>
                   </div>
                   <Button
@@ -335,7 +336,7 @@ export function RunIntake({
                     ) : (
                       <Play />
                     )}
-                    Use anonymised case
+                    Try the sample deal
                   </Button>
                 </div>
               </CardHeader>
@@ -358,8 +359,8 @@ export function RunIntake({
                     }
                   />
                   <p className="mt-2 text-xs text-muted-foreground">
-                    CSV only, up to 2 MB. The case sample contains 86 anonymised
-                    listings.
+                    CSV only, up to 2 MB. The sample is a real 86-listing pull,
+                    anonymised.
                   </p>
                 </div>
                 <Button
@@ -374,7 +375,7 @@ export function RunIntake({
                   ) : (
                     <FileSearch />
                   )}
-                  {sourceBusy ? 'Inspecting…' : 'Inspect source'}
+                  {sourceBusy ? 'Checking…' : 'Check file'}
                 </Button>
               </CardContent>
               {inspection && (
@@ -388,12 +389,12 @@ export function RunIntake({
                     value={`${inspection.headerCount}/${inspection.requiredColumnCount}`}
                   />
                   <SourceFact
-                    label="Latest evidence"
+                    label="Most recent listing"
                     value={inspection.dateRange.lastSeenTo ?? 'Missing'}
                   />
                   <SourceFact
-                    label="Structure"
-                    value={inspection.validStructure ? 'Valid' : 'Blocked'}
+                    label="File check"
+                    value={inspection.validStructure ? 'Looks good' : 'Needs fixing'}
                   />
                 </CardContent>
               )}
@@ -401,10 +402,11 @@ export function RunIntake({
 
             <Card className={!inspection?.validStructure ? 'opacity-60' : ''}>
               <CardHeader className="border-b">
-                <CardTitle>2. Confirm the subject and policy</CardTitle>
+                <CardTitle>2. Confirm the home you&apos;re pricing</CardTitle>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  These values define comparability. They come from the deal
-                  record or policy—not from the listing CSV.
+                  These describe the home you&apos;re comparing against. They come
+                  from the deal record, not the listing file, so they&apos;re
+                  yours to set.
                 </p>
               </CardHeader>
               <CardContent className="space-y-6 py-5">
@@ -473,7 +475,7 @@ export function RunIntake({
                     <Field
                       label="Area tolerance"
                       htmlFor="tolerance"
-                      helper="Allowed difference from the subject area."
+                      helper="Allowed difference from the home's area."
                     >
                       <Input
                         id="tolerance"

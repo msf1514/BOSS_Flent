@@ -405,13 +405,13 @@ export function MarketWorkbench({
               </strong>
             </div>
             <div>
-              <Label htmlFor="completion-rationale">Reviewer rationale</Label>
+              <Label htmlFor="completion-rationale">Your rationale</Label>
               <Textarea
                 id="completion-rationale"
                 className="mt-2"
                 value={completionRationale}
                 onChange={(event) => setCompletionRationale(event.target.value)}
-                placeholder="Summarise why this evidence packet is fit for handoff and which limitations remain."
+                placeholder="Say why this market evidence is ready to hand off, and what still needs checking."
               />
               <p className="mt-1.5 text-xs text-muted-foreground">
                 Required · 20 characters minimum
@@ -548,8 +548,8 @@ function DealOverview({
               <div>
                 <CardTitle>Decision evidence coverage</CardTitle>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Five BOSS dimensions, with unknowns shown instead of scored as
-                  zero.
+                  The five things a full decision needs. We fill in Market here; the
+                  rest stay honestly blank until their owners weigh in.
                 </p>
               </div>
               <Badge
@@ -805,26 +805,26 @@ function MarketSummary({
           note="25th to 75th percentile"
         />
         <Metric
-          label="Observed sources"
+          label="Portals in the rate"
           value={String(run.summary.observedPortalLabelCount)}
-          note="Source labels represented in current set"
+          note="Different sources in the trusted set"
         />
         <Metric
-          label="Single-row sensitivity"
+          label="Reliance on one listing"
           value={
             run.summary.maximumLeaveOneOutMovementPct === null
               ? 'Not available'
               : `${run.summary.maximumLeaveOneOutMovementPct}%`
           }
-          note="Maximum median movement if one row is removed"
+          note="How much the rate moves if the most influential listing is dropped"
         />
       </div>
       <Card>
         <CardHeader className="border-b">
           <CardTitle>How the evidence was narrowed</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
-            Plain-language stages; internal calculation IDs remain in the audit
-            layer.
+            From every listing in the file down to the ones we trust for the
+            rate.
           </p>
         </CardHeader>
         <CardContent className="grid gap-3 py-5 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:items-center">
@@ -832,7 +832,7 @@ function MarketSummary({
             label="Broad reference set"
             count={b.B0.count}
             estimate={b.B0.estimate}
-            detail="All valid uploaded listings matching the subject BHK."
+            detail="Every valid listing that matches the home's BHK."
           />
           <ChevronRight className="hidden size-5 text-muted-foreground md:block" />
           <Stage
@@ -853,7 +853,7 @@ function MarketSummary({
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="border-amber-200">
           <CardHeader className="border-b border-amber-200">
-            <CardTitle>Limits that travel with the estimate</CardTitle>
+            <CardTitle>What this estimate can&apos;t tell you</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 py-5">
             {run.summary.limitations.map((item) => (
@@ -955,7 +955,7 @@ function Comparables({
   return (
     <Card>
       <CardHeader className="border-b">
-        <CardTitle>Comparable ledger</CardTitle>
+        <CardTitle>Listing-by-listing review</CardTitle>
         <p className="mt-1 text-sm text-muted-foreground">
           Every accepted row stays inspectable. Select a row to see why it is or
           is not influencing the current set.
@@ -970,7 +970,7 @@ function Comparables({
               className="pl-9"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search ID, source, society or reason"
+              placeholder="Search by ID, source, society or reason"
             />
           </div>
           <select
@@ -979,12 +979,12 @@ function Comparables({
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           >
-            <option value="material">Material rows</option>
+            <option value="material">Rows that matter</option>
             <option value="all">All rows</option>
-            <option value="include">Current comparables</option>
-            <option value="needs_human_review">Needs judgment</option>
+            <option value="include">Counts toward the rate</option>
+            <option value="needs_human_review">Needs your call</option>
             <option value="duplicate_collapsed">Likely duplicates</option>
-            <option value="exclude">Outside policy</option>
+            <option value="exclude">Filtered out</option>
           </select>
         </div>
         <div className="table-scroll rounded-md border bg-white">
@@ -992,10 +992,10 @@ function Comparables({
             <thead className="sticky top-0 z-10 border-b bg-slate-100/95 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
               <tr>
                 <th className="p-3">Listing</th>
-                <th className="p-3">Observed facts</th>
+                <th className="p-3">What was listed</th>
                 <th className="p-3">Asking rent</th>
-                <th className="p-3">Current treatment</th>
-                <th className="p-3">Influences estimate</th>
+                <th className="p-3">What we did with it</th>
+                <th className="p-3">Counts toward rate</th>
               </tr>
             </thead>
             <tbody>
@@ -1161,7 +1161,7 @@ function EvidenceTasks({
     <div className="space-y-4">
       <Alert className="border-sky-200 bg-sky-50">
         <FileCheck2 />
-        <AlertTitle>Why these tasks exist</AlertTitle>
+        <AlertTitle>Why these follow-ups exist</AlertTitle>
         <AlertDescription>
           They track missing facts that cannot be resolved from the uploaded
           listing fields. Each task names the decision impact, owner and
@@ -1348,7 +1348,7 @@ function ReviewDialog({
   onSave: () => Promise<void>;
   onClose: () => void;
 }) {
-  const reviewable = row?.b2State === 'needs_human_review';
+  const reviewable = Boolean(row);
   return (
     <Dialog
       open={Boolean(row)}
@@ -1369,9 +1369,9 @@ function ReviewDialog({
               {row.listingId}
             </DialogTitle>
             <DialogDescription>
-              {reviewable
-                ? 'The system found an ambiguity that requires a named human judgment.'
-                : 'This row is inspectable, but its treatment follows the declared policy and cannot be overridden from this review.'}
+              {row?.b2State === 'needs_human_review'
+                ? 'This listing needs a human call. Include, exclude or defer it, and say why.'
+                : "You can disagree with how this listing was handled. Include, exclude or defer it, and record your reason."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-3 px-5 py-5 sm:px-6">
@@ -1390,10 +1390,10 @@ function ReviewDialog({
             />
           </div>
           <div className="mx-5 rounded-md border bg-slate-50 p-4 text-sm sm:mx-6">
-            <p className="data-label">Why it received this treatment</p>
+            <p className="data-label">Why we handled it this way</p>
             <p className="mt-2 leading-6">
               {row.reasons.join(' · ').replaceAll('_', ' ') ||
-                'Meets the declared comparison policy.'}
+                'Matches the home on every comparison rule.'}
             </p>
           </div>
           {reviewable && (
@@ -1421,7 +1421,7 @@ function ReviewDialog({
                   className="mt-2"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Explain the observable evidence and why this treatment is appropriate."
+                  placeholder="Point to the evidence and say why your call is right."
                 />
                 <p className="mt-1.5 text-xs text-muted-foreground">
                   This decision is appended to history and only changes the
