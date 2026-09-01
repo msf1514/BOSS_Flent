@@ -47,14 +47,19 @@ const result = await runEvidenceEngine(
   [],
   sourceAnnotationsForHash(inputHash),
 );
+// Fuzzy cross-post dedup now collapses 2 same-unit rows that the old
+// exact-match dedup double-counted, so B1 drops 11->9 and B2 10->8. The
+// estimate is unchanged because the collapsed rows sat near the median — the
+// point is a defensible sample, not a moved number.
 assert.deepEqual(result.summary.baselines, {
   B0: { count: 84, estimate: 59000 },
-  B1: { count: 11, estimate: 58000 },
-  B2: { count: 10, estimate: 58250 },
+  B1: { count: 9, estimate: 58000 },
+  B2: { count: 8, estimate: 58250 },
 });
 assert.deepEqual(result.summary.stateCounts, {
   exclude: 74,
-  include: 10,
+  include: 8,
+  duplicate_collapsed: 2,
   needs_human_review: 2,
 });
 assert.equal(result.validation.acceptedRows, 86);
@@ -158,6 +163,38 @@ assert.equal(
   completableAssessment.completionDisposition,
   'usable_with_caveats',
 );
+// --- Listing-trust detectors on the real packet ---------------------------
+const reasonsOf = (id) =>
+  result.rows.find((row) => row.listingId === id)?.reasons ?? [];
+const stateOf = (id) =>
+  result.rows.find((row) => row.listingId === id)?.b2State;
+
+// Fuzzy cross-post: CP-0071 and CP-0075 are same-unit re-posts and must be
+// collapsed, not counted twice, with an honest reason.
+assert.equal(stateOf('CP-0071'), 'duplicate_collapsed');
+assert.ok(reasonsOf('CP-0071').includes('cross_post_duplicate'));
+assert.equal(stateOf('CP-0075'), 'duplicate_collapsed');
+assert.equal(
+  result.rows.find((row) => row.listingId === 'CP-0071')
+    ?.duplicateGroup !== null,
+  true,
+);
+
+// Bait: CP-0082 (₹12k) is pulled out of the median and flagged for a human.
+assert.ok(reasonsOf('CP-0082').includes('suspected_bait_price'));
+assert.equal(stateOf('CP-0082'), 'needs_human_review');
+
+// Aspirational: CP-0083 (₹185k) carries an honest reason rather than vanishing.
+assert.ok(reasonsOf('CP-0083').includes('suspected_aspirational_ask'));
+
+// Mislabel: CP-0081 (3BHK that is really this 2BHK) and CP-0085 (1BHK @ 2100sqft).
+assert.ok(reasonsOf('CP-0081').includes('suspected_mislabel_configuration'));
+assert.ok(reasonsOf('CP-0085').includes('implausible_area_for_bhk'));
+
+// No bait/aspirational false-positive on a clean central comp.
+assert.ok(!reasonsOf('CP-0008').includes('suspected_bait_price'));
+assert.ok(!reasonsOf('CP-0008').includes('suspected_aspirational_ask'));
+
 console.log(
-  'Engine contract passed: sample invariants, strict dates, source-bound annotations, config validation, governed handoff and deferred readiness.',
+  'Engine contract passed: sample invariants, strict dates, source-bound annotations, config validation, governed handoff, deferred readiness, and listing-trust detectors (fuzzy dedup, bait, aspirational, mislabel).',
 );

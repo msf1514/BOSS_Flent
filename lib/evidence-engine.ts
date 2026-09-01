@@ -1,4 +1,12 @@
-export const ENGINE_VERSION = '2.0.0';
+import {
+  clusterDuplicates,
+  priceSignal,
+  areaPerBhkImplausible,
+  looksLikeSubjectInDisguise,
+  type SignalRow,
+} from './listing-signals.ts';
+
+export const ENGINE_VERSION = '2.1.0';
 export const SCHEMA_VERSION = '1.0.0';
 export const MAX_CSV_ROWS = 500;
 
@@ -469,38 +477,42 @@ export async function runEvidenceEngine(
     };
   });
   const eligible = base.filter((row) => row.b1State === 'include');
-  const groups = new Map<string, typeof eligible>();
-  for (const row of eligible) {
-    const key = JSON.stringify([
-      row.item.raw.posted_date,
-      row.item.raw.last_seen_date,
-      row.item.bhk,
-      row.item.furnishing,
-      row.item.area,
-      row.item.rent,
-      row.item.deposit,
-      row.item.societyFamily,
-    ]);
-    groups.set(key, [...(groups.get(key) ?? []), row]);
+  // Fuzzy cross-post detection: the same physical flat re-posted on several
+  // portals (often with a different society spelling and a slightly different
+  // rent) is collapsed to one representative. See lib/listing-signals.ts.
+  const signalRows: SignalRow[] = eligible.map((row) => ({
+    listingId: row.item.raw.listing_id,
+    bhk: row.item.bhk,
+    area: row.item.area,
+    rent: row.item.rent,
+    deposit: row.item.deposit,
+    furnishing: row.item.furnishing,
+    source: String(row.item.raw.source ?? ''),
+    posterType: String(row.item.raw.poster_type ?? ''),
+    lastSeen: row.item.lastSeen,
+  }));
+  const byId = new Map(eligible.map((row) => [row.item.raw.listing_id, row]));
+  for (const cluster of clusterDuplicates(signalRows)) {
+    for (const memberId of cluster.memberIds) {
+      const row = byId.get(memberId);
+      if (!row) continue;
+      row.duplicateGroup = cluster.clusterId;
+      row.representativeListingId = cluster.representativeId;
+      if (memberId !== cluster.representativeId) {
+        row.b1State = 'duplicate_collapsed';
+        row.reasons.push('cross_post_duplicate');
+      }
+    }
   }
-  for (const [key, group] of groups) {
-    group.sort((a, b) =>
-      a.item.raw.listing_id.localeCompare(b.item.raw.listing_id),
-    );
-    if (group.length > 1) {
-      const groupId = `DUP-${(await canonicalHash(key)).slice(0, 8).toUpperCase()}`;
-      group.forEach((row, index) => {
-        row.duplicateGroup = groupId;
-        row.representativeListingId = group[0].item.raw.listing_id;
-        if (index > 0) {
-          row.b1State = 'duplicate_collapsed';
-          row.reasons.push('possible_duplicate');
-        }
-      });
-    } else group[0].representativeListingId = group[0].item.raw.listing_id;
-  }
+  for (const row of eligible)
+    row.representativeListingId ??= row.item.raw.listing_id;
   const b1 = base.filter((row) => row.b1State === 'include');
   const center = b1.length ? median(b1.map((row) => row.item.rent)) : null;
+  // Comparable rent band from the surviving same-config set, used only to judge
+  // whether a wrong-configuration row "looks like the subject in disguise".
+  const b1Rents = b1.map((row) => row.item.rent);
+  const comparableLow = b1Rents.length ? percentile(b1Rents, 0.1) : null;
+  const comparableHigh = b1Rents.length ? percentile(b1Rents, 0.9) : null;
   const rows: AuditRow[] = base
     .map((row) => {
       let b2State: AuditRow['b2State'] =
@@ -509,14 +521,32 @@ export async function runEvidenceEngine(
           : row.b1State === 'duplicate_collapsed'
             ? 'duplicate_collapsed'
             : 'exclude';
-      if (
-        center !== null &&
-        row.b1State === 'include' &&
-        (row.item.rent < center * 0.5 || row.item.rent > center * 1.75)
-      ) {
-        b2State = 'needs_human_review';
-        row.reasons.push('extreme_value_review');
+      // Price-plausibility: bait (implausibly low) and aspirational (implausibly
+      // high) asks are flagged for a human against the robust centre. Applied to
+      // every accepted row so a row excluded for another reason still carries an
+      // honest price reason rather than vanishing silently.
+      const price = priceSignal(row.item.rent, center);
+      if (price) {
+        row.reasons.push(price);
+        if (row.b1State === 'include') b2State = 'needs_human_review';
       }
+      // Mislabel: impossible area-per-bedroom, or a non-subject configuration
+      // whose area and rent sit inside the subject's comparable band.
+      if (areaPerBhkImplausible(row.item.bhk, row.item.area))
+        row.reasons.push('implausible_area_for_bhk');
+      if (
+        looksLikeSubjectInDisguise({
+          bhk: row.item.bhk,
+          area: row.item.area,
+          rent: row.item.rent,
+          subjectBhk: config.bhk,
+          subjectArea: config.areaSqft,
+          subjectAreaTolerance: config.areaToleranceSqft,
+          comparableLow,
+          comparableHigh,
+        })
+      )
+        row.reasons.push('suspected_mislabel_configuration');
       const sourceAnnotations = annotations[row.item.raw.listing_id] ?? [];
       if (sourceAnnotations.length) {
         b2State = 'needs_human_review';
