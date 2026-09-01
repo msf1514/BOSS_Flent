@@ -19,7 +19,7 @@ const localBindingConfig = {
     ? [
         {
           binding: d1,
-          database_name: 'site-creator-d1',
+          database_name: 'bossengine_d1',
           database_id: SITE_CREATOR_PLACEHOLDER_DATABASE_ID,
         },
       ]
@@ -28,7 +28,7 @@ const localBindingConfig = {
     ? [
         {
           binding: r2,
-          bucket_name: 'site-creator-r2',
+          bucket_name: 'bossengine',
         },
       ]
     : [],
