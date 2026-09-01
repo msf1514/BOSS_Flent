@@ -67,12 +67,21 @@ export const id = (prefix: string) => `${prefix}_${crypto.randomUUID()}`;
 export const now = () => new Date().toISOString();
 let schemaReady: Promise<unknown> | null = null;
 export async function ensureSchema() {
-  schemaReady ??= db()
-    .batch(schemaStatements.map((sql) => db().prepare(sql)))
-    .catch((error) => {
-      schemaReady = null;
-      throw error;
-    });
+  // Create tables/indexes one statement at a time rather than in a single
+  // db().batch(). D1's batch is one all-or-nothing transaction, so a single
+  // problematic statement (e.g. an index created alongside its table) rolls the
+  // whole thing back and leaves the database with NO tables — after which every
+  // write silently fails. Every statement here is CREATE ... IF NOT EXISTS, so
+  // running them individually is safe, idempotent and self-healing, and partial
+  // progress is kept. Only a fully successful pass is cached.
+  schemaReady ??= (async () => {
+    for (const sql of schemaStatements) {
+      await db().prepare(sql).run();
+    }
+  })().catch((error) => {
+    schemaReady = null;
+    throw error;
+  });
   await schemaReady;
 }
 const parsed = <T>(value: unknown) => JSON.parse(String(value)) as T;
