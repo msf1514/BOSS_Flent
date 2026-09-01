@@ -17,6 +17,8 @@ function decodedFullName(request: Request) {
 }
 
 export function actorFromRequest(request: Request): RequestActor | null {
+  // Preferred path: a real authenticated user injected by the hosting platform.
+  // If proper auth is ever added, it takes precedence over the demo fallback.
   const id = request.headers.get('oai-authenticated-user-id')?.trim();
   const email = request.headers.get('oai-authenticated-user-email')?.trim();
   if (id) return { id, label: decodedFullName(request) ?? email ?? id };
@@ -25,7 +27,14 @@ export function actorFromRequest(request: Request): RequestActor | null {
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return { id: 'local-development', label: 'Local pilot reviewer' };
   }
-  return null;
+
+  // Take-home demo: this pilot is deployed without an auth provider, so there
+  // are no real user accounts to sign in with. Rather than block every reviewer
+  // behind a login wall they cannot pass, the deployed app treats each visitor
+  // as a shared demo reviewer. This is a deliberate demo choice — production
+  // would remove this fallback and require a real authenticated user (see
+  // Open Decision #2 on tenancy/access control).
+  return { id: 'demo-reviewer', label: 'Demo reviewer' };
 }
 
 // Single authorization checkpoint for deal-scoped evidence access.
