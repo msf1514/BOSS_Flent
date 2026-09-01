@@ -28,6 +28,12 @@ This version accepts CSV/manual uploads. Live portal scraping is not implemented
 
 The engine supports the market-evidence input to a wider BOSS decision. It shows which other decision dimensions still need owners and evidence rather than manufacturing a blended property score.
 
+## Case-packet roadmap
+
+The supplied exercise packet contains more than listing data: a deal record, internal comments, subject-property photos, historical outcomes and a provisional BOSS assessment. The current coverage, architectural boundary, proposed evidence registry, phased backlog, open decisions and acceptance criteria are maintained in [`docs/CASE_PACKET_COVERAGE_AND_NEXT_WORK.md`](docs/CASE_PACKET_COVERAGE_AND_NEXT_WORK.md).
+
+That document is the durable handoff for extending this repository. It distinguishes evidence BOSS should preserve from evidence the Problem 1 market engine is allowed to calculate from.
+
 ## Run locally
 
 ```bash
