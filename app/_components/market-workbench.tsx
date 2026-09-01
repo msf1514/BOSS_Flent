@@ -40,6 +40,13 @@ import type { AuditRow } from '@/lib/evidence-engine';
 import { assessMarketReview, requestPurpose } from '@/lib/market-review';
 import type { AuditEvent, EvidenceRequest, StoredRun } from '@/lib/storage';
 import { MobileHeader, ProductRail } from './boss-shell';
+import {
+  EvidenceFunnel,
+  MarketAnswer,
+  ProblemOneOrientation,
+  ScopeNote,
+  TrustSignals,
+} from './problem-one-overview';
 
 type Notice = { kind: 'error' | 'success'; text: string } | null;
 type ReviewDecision = 'include' | 'exclude' | 'defer';
@@ -345,24 +352,16 @@ export function MarketWorkbench({
                 />
               </TabsContent>
               <TabsContent value="occupancy" className="pt-5">
-                <BoundaryPanel
-                  title="Occupancy and demand"
-                  owner="Pricing / Revenue"
-                  detail="This market-listing upload does not contain enquiries, bookings, signed room prices or first-fill outcomes."
-                />
+                <ScopeNote dimension="Occupancy and demand" />
               </TabsContent>
               <TabsContent value="economics" className="pt-5">
-                <EconomicsBoundary run={run} />
+                <ScopeNote dimension="Deal economics" />
               </TabsContent>
               <TabsContent value="quality" className="pt-5">
-                <BoundaryPanel
-                  title="Property quality"
-                  owner="Property team"
-                  detail="Condition, access, bathrooms, sunlight, ventilation, noise and layout need site-visit evidence. Missing observations remain unknown."
-                />
+                <ScopeNote dimension="Property quality" />
               </TabsContent>
               <TabsContent value="closing" className="pt-5">
-                <ClosingBoundary run={run} />
+                <ScopeNote dimension="Closing and negotiation" />
               </TabsContent>
             </Tabs>
           </div>
@@ -481,6 +480,22 @@ function DealOverview({
   ).length;
   return (
     <div className="space-y-4">
+      <ProblemOneOrientation run={run} />
+      <MarketAnswer
+        median={assessment.marketMedian ?? 0}
+        confidence={run.summary.askingEvidenceConfidence}
+        trustedCount={run.summary.baselines.B2.count}
+        portals={run.summary.observedPortalLabelCount}
+        looMovementPct={run.summary.maximumLeaveOneOutMovementPct}
+      />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <EvidenceFunnel
+          all={run.summary.baselines.B0.count}
+          matched={run.summary.baselines.B1.count}
+          trusted={run.summary.baselines.B2.count}
+        />
+        <TrustSignals rows={run.rows} />
+      </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Metric
           label="Current asking-rent median"
@@ -1453,143 +1468,6 @@ function ReviewDialog({
   );
 }
 
-function BoundaryPanel({
-  title,
-  owner,
-  detail,
-}: {
-  title: string;
-  owner: string;
-  detail: string;
-}) {
-  return (
-    <Card>
-      <CardContent className="grid min-h-72 place-items-center p-6 text-center">
-        <div className="max-w-xl">
-          <span className="mx-auto grid size-11 place-items-center rounded-xl border bg-slate-50">
-            <CircleDot className="size-5 text-slate-500" />
-          </span>
-          <h2 className="mt-4 text-xl font-bold">
-            {title} is not assessed by this source
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            {detail}
-          </p>
-          <div className="mx-auto mt-5 w-fit rounded-full border bg-white px-3 py-2 text-xs font-semibold">
-            Accountable owner: {owner}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function EconomicsBoundary({ run }: { run: StoredRun }) {
-  const capital =
-    (run.config.landlordDeposit ?? 0) + (run.config.improvementCapex ?? 0);
-  return (
-    <div className="space-y-4">
-      <Alert className="border-amber-200 bg-amber-50">
-        <AlertCircle />
-        <AlertTitle>Commercial context, not an underwriting result</AlertTitle>
-        <AlertDescription>
-          The deal inputs below are versioned for context. This module does not
-          have tenant revenue, occupancy, operating costs or approved thresholds
-          needed to calculate contribution, payback or an acquisition
-          recommendation.
-        </AlertDescription>
-      </Alert>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric
-          label="Landlord base rent"
-          value={money(run.config.landlordBaseRent)}
-          note="Recorded deal term"
-        />
-        <Metric
-          label="Maintenance"
-          value={money(run.config.landlordMaintenance)}
-          note="Recorded deal term"
-        />
-        <Metric
-          label="Security deposit"
-          value={money(run.config.landlordDeposit)}
-          note="Capital exposure before tenant deposit recovery"
-        />
-        <Metric
-          label="Deposit + capex context"
-          value={money(capital)}
-          note="Not equivalent to final capital employed"
-        />
-      </div>
-    </div>
-  );
-}
-
-function ClosingBoundary({ run }: { run: StoredRun }) {
-  return (
-    <Card>
-      <CardHeader className="border-b">
-        <CardTitle>Market review handoff</CardTitle>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Completing Problem 1 freezes one input to the wider deal process. It
-          is not lease authorization or transaction closing.
-        </p>
-      </CardHeader>
-      <CardContent className="grid gap-4 py-5 md:grid-cols-[0.9fr_1.1fr]">
-        <div
-          className={`rounded-lg border p-5 ${run.reviewClosure ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}
-        >
-          <p className="data-label">Market review</p>
-          <h2 className="mt-2 text-xl font-bold">
-            {run.reviewClosure ? 'Complete' : 'Not complete'}
-          </h2>
-          <p className="mt-2 text-sm leading-6">
-            {run.reviewClosure
-              ? `${run.reviewClosure.actor} completed evidence v${run.versionNumber} on ${dateTime(run.reviewClosure.createdAt)}.`
-              : 'Resolve comparable judgments and evidence tasks, apply them in a new version, then complete the review.'}
-          </p>
-          {run.reviewClosure && (
-            <p className="mt-3 border-t border-emerald-200 pt-3 text-sm">
-              <strong>Rationale:</strong> {run.reviewClosure.rationale}
-            </p>
-          )}
-        </div>
-        <div className="rounded-lg border bg-white p-5">
-          <p className="data-label">What happens next in BOSS</p>
-          <ol className="mt-3 space-y-3 text-sm">
-            <HandoffStep
-              number="1"
-              text="Demand, economics and property teams complete their evidence."
-            />
-            <HandoffStep
-              number="2"
-              text="BOSS creates an inspectable recommendation from the full decision packet."
-            />
-            <HandoffStep
-              number="3"
-              text="A named acquisition owner authorizes acquire, negotiate, hold or pass."
-            />
-            <HandoffStep
-              number="4"
-              text="Negotiation, execution and actual transaction closing remain separately tracked."
-            />
-          </ol>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function HandoffStep({ number, text }: { number: string; text: string }) {
-  return (
-    <li className="flex gap-3">
-      <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-        {number}
-      </span>
-      <span className="pt-1 leading-5">{text}</span>
-    </li>
-  );
-}
 function Metric({
   label,
   value,
