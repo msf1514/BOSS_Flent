@@ -27,3 +27,18 @@ export function actorFromRequest(request: Request): RequestActor | null {
   }
   return null;
 }
+
+// Single authorization checkpoint for deal-scoped evidence access.
+//
+// Today this only confirms an authenticated actor: there is no deal-ownership
+// or team-membership model in the pilot (Open Decision #2 in
+// docs/CASE_PACKET_COVERAGE_AND_NEXT_WORK.md), so any signed-in user can read
+// any deal they can name. That is an accepted, documented limitation — NOT
+// per-user isolation. When a tenancy model lands, enforce it here alone and
+// every evidence route inherits it. Returns true when access is permitted.
+export function authorizeDealAccess(
+  actor: RequestActor | null,
+  _dealId: string,
+): actor is RequestActor {
+  return actor !== null;
+}

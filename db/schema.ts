@@ -8,6 +8,7 @@ export const schemaStatements = [
   `CREATE TABLE IF NOT EXISTS audit_events (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL, run_id TEXT, event_type TEXT NOT NULL, entity_id TEXT, actor TEXT NOT NULL, payload_json TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS run_operations (operation_key TEXT PRIMARY KEY, deal_id TEXT NOT NULL, run_id TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS market_review_closures (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL UNIQUE, run_id TEXT NOT NULL, disposition TEXT NOT NULL CHECK(disposition IN ('usable_with_caveats','insufficient_evidence')), rationale TEXT NOT NULL, actor TEXT NOT NULL, created_at TEXT NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS evidence_artifacts (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL, kind TEXT NOT NULL CHECK(kind IN ('listing_csv','deal_record','comment_thread','image','document','outcome_set','reference_assessment','unsupported')), filename TEXT NOT NULL, object_key TEXT NOT NULL, content_hash TEXT NOT NULL, mime_type TEXT NOT NULL, byte_size INTEGER NOT NULL CHECK(byte_size >= 0), source_system TEXT NOT NULL, source_reference TEXT NOT NULL DEFAULT '', captured_by TEXT NOT NULL, captured_at TEXT NOT NULL, parser_version TEXT NOT NULL, ingestion_status TEXT NOT NULL CHECK(ingestion_status IN ('received','parsed','failed','superseded','deleted')), sensitivity TEXT NOT NULL CHECK(sensitivity IN ('standard','financial','personal','restricted')), retention_policy TEXT NOT NULL DEFAULT 'deal-lifetime', note TEXT NOT NULL DEFAULT '', supersedes_id TEXT, created_at TEXT NOT NULL)`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_runs_deal_version ON runs(deal_id, version_number)`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_rows_run_listing ON run_rows(run_id, listing_id)`,
   `CREATE INDEX IF NOT EXISTS idx_runs_deal ON runs(deal_id, version_number DESC)`,
@@ -16,4 +17,7 @@ export const schemaStatements = [
   `CREATE INDEX IF NOT EXISTS idx_requests_run ON evidence_requests(run_id)`,
   `CREATE INDEX IF NOT EXISTS idx_audit_deal ON audit_events(deal_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_market_review_closures_run ON market_review_closures(run_id)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_evidence_artifacts_dedupe ON evidence_artifacts(deal_id, content_hash)`,
+  `CREATE INDEX IF NOT EXISTS idx_evidence_artifacts_deal ON evidence_artifacts(deal_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_evidence_artifacts_kind ON evidence_artifacts(deal_id, kind)`,
 ] as const;
