@@ -47,6 +47,7 @@ import {
   ScopeNote,
   TrustSignals,
 } from './problem-one-overview';
+import { ConfidenceDerivation, ReasonChips } from './trust-vocabulary';
 
 type Notice = { kind: 'error' | 'success'; text: string } | null;
 type ReviewDecision = 'include' | 'exclude' | 'defer';
@@ -489,13 +490,19 @@ function DealOverview({
         looMovementPct={run.summary.maximumLeaveOneOutMovementPct}
       />
       <div className="grid gap-4 lg:grid-cols-2">
+        <ConfidenceDerivation
+          confidence={run.summary.askingEvidenceConfidence}
+          trustedCount={run.summary.baselines.B2.count}
+          portals={run.summary.observedPortalLabelCount}
+          looMovementPct={run.summary.maximumLeaveOneOutMovementPct}
+        />
         <EvidenceFunnel
           all={run.summary.baselines.B0.count}
           matched={run.summary.baselines.B1.count}
           trusted={run.summary.baselines.B2.count}
         />
-        <TrustSignals rows={run.rows} />
       </div>
+      <TrustSignals rows={run.rows} />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Metric
           label="Current asking-rent median"
@@ -695,7 +702,7 @@ function MarketWorkspace(props: {
             <TabsTrigger value="summary">Summary</TabsTrigger>
             <TabsTrigger value="comparables">Comparables</TabsTrigger>
             <TabsTrigger value="review">
-              Comparable review · {props.pending}
+              Needs your call · {props.pending}
             </TabsTrigger>
             <TabsTrigger value="tasks">
               Evidence tasks · {props.unresolved}
@@ -766,7 +773,7 @@ function MarketPipeline({
   const steps = [
     ['Source captured', true],
     ['Analysis completed', true],
-    ['Comparable review', pending === 0],
+    ['Flagged rows resolved', pending === 0],
     ['Evidence tasks', unresolved === 0],
     ['Market review complete', Boolean(run.reviewClosure)],
   ] as const;
@@ -1047,6 +1054,9 @@ function Comparables({
                   </td>
                   <td className="p-3">
                     <RowStateBadge state={row.b2State} />
+                    <div className="mt-1.5">
+                      <ReasonChips reasons={row.reasons} limit={2} />
+                    </div>
                   </td>
                   <td className="p-3 font-semibold">
                     {row.effectiveWeight === 1 ? 'Yes' : 'No'}
@@ -1097,7 +1107,7 @@ function ComparableReview({
   return (
     <Card>
       <CardHeader className="border-b">
-        <CardTitle>Comparable review</CardTitle>
+        <CardTitle>Listings that need your call</CardTitle>
         <p className="mt-1 text-sm text-muted-foreground">
           Decide whether flagged listings should influence the current evidence
           set. This is human judgment about ambiguous rows—not general task
@@ -1134,10 +1144,10 @@ function ComparableReview({
                     </Badge>
                   )}
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Flagged because:{' '}
-                  {row.reasons.join(' · ').replaceAll('_', ' ')}
-                </p>
+                <div className="mt-3">
+                  <p className="data-label mb-1.5">Why we handled it this way</p>
+                  <ReasonChips reasons={row.reasons} showMeaning />
+                </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Current median impact:{' '}
                   {row.effectiveWeight
