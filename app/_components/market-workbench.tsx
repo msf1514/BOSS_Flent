@@ -248,7 +248,7 @@ export function MarketWorkbench({
           className="workbench-grid min-h-screen py-6 lg:py-8"
         >
           <div className="app-shell max-w-[1440px]">
-            <header className="border-b pb-4">
+            <header className="sticky top-0 z-30 -mx-4 border-b bg-[var(--warm-canvas)]/95 px-4 pt-2 pb-4 backdrop-blur supports-[backdrop-filter]:bg-[var(--warm-canvas)]/80 sm:-mx-6 sm:px-6">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -503,12 +503,7 @@ function DealOverview({
         />
       </div>
       <TrustSignals rows={run.rows} />
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric
-          label="Current asking-rent median"
-          value={money(assessment.marketMedian)}
-          note={`${run.summary.baselines.B2.count} current comparables`}
-        />
+      <div className="grid gap-3 sm:grid-cols-3">
         <Metric
           label="Owner monthly cost"
           value={money(assessment.ownerMonthlyCost)}

@@ -33,16 +33,28 @@ An experienced pass over the actual UI against the question a user really asks:
 
 ## Two-source clarity (CSV = comparables vs form = deal terms)
 
-8. **No visual cue that the two inputs have different origins.** The
-   "Captured, not used to calculate the median" pill is a start; the *why two
-   inputs* isn't explained. **OPEN** — next tranche.
+8. **No visual cue that the two inputs have different origins.** **DONE** — a
+   `TwoSourceExplainer` on the intake plus provenance badges on each step
+   ("Market comparables · sets the rate" vs "This home's facts · from the deal
+   record") make the two-lane model explicit.
 9. **Intake "N required fields remain"** doesn't separate subject facts from
-   commercial context. **OPEN.**
+   commercial context. Partly **DONE** — commercial context is a labelled group
+   ("Captured, not used to calculate the median"); a per-group required count is
+   still **OPEN**.
 
 ## Orientation
 
-10. **No sticky header** — user loses "where am I / where next". **OPEN.**
+10. **No sticky header** — user loses "where am I / where next". **DONE** — the
+    deal header is now sticky with a blurred backdrop.
 11. **Funnel visual** regressed from the earlier version. **OPEN.**
+
+## Redundancy & naming (update)
+
+7. **Overview vs Market-tab duplication.** Partly **DONE** — removed the
+   duplicated median tile from the Overview (it now shows once, in the hero).
+   The Market→Summary staged card is kept because it adds the *estimate at each
+   stage*, which the Overview funnel does not. Cross-tab overlap of the tiles
+   remains **OPEN** but is low-severity (not same-screen).
 
 ## Priority for the next tranches
 

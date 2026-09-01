@@ -5,6 +5,8 @@ import {
   AlertCircle,
   CheckCircle2,
   FileSearch,
+  FileSpreadsheet,
+  Home,
   Loader2,
   Play,
 } from 'lucide-react';
@@ -49,6 +51,40 @@ const blankConfig: RunConfig = {
   landlordDeposit: -1,
   improvementCapex: -1,
 };
+
+// Makes the two-source mental model explicit: the CSV carries market comparables
+// (many other listings, which set the rate); the form carries this home and its
+// deal terms (which are never mixed into the rate). This is the distinction
+// users kept missing.
+function TwoSourceExplainer() {
+  return (
+    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <div className="rounded-lg border border-teal-200 bg-teal-50/50 p-3">
+        <div className="flex items-center gap-2">
+          <FileSpreadsheet className="size-4 text-[var(--flent-teal)]" />
+          <p className="text-sm font-semibold">The listings file → the rate</p>
+        </div>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          Many <strong>other</strong> homes nearby, pulled from portals. These set
+          the market rate — after we clean out the untrustworthy ones.
+        </p>
+      </div>
+      <div className="rounded-lg border bg-[var(--warm-canvas)] p-3">
+        <div className="flex items-center gap-2">
+          <Home className="size-4 text-muted-foreground" />
+          <p className="text-sm font-semibold">
+            This home + its terms → never in the rate
+          </p>
+        </div>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          The home you&apos;re pricing and its landlord terms come from the deal
+          record. They&apos;re captured for context, but never mixed into the
+          market median.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function Field({
   label,
@@ -279,6 +315,7 @@ export function RunIntake({
                   home you&apos;re pricing, and get a market rate you can defend
                   line by line.
                 </p>
+                <TwoSourceExplainer />
               </div>
               <div className="flex flex-wrap gap-2 text-xs font-semibold">
                 {['1 Upload', '2 Inspect', '3 Analyse'].map((step, index) => {
@@ -320,6 +357,14 @@ export function RunIntake({
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <CardTitle>1. Upload your listings</CardTitle>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <Badge
+                    variant="outline"
+                    className="border-teal-200 bg-teal-50 text-teal-800"
+                  >
+                    Market comparables · sets the rate
+                  </Badge>
+                </div>
                     <p className="mt-1 text-sm text-muted-foreground">
                       We check the file&apos;s columns and rows before anything is
                       calculated.
@@ -403,6 +448,14 @@ export function RunIntake({
             <Card className={!inspection?.validStructure ? 'opacity-60' : ''}>
               <CardHeader className="border-b">
                 <CardTitle>2. Confirm the home you&apos;re pricing</CardTitle>
+                <div className="mt-1 mb-1 flex flex-wrap items-center gap-2">
+                  <Badge
+                    variant="outline"
+                    className="border-slate-300 bg-slate-50 text-slate-700"
+                  >
+                    This home&apos;s facts · from the deal record
+                  </Badge>
+                </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   These describe the home you&apos;re comparing against. They come
                   from the deal record, not the listing file, so they&apos;re
