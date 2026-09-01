@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   AlertCircle,
   CheckCircle2,
@@ -80,6 +80,76 @@ function TwoSourceExplainer() {
           The home you&apos;re pricing and its landlord terms come from the deal
           record. They&apos;re captured for context, but never mixed into the
           market median.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Shown while the analysis runs. The stages describe the REAL categories of work
+// the engine performs on every run — validate, match, de-duplicate, flag prices,
+// score confidence — so the wait explains what "cleaning the evidence" means. The
+// result screen then proves each stage with actual counts. Honest narration, not
+// fake progress: the messages advance for feel, the numbers arrive with the run.
+const ANALYSIS_STAGES = [
+  'Checking the file — validating every row',
+  'Matching listings to the home you’re pricing',
+  'Collapsing cross-posted duplicates',
+  'Flagging bait, aspirational and mislabelled prices',
+  'Scoring how much to trust the rate',
+];
+
+function AnalysisPreloader() {
+  const [stage, setStage] = useState(0);
+  // Advance through the stages, holding on the last until the run returns.
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setStage((s) => Math.min(s + 1, ANALYSIS_STAGES.length - 1));
+    }, 700);
+    return () => clearInterval(timer);
+  }, []);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--warm-canvas)]/80 backdrop-blur-sm">
+      <div className="mx-4 w-full max-w-md rounded-2xl border bg-white p-6 shadow-xl">
+        <div className="flex items-center gap-3">
+          <Loader2 className="size-5 animate-spin text-[var(--flent-teal)]" />
+          <p className="text-sm font-bold">Cleaning the market evidence…</p>
+        </div>
+        <p className="mt-2 text-xs leading-5 text-muted-foreground">
+          We don’t just average the listings — we work out which ones to trust
+          first. Here’s what’s happening:
+        </p>
+        <ul className="mt-4 space-y-2.5">
+          {ANALYSIS_STAGES.map((label, index) => {
+            const done = index < stage;
+            const active = index === stage;
+            return (
+              <li key={label} className="flex items-center gap-2.5 text-sm">
+                {done ? (
+                  <CheckCircle2 className="size-4 shrink-0 text-[var(--flent-teal)]" />
+                ) : active ? (
+                  <Loader2 className="size-4 shrink-0 animate-spin text-[var(--flent-teal)]" />
+                ) : (
+                  <span className="size-4 shrink-0 rounded-full border border-slate-300" />
+                )}
+                <span
+                  className={
+                    done
+                      ? 'text-muted-foreground line-through decoration-teal-300'
+                      : active
+                        ? 'font-semibold'
+                        : 'text-muted-foreground'
+                  }
+                >
+                  {label}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-4 border-t pt-3 text-xs text-muted-foreground">
+          Every decision is kept with its reason — you’ll see them all on the next
+          screen.
         </p>
       </div>
     </div>
@@ -315,6 +385,7 @@ export function RunIntake({
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
+      {runBusy && <AnalysisPreloader />}
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
