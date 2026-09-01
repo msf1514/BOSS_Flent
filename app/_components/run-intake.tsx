@@ -40,8 +40,8 @@ const sampleConfig: RunConfig = {
 
 const blankConfig: RunConfig = {
   ...sampleConfig,
-  dealName: '',
-  evidenceCutoff: '',
+  dealName: 'Untitled market review',
+  evidenceCutoff: new Date().toISOString().slice(0, 10),
   societyPrefix: '',
   bhk: 0,
   areaSqft: 0,
@@ -91,16 +91,40 @@ function Field({
   htmlFor,
   helper,
   children,
+  state,
 }: {
   label: string;
   htmlFor: string;
   helper?: string;
   children: React.ReactNode;
+  // Colour psychology: 'needs' = a required field still empty (amber, draws the
+  // eye); 'set' = a required field now filled (teal tick, reassures); undefined
+  // = a pre-filled default the user can ignore.
+  state?: 'needs' | 'set';
 }) {
   return (
-    <div>
-      <Label htmlFor={htmlFor} className="data-label mb-2 block">
+    <div
+      className={
+        state === 'needs'
+          ? 'rounded-lg border border-amber-200 bg-amber-50/40 p-3'
+          : state === 'set'
+            ? 'rounded-lg border border-teal-100 bg-teal-50/30 p-3'
+            : ''
+      }
+    >
+      <Label
+        htmlFor={htmlFor}
+        className="data-label mb-2 flex items-center gap-1.5"
+      >
         {label}
+        {state === 'needs' && (
+          <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[0.5625rem] font-bold tracking-normal text-amber-800">
+            REQUIRED
+          </span>
+        )}
+        {state === 'set' && (
+          <CheckCircle2 className="size-3 text-[var(--flent-teal)]" />
+        )}
       </Label>
       {children}
       {helper && (
@@ -466,25 +490,20 @@ export function RunIntake({
               <CardContent className="space-y-6 py-5">
                 <fieldset disabled={!inspection?.validStructure || runBusy}>
                   <legend className="sr-only">Run configuration</legend>
+
+                  {/* Required group — specific to this home, can't be guessed. */}
+                  <div className="mb-3 flex flex-wrap items-center gap-2">
+                    <h3 className="text-sm font-bold">The home you&apos;re pricing</h3>
+                    <span className="text-xs text-muted-foreground">
+                      Sets which listings count as comparable — please fill these in.
+                    </span>
+                  </div>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <Field label="Deal name" htmlFor="deal-name">
-                      <Input
-                        id="deal-name"
-                        value={config.dealName}
-                        onChange={(e) => update('dealName', e.target.value)}
-                      />
-                    </Field>
-                    <Field label="Evidence cutoff" htmlFor="cutoff">
-                      <Input
-                        id="cutoff"
-                        type="date"
-                        value={config.evidenceCutoff}
-                        onChange={(e) =>
-                          update('evidenceCutoff', e.target.value)
-                        }
-                      />
-                    </Field>
-                    <Field label="Society match" htmlFor="society">
+                    <Field
+                      label="Society match"
+                      htmlFor="society"
+                      state={config.societyPrefix.trim() ? 'set' : 'needs'}
+                    >
                       <Input
                         id="society"
                         value={config.societyPrefix}
@@ -493,7 +512,11 @@ export function RunIntake({
                         }
                       />
                     </Field>
-                    <Field label="BHK" htmlFor="bhk">
+                    <Field
+                      label="BHK"
+                      htmlFor="bhk"
+                      state={config.bhk >= 1 ? 'set' : 'needs'}
+                    >
                       <Input
                         id="bhk"
                         type="number"
@@ -502,7 +525,11 @@ export function RunIntake({
                         onChange={(e) => update('bhk', Number(e.target.value))}
                       />
                     </Field>
-                    <Field label="Area (sq ft)" htmlFor="area">
+                    <Field
+                      label="Area (sq ft)"
+                      htmlFor="area"
+                      state={config.areaSqft >= 100 ? 'set' : 'needs'}
+                    >
                       <Input
                         id="area"
                         type="number"
@@ -513,7 +540,11 @@ export function RunIntake({
                         }
                       />
                     </Field>
-                    <Field label="Furnishing" htmlFor="furnishing">
+                    <Field
+                      label="Furnishing"
+                      htmlFor="furnishing"
+                      state={config.furnishing ? 'set' : 'needs'}
+                    >
                       <select
                         id="furnishing"
                         className="control-select"
@@ -526,43 +557,74 @@ export function RunIntake({
                         <option value="fully-furnished">Fully furnished</option>
                       </select>
                     </Field>
-                    <Field
-                      label="Area tolerance"
-                      htmlFor="tolerance"
-                      helper="Allowed difference from the home's area."
-                    >
-                      <Input
-                        id="tolerance"
-                        type="number"
-                        min="0"
-                        value={config.areaToleranceSqft}
-                        onChange={(e) =>
-                          update('areaToleranceSqft', Number(e.target.value))
-                        }
-                      />
-                    </Field>
-                    <Field
-                      label="Maximum listing age"
-                      htmlFor="age"
-                      helper="Days from last seen to evidence cutoff."
-                    >
-                      <Input
-                        id="age"
-                        type="number"
-                        min="1"
-                        value={config.maxLastSeenAgeDays}
-                        onChange={(e) =>
-                          update('maxLastSeenAgeDays', Number(e.target.value))
-                        }
-                      />
-                    </Field>
+                  </div>
+
+                  {/* Pre-filled defaults — sensible values, adjust only if needed. */}
+                  <div className="mt-6 border-t pt-5">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <h3 className="text-sm font-bold">
+                        Matching rules &amp; label
+                      </h3>
+                      <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[0.625rem] font-semibold uppercase tracking-wide text-slate-600">
+                        Pre-filled · adjust if needed
+                      </span>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      <Field label="Deal name" htmlFor="deal-name">
+                        <Input
+                          id="deal-name"
+                          value={config.dealName}
+                          onChange={(e) => update('dealName', e.target.value)}
+                        />
+                      </Field>
+                      <Field label="Evidence cutoff" htmlFor="cutoff">
+                        <Input
+                          id="cutoff"
+                          type="date"
+                          value={config.evidenceCutoff}
+                          onChange={(e) =>
+                            update('evidenceCutoff', e.target.value)
+                          }
+                        />
+                      </Field>
+                      <Field
+                        label="Area tolerance"
+                        htmlFor="tolerance"
+                        helper="Allowed +/- from the home's area."
+                      >
+                        <Input
+                          id="tolerance"
+                          type="number"
+                          min="0"
+                          value={config.areaToleranceSqft}
+                          onChange={(e) =>
+                            update('areaToleranceSqft', Number(e.target.value))
+                          }
+                        />
+                      </Field>
+                      <Field
+                        label="Maximum listing age"
+                        htmlFor="age"
+                        helper="Days from last seen to cutoff."
+                      >
+                        <Input
+                          id="age"
+                          type="number"
+                          min="1"
+                          value={config.maxLastSeenAgeDays}
+                          onChange={(e) =>
+                            update('maxLastSeenAgeDays', Number(e.target.value))
+                          }
+                        />
+                      </Field>
+                    </div>
                   </div>
                 </fieldset>
               </CardContent>
               <CardContent className="flex flex-col gap-3 border-t bg-slate-50/60 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-2xl text-xs leading-5 text-muted-foreground">
                   {missingConfigCount > 0
-                    ? `${missingConfigCount} required ${missingConfigCount === 1 ? 'field remains' : 'fields remain'}. Confirm the home's facts before analysis.`
+                    ? `Fill the ${missingConfigCount} highlighted ${missingConfigCount === 1 ? 'field' : 'fields'} about the home to run the analysis.`
                     : 'Ready. The analysis will preserve the uploaded source, validate every row, and record a versioned evidence result.'}
                 </p>
                 <Button
