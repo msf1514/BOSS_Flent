@@ -111,23 +111,42 @@ export function ProblemOneOrientation({ run }: { run: StoredRun }) {
   );
 }
 
-// The answer: rent benchmark + confidence as the dominant colour cue.
+// The answer: rent benchmark + confidence as the dominant colour cue. The whole
+// card is clickable to reveal the listings the rate is built from.
 export function MarketAnswer({
   median,
   confidence,
   trustedCount,
   portals,
   looMovementPct,
+  rows,
 }: {
   median: number;
   confidence: Confidence;
   trustedCount: number;
   portals: number;
   looMovementPct: number | null;
+  rows?: EvidenceRow[];
 }) {
+  const [open, setOpen] = useState(false);
   const ui = CONFIDENCE_UI[confidence];
+  const trusted = (rows ?? []).filter((r) => r.b2State === 'include');
+  const canInspect = trusted.length > 0;
   return (
-    <div className="rounded-xl border bg-white p-5">
+    // oxlint-disable-next-line jsx-a11y/no-static-element-interactions
+    <div
+      className={`rounded-xl border bg-white p-5 ${canInspect ? 'cursor-pointer transition-shadow hover:shadow-sm' : ''}`}
+      onClick={canInspect && !open ? () => setOpen(true) : undefined}
+      role={canInspect ? 'button' : undefined}
+      tabIndex={canInspect ? 0 : undefined}
+      onKeyDown={
+        canInspect
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') setOpen(true);
+            }
+          : undefined
+      }
+    >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="data-label">Market rate for this home (asking median)</p>
@@ -199,6 +218,18 @@ export function MarketAnswer({
           </p>
         </div>
       )}
+      {canInspect && (
+        <p className="mt-3 text-xs text-muted-foreground">
+          Click to see the {trusted.length} listings this rate is built from.
+        </p>
+      )}
+      <EvidenceModal
+        open={open}
+        onOpenChange={setOpen}
+        title={`The rate is built from ${trusted.length} listings`}
+        description="The market rate is the median asking rent of these trusted comparables."
+        rows={trusted}
+      />
     </div>
   );
 }

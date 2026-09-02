@@ -513,6 +513,7 @@ function DealOverview({
         trustedCount={run.summary.baselines.B2.count}
         portals={run.summary.observedPortalLabelCount}
         looMovementPct={run.summary.maximumLeaveOneOutMovementPct}
+        rows={run.rows}
       />
       <div className="grid gap-4 lg:grid-cols-2">
         <ConfidenceDerivation
