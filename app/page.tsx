@@ -15,6 +15,9 @@ type View = 'list' | 'intake' | 'run';
 export default function Page() {
   const [view, setView] = useState<View>('list');
   const [run, setRun] = useState<StoredRun | null>(null);
+  const [prefill, setPrefill] = useState<StoredRun['config'] | undefined>(
+    undefined,
+  );
   const [opening, setOpening] = useState(false);
   const [error, setError] = useState('');
 
@@ -73,6 +76,7 @@ export default function Page() {
       <MarketWorkbench
         initialRun={run}
         onNew={() => {
+          setPrefill(run.config);
           setRun(null);
           setView('intake');
         }}
@@ -86,7 +90,9 @@ export default function Page() {
   if (view === 'intake')
     return (
       <RunIntake
+        initialConfig={prefill}
         onCreated={(created) => {
+          setPrefill(undefined);
           setRun(created);
           setView('run');
         }}
@@ -94,6 +100,12 @@ export default function Page() {
     );
 
   return (
-    <DealsList onOpen={openRun} onNew={() => setView('intake')} />
+    <DealsList
+      onOpen={openRun}
+      onNew={() => {
+        setPrefill(undefined);
+        setView('intake');
+      }}
+    />
   );
 }

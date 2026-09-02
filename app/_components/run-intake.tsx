@@ -208,10 +208,16 @@ function Field({
 
 export function RunIntake({
   onCreated,
+  initialConfig,
 }: {
   onCreated: (run: StoredRun) => void;
+  // When adding new evidence to an existing deal, its facts are prefilled so the
+  // reviewer only has to swap the CSV. A fresh review starts blank.
+  initialConfig?: RunConfig;
 }) {
-  const [config, setConfig] = useState(blankConfig);
+  const [config, setConfig] = useState<RunConfig>(
+    initialConfig ?? blankConfig,
+  );
   const [file, setFile] = useState<File | null>(null);
   const [inspection, setInspection] = useState<SourceInspection | null>(null);
   const [sourceBusy, setSourceBusy] = useState(false);
@@ -422,6 +428,13 @@ export function RunIntake({
                   line by line.
                 </p>
                 <TwoSourceExplainer />
+                {initialConfig && (
+                  <div className="mt-3 rounded-lg border border-teal-200 bg-teal-50/60 p-3 text-sm text-teal-900">
+                    <strong>Facts carried over.</strong> The home&apos;s details
+                    below are prefilled from your last review — just add the new
+                    listings CSV and adjust anything that changed.
+                  </div>
+                )}
               </div>
               <div className="flex flex-wrap gap-2 text-xs font-semibold">
                 {['1 Upload', '2 Inspect', '3 Analyse'].map((step, index) => {

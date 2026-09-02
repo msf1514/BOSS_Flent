@@ -254,13 +254,13 @@ export function EvidenceFunnel({
     {
       label: 'All uploaded listings',
       count: all,
-      tone: 'bg-slate-200',
+      tone: 'bg-slate-400',
       note: 'Everything in the file',
     },
     {
       label: 'Match this home',
       count: matched,
-      tone: 'bg-teal-300',
+      tone: 'bg-teal-500',
       note: 'Same size, config and area; recent enough',
     },
     {
@@ -293,23 +293,42 @@ export function EvidenceFunnel({
         many you can actually trust.
         {canInspect ? ' Click to see the ones that made it.' : ''}
       </p>
-      <div className="mt-4 space-y-3">
-        {stages.map((stage) => (
-          <div key={stage.label}>
-            <div className="flex items-baseline justify-between text-sm">
-              <span className="font-semibold">{stage.label}</span>
-              <span className="data-value">{stage.count}</span>
-            </div>
-            <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-slate-100">
+      <div className="mt-5 flex flex-col items-center gap-0">
+        {stages.map((stage, i) => {
+          const widthPct = Math.max((stage.count / max) * 100, 14);
+          const dropped = i > 0 ? stages[i - 1].count - stage.count : 0;
+          return (
+            <div key={stage.label} className="w-full">
+              {i > 0 && dropped > 0 && (
+                <div className="flex items-center justify-center py-1.5 text-[0.6875rem] font-medium text-muted-foreground">
+                  <ChevronDown className="size-3.5" />
+                  <span className="ml-1">
+                    {dropped} removed —{' '}
+                    {i === 1
+                      ? 'wrong size, area, furnishing, off-society or stale'
+                      : 'duplicates & flagged prices'}
+                  </span>
+                </div>
+              )}
               <div
-                className={`h-full rounded-full ${stage.tone} transition-[width] duration-700 ease-out`}
-                style={{ width: `${Math.max((stage.count / max) * 100, 2)}%` }}
-              />
+                className={`mx-auto flex flex-col items-center justify-center rounded-md py-3 text-center text-white transition-[width] duration-700 ease-out ${stage.tone}`}
+                style={{ width: `${widthPct}%`, minWidth: '120px' }}
+              >
+                <span className="data-value text-xl font-bold leading-none">
+                  {stage.count}
+                </span>
+                <span className="mt-1 px-2 text-[0.6875rem] font-semibold leading-tight">
+                  {stage.label}
+                </span>
+              </div>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">{stage.note}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
+      <p className="mt-4 border-t pt-3 text-center text-xs text-muted-foreground">
+        {all} listings in the file → {trusted} trusted for the rate
+        {all > 0 ? ` (${Math.round((trusted / all) * 100)}% survived)` : ''}
+      </p>
 
       <EvidenceModal
         open={open}
