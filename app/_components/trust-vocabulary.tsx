@@ -11,6 +11,7 @@ import {
 import {
   AlertTriangle,
   CalendarClock,
+  ChevronDown,
   CircleHelp,
   Copy,
   Ruler,
@@ -128,6 +129,8 @@ export type EvidenceRow = {
     areaSqft?: string | number | null;
   };
   reasons: string[];
+  b0State: string;
+  b1State: string;
   b2State: string;
 };
 
@@ -188,6 +191,201 @@ export function EvidenceModal({
             ))}
           </ul>
         )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// The full funnel, broken down: how many listings survived each honest cleaning
+// stage, WHAT was removed between stages, and WHY — every drop drilling down to the
+// exact listings and their reasons, ending in the trusted survivors. This is the
+// "every number reveals the listings behind it" principle applied to the funnel,
+// and it works even when nothing survived (the honest-failure story).
+export type Baseline = { count: number; estimate: number | null };
+
+const FUNNEL_STAGES = [
+  {
+    key: 'all' as const,
+    label: 'All uploaded listings',
+    note: 'Everything in the file',
+    tone: 'bg-slate-400',
+  },
+  {
+    key: 'matched' as const,
+    label: 'Match this home',
+    note: 'Same size, config and area; recent enough',
+    tone: 'bg-teal-500',
+  },
+  {
+    key: 'trusted' as const,
+    label: 'Trusted for the rate',
+    note: 'After removing duplicates and flagged prices',
+    tone: 'bg-[var(--flent-teal)]',
+  },
+];
+
+// Pick the single reason we group a dropped row under, so per-group counts sum to
+// the transition's "N removed". The engine pushes reasons structural → price, so
+// the first known reason is the most fundamental cause of the drop.
+function primaryReason(row: EvidenceRow): string {
+  return row.reasons.find((code) => REASON_META[code]) ?? 'missing_required_field';
+}
+
+const byListingId = (a: EvidenceRow, b: EvidenceRow) =>
+  a.listingId.localeCompare(b.listingId);
+
+// The dropped listings for one transition, grouped by primary reason.
+function DroppedGroups({ rows }: { rows: EvidenceRow[] }) {
+  const groups = new Map<string, EvidenceRow[]>();
+  for (const row of rows) {
+    const code = primaryReason(row);
+    const bucket = groups.get(code) ?? [];
+    bucket.push(row);
+    groups.set(code, bucket);
+  }
+  const ordered = Array.from(groups.entries()).sort(
+    (a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]),
+  );
+  return (
+    <div className="mt-2 space-y-3">
+      {ordered.map(([code, groupRows]) => {
+        const meta = REASON_META[code];
+        return (
+          <div key={code}>
+            <div className="flex items-center gap-2">
+              <ReasonChips reasons={[code]} />
+              <span className="text-xs text-muted-foreground">
+                {groupRows.length} listing{groupRows.length === 1 ? '' : 's'}
+              </span>
+            </div>
+            {meta && (
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                {meta.meaning}
+              </p>
+            )}
+            <ul className="mt-1">
+              {[...groupRows].sort(byListingId).map((row) => (
+                <ListingLine key={row.listingId} row={row} />
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function FunnelBreakdownModal({
+  open,
+  onOpenChange,
+  rows,
+  baselines,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  rows: EvidenceRow[];
+  baselines: { B0: Baseline; B1: Baseline; B2: Baseline };
+}) {
+  const counts = {
+    all: baselines.B0.count,
+    matched: baselines.B1.count,
+    trusted: baselines.B2.count,
+  };
+  const estimates = {
+    all: baselines.B0.estimate,
+    matched: baselines.B1.estimate,
+    trusted: baselines.B2.estimate,
+  };
+  const max = Math.max(counts.all, 1);
+
+  // Drops between stages, derived from row state so they equal the bar deltas.
+  const droppedToMatch = rows.filter(
+    (r) => r.b0State === 'include' && r.b1State !== 'include',
+  );
+  const droppedToTrusted = rows.filter(
+    (r) => r.b1State === 'include' && r.b2State !== 'include',
+  );
+  const trusted = rows.filter((r) => r.b2State === 'include').sort(byListingId);
+
+  const transitions = [droppedToMatch, droppedToTrusted];
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="max-h-[80vh] overflow-y-auto sm:max-w-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DialogHeader>
+          <DialogTitle>How the evidence was narrowed</DialogTitle>
+          <DialogDescription>
+            {counts.all} listings in the file → {counts.trusted} trusted for the
+            rate. Every drop is shown with the listings behind it.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex flex-col items-center gap-0">
+          {FUNNEL_STAGES.map((stage, i) => {
+            const count = counts[stage.key];
+            const estimate = estimates[stage.key];
+            const widthPct = Math.max((count / max) * 100, 22);
+            const dropped = i > 0 ? transitions[i - 1] : [];
+            return (
+              <div key={stage.key} className="w-full">
+                {i > 0 && dropped.length > 0 && (
+                  <details className="group/drop w-full py-1.5">
+                    <summary className="flex cursor-pointer list-none items-center justify-center gap-1 text-[0.6875rem] font-medium text-muted-foreground">
+                      <ChevronDown className="size-3.5 transition-transform group-open/drop:rotate-180" />
+                      <span>
+                        {dropped.length} removed —{' '}
+                        {i === 1
+                          ? 'not a match for this home'
+                          : 'duplicates & flagged prices'}
+                        <span className="ml-1 underline underline-offset-2">
+                          see which
+                        </span>
+                      </span>
+                    </summary>
+                    <div className="mt-2 rounded-lg border bg-[var(--warm-canvas)] p-3">
+                      <DroppedGroups rows={dropped} />
+                    </div>
+                  </details>
+                )}
+                <div
+                  className={`mx-auto flex flex-col items-center justify-center rounded-md py-3 text-center text-white ${stage.tone}`}
+                  style={{ width: `${widthPct}%`, minWidth: '150px' }}
+                >
+                  <span className="data-value text-xl font-bold leading-none">
+                    {count}
+                  </span>
+                  <span className="mt-1 px-2 text-[0.6875rem] font-semibold leading-tight">
+                    {stage.label}
+                  </span>
+                  <span className="mt-1 text-[0.6875rem] font-medium leading-none opacity-90">
+                    median {estimate === null ? '—' : inr(estimate)}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-4">
+          <p className="data-label">
+            {trusted.length} trusted for the rate
+          </p>
+          {trusted.length === 0 ? (
+            <p className="mt-1 text-sm text-muted-foreground">
+              No listings survived to the trusted set — the honest answer is
+              &ldquo;not enough evidence&rdquo; rather than a confident guess.
+            </p>
+          ) : (
+            <ul className="mt-1">
+              {trusted.map((row) => (
+                <ListingLine key={row.listingId} row={row} />
+              ))}
+            </ul>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -50,6 +50,7 @@ import {
 import {
   ConfidenceDerivation,
   EvidenceModal,
+  FunnelBreakdownModal,
   ReasonChips,
   RemediationGuide,
 } from './trust-vocabulary';
@@ -538,6 +539,7 @@ function DealOverview({
           matched={run.summary.baselines.B1.count}
           trusted={run.summary.baselines.B2.count}
           rows={run.rows}
+          baselines={run.summary.baselines}
         />
       </div>
       <TrustSignals rows={run.rows} />
@@ -876,7 +878,6 @@ function MarketSummary({
 }) {
   const b = run.summary.baselines;
   const [narrowOpen, setNarrowOpen] = useState(false);
-  const trustedRows = run.rows.filter((r) => r.b2State === 'include');
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -907,13 +908,11 @@ function MarketSummary({
       </div>
       <Card
         className="cursor-pointer transition-shadow hover:shadow-sm"
-        onClick={
-          trustedRows.length > 0 ? () => setNarrowOpen(true) : undefined
-        }
-        role={trustedRows.length > 0 ? 'button' : undefined}
-        tabIndex={trustedRows.length > 0 ? 0 : undefined}
+        onClick={run.rows.length > 0 ? () => setNarrowOpen(true) : undefined}
+        role={run.rows.length > 0 ? 'button' : undefined}
+        tabIndex={run.rows.length > 0 ? 0 : undefined}
         onKeyDown={
-          trustedRows.length > 0
+          run.rows.length > 0
             ? (e) => {
                 if (e.key === 'Enter' || e.key === ' ') setNarrowOpen(true);
               }
@@ -925,9 +924,7 @@ function MarketSummary({
           <p className="mt-1 text-sm text-muted-foreground">
             From every listing in the file down to the ones we trust for the
             rate.{' '}
-            {trustedRows.length > 0
-              ? 'Click to see the survivors.'
-              : ''}
+            {run.rows.length > 0 ? 'Click to see the full breakdown.' : ''}
           </p>
         </CardHeader>
         <CardContent className="grid gap-3 py-5 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:items-center">
@@ -953,12 +950,11 @@ function MarketSummary({
           />
         </CardContent>
       </Card>
-      <EvidenceModal
+      <FunnelBreakdownModal
         open={narrowOpen}
         onOpenChange={setNarrowOpen}
-        title={`${trustedRows.length} listings survived to the trusted set`}
-        description="From the full file down to these — the comparables the rate is built from."
-        rows={trustedRows}
+        rows={run.rows}
+        baselines={run.summary.baselines}
       />
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="border-amber-200">

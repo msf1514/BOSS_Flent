@@ -17,6 +17,8 @@ import {
 import type { StoredRun } from '@/lib/storage';
 import {
   EvidenceModal,
+  FunnelBreakdownModal,
+  type Baseline,
   type EvidenceRow,
 } from './trust-vocabulary';
 
@@ -242,14 +244,16 @@ export function EvidenceFunnel({
   matched,
   trusted,
   rows: dataRows,
+  baselines,
 }: {
   all: number;
   matched: number;
   trusted: number;
   rows?: EvidenceRow[];
+  baselines?: { B0: Baseline; B1: Baseline; B2: Baseline };
 }) {
   const [open, setOpen] = useState(false);
-  const trustedRows = (dataRows ?? []).filter((r) => r.b2State === 'include');
+  const rows = dataRows ?? [];
   const stages = [
     {
       label: 'All uploaded listings',
@@ -271,7 +275,12 @@ export function EvidenceFunnel({
     },
   ];
   const max = Math.max(all, 1);
-  const canInspect = trustedRows.length > 0;
+  const canInspect = rows.length > 0;
+  const modalBaselines = baselines ?? {
+    B0: { count: all, estimate: null },
+    B1: { count: matched, estimate: null },
+    B2: { count: trusted, estimate: null },
+  };
   return (
     // oxlint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
@@ -291,7 +300,7 @@ export function EvidenceFunnel({
       <p className="mt-1 text-sm text-muted-foreground">
         The number that matters isn&apos;t how many listings exist — it&apos;s how
         many you can actually trust.
-        {canInspect ? ' Click to see the ones that made it.' : ''}
+        {canInspect ? ' Click to see the full breakdown.' : ''}
       </p>
       <div className="mt-5 flex flex-col items-center gap-0">
         {stages.map((stage, i) => {
@@ -330,12 +339,11 @@ export function EvidenceFunnel({
         {all > 0 ? ` (${Math.round((trusted / all) * 100)}% survived)` : ''}
       </p>
 
-      <EvidenceModal
+      <FunnelBreakdownModal
         open={open}
         onOpenChange={setOpen}
-        title={`${trustedRows.length} listings that made it into the rate`}
-        description="These are the trusted comparables the market rate is built from."
-        rows={trustedRows}
+        rows={rows}
+        baselines={modalBaselines}
       />
     </div>
   );
