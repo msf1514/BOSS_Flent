@@ -47,7 +47,12 @@ import {
   ScopeNote,
   TrustSignals,
 } from './problem-one-overview';
-import { ConfidenceDerivation, ReasonChips, RemediationGuide } from './trust-vocabulary';
+import {
+  ConfidenceDerivation,
+  EvidenceModal,
+  ReasonChips,
+  RemediationGuide,
+} from './trust-vocabulary';
 
 type Notice = { kind: 'error' | 'success'; text: string } | null;
 type ReviewDecision = 'include' | 'exclude' | 'defer';
@@ -504,6 +509,11 @@ function DealOverview({
   isComplete: boolean;
   onComplete: () => void;
 }) {
+  const [tileModal, setTileModal] = useState<null | 'trusted' | 'band'>(null);
+  const trustedRows = run.rows.filter((r) => r.b2State === 'include');
+  const bandRows = [...trustedRows].sort(
+    (a, b) => Number(a.observed.rent) - Number(b.observed.rent),
+  );
   return (
     <div className="space-y-4">
       <ProblemOneOrientation run={run} />
@@ -536,18 +546,43 @@ function DealOverview({
           label="Trusted comparables"
           value={String(run.summary.baselines.B2.count)}
           note="Listings that count toward the rate"
+          onClick={
+            trustedRows.length > 0 ? () => setTileModal('trusted') : undefined
+          }
+          hint="See the listings"
         />
         <Metric
           label="Middle 50% of asking rents"
           value={`${money(run.summary.band.p25)} – ${money(run.summary.band.p75)}`}
           note="Where most comparable asks sit"
+          onClick={
+            bandRows.length > 0 ? () => setTileModal('band') : undefined
+          }
+          hint="See the spread"
         />
         <Metric
           label="Work remaining"
           value={`${pending + unresolved}`}
           note={`${pending} listing decisions · ${unresolved} evidence tasks`}
+          onClick={onOpenMarket}
+          hint="Open the review"
         />
       </div>
+      <EvidenceModal
+        open={tileModal !== null}
+        onOpenChange={(o) => !o && setTileModal(null)}
+        title={
+          tileModal === 'band'
+            ? 'Trusted listings, low to high asking rent'
+            : `${trustedRows.length} trusted comparables`
+        }
+        description={
+          tileModal === 'band'
+            ? 'The middle 50% band is the interquartile range across these asks.'
+            : 'The listings that count toward the market rate.'
+        }
+        rows={tileModal === 'band' ? bandRows : trustedRows}
+      />
       <div>
         <Card
           className={
@@ -659,23 +694,26 @@ function PendingByOwner({
                 </p>
                 <ul className="mt-2 space-y-1.5">
                   {tasks.map((task) => (
-                    <li
-                      key={task.id}
-                      className="flex items-center justify-between gap-3 text-sm"
-                    >
-                      <span>{task.title}</span>
-                      <Badge
-                        variant="outline"
-                        className={
-                          task.status === 'blocked'
-                            ? 'shrink-0 border-red-200 bg-red-50 text-red-800'
-                            : 'shrink-0 border-amber-200 bg-amber-50 text-amber-900'
-                        }
+                    <li key={task.id}>
+                      <button
+                        type="button"
+                        onClick={onOpenMarket}
+                        className="flex w-full items-center justify-between gap-3 rounded-md px-1 py-1 text-left text-sm transition-colors hover:bg-slate-50"
                       >
-                        {task.owner && task.owner !== 'Unassigned'
-                          ? `With ${task.owner}`
-                          : 'Unassigned'}
-                      </Badge>
+                        <span>{task.title}</span>
+                        <Badge
+                          variant="outline"
+                          className={
+                            task.status === 'blocked'
+                              ? 'shrink-0 border-red-200 bg-red-50 text-red-800'
+                              : 'shrink-0 border-amber-200 bg-amber-50 text-amber-900'
+                          }
+                        >
+                          {task.owner && task.owner !== 'Unassigned'
+                            ? `With ${task.owner}`
+                            : 'Unassigned'}
+                        </Badge>
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -837,6 +875,8 @@ function MarketSummary({
   busy: boolean;
 }) {
   const b = run.summary.baselines;
+  const [narrowOpen, setNarrowOpen] = useState(false);
+  const trustedRows = run.rows.filter((r) => r.b2State === 'include');
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -865,12 +905,29 @@ function MarketSummary({
           note="How much the rate moves if the most influential listing is dropped"
         />
       </div>
-      <Card>
+      <Card
+        className="cursor-pointer transition-shadow hover:shadow-sm"
+        onClick={
+          trustedRows.length > 0 ? () => setNarrowOpen(true) : undefined
+        }
+        role={trustedRows.length > 0 ? 'button' : undefined}
+        tabIndex={trustedRows.length > 0 ? 0 : undefined}
+        onKeyDown={
+          trustedRows.length > 0
+            ? (e) => {
+                if (e.key === 'Enter' || e.key === ' ') setNarrowOpen(true);
+              }
+            : undefined
+        }
+      >
         <CardHeader className="border-b">
           <CardTitle>How the evidence was narrowed</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
             From every listing in the file down to the ones we trust for the
-            rate.
+            rate.{' '}
+            {trustedRows.length > 0
+              ? 'Click to see the survivors.'
+              : ''}
           </p>
         </CardHeader>
         <CardContent className="grid gap-3 py-5 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:items-center">
@@ -896,6 +953,13 @@ function MarketSummary({
           />
         </CardContent>
       </Card>
+      <EvidenceModal
+        open={narrowOpen}
+        onOpenChange={setNarrowOpen}
+        title={`${trustedRows.length} listings survived to the trusted set`}
+        description="From the full file down to these — the comparables the rate is built from."
+        rows={trustedRows}
+      />
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="border-amber-200">
           <CardHeader className="border-b border-amber-200">
@@ -1516,17 +1580,41 @@ function Metric({
   label,
   value,
   note,
+  onClick,
+  hint,
 }: {
   label: string;
   value: string;
   note: string;
+  onClick?: () => void;
+  hint?: string;
 }) {
+  const clickable = Boolean(onClick);
   return (
-    <Card>
+    <Card
+      className={
+        clickable ? 'cursor-pointer transition-shadow hover:shadow-sm' : ''
+      }
+      onClick={onClick}
+      role={clickable ? 'button' : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onKeyDown={
+        clickable
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') onClick?.();
+            }
+          : undefined
+      }
+    >
       <CardContent className="py-5">
         <p className="text-xs font-semibold text-muted-foreground">{label}</p>
         <p className="data-value mt-2 text-2xl font-semibold">{value}</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">{note}</p>
+        {clickable && hint && (
+          <p className="mt-2 text-xs font-semibold text-[var(--flent-teal)]">
+            {hint} →
+          </p>
+        )}
       </CardContent>
     </Card>
   );
