@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { AnonymousAnalysis } from '@/app/_components/anonymous-analysis';
 import { DealsList } from '@/app/_components/deals-list';
 import { MarketWorkbench } from '@/app/_components/market-workbench';
 import { RunIntake } from '@/app/_components/run-intake';
@@ -10,7 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import type { StoredRun } from '@/lib/storage';
 
-type View = 'list' | 'intake' | 'run';
+type View = 'list' | 'intake' | 'run' | 'anonymous';
 
 export default function Page() {
   const [view, setView] = useState<View>('list');
@@ -99,6 +100,9 @@ export default function Page() {
       />
     );
 
+  if (view === 'anonymous')
+    return <AnonymousAnalysis onExit={() => setView('list')} />;
+
   return (
     <DealsList
       onOpen={openRun}
@@ -106,6 +110,7 @@ export default function Page() {
         setPrefill(undefined);
         setView('intake');
       }}
+      onAnonymous={() => setView('anonymous')}
     />
   );
 }

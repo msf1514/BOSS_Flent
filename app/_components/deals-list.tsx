@@ -2,7 +2,13 @@
 /* oxlint-disable react/react-compiler */
 
 import { useEffect, useState } from 'react';
-import { FilePlus2, FileText, Loader2, RefreshCw } from 'lucide-react';
+import {
+  FilePlus2,
+  FileText,
+  Loader2,
+  RefreshCw,
+  ShieldCheck,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MobileHeader, ProductRail } from './boss-shell';
@@ -23,9 +29,11 @@ type RunSummary = {
 export function DealsList({
   onOpen,
   onNew,
+  onAnonymous,
 }: {
   onOpen: (runId: string) => void;
   onNew: () => void;
+  onAnonymous: () => void;
 }) {
   const [runs, setRuns] = useState<RunSummary[] | null>(null);
   const [error, setError] = useState('');
@@ -67,6 +75,9 @@ export function DealsList({
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => load()}>
                   <RefreshCw /> Refresh
+                </Button>
+                <Button variant="outline" onClick={onAnonymous}>
+                  <ShieldCheck /> Try anonymously
                 </Button>
                 <Button onClick={onNew}>
                   <FilePlus2 /> New market review
