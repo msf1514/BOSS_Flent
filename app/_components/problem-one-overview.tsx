@@ -480,15 +480,7 @@ export function TrustSignals({
 // decision (Problem 3), and — once the resulting deal's real outcome is known —
 // feeds the calibration loop (Problem 2). It's a hand-off then a loop, not a
 // linear march.
-export function NextSteps({
-  isComplete,
-  onComplete,
-  blockers,
-}: {
-  isComplete: boolean;
-  onComplete: () => void;
-  blockers: number;
-}) {
+export function NextSteps({ isComplete }: { isComplete: boolean }) {
   const steps = [
     {
       title: 'Market rate + confidence',
@@ -556,22 +548,10 @@ export function NextSteps({
             complete
           </span>
         ) : (
-          <>
-            <button
-              type="button"
-              onClick={onComplete}
-              disabled={blockers > 0}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-            >
-              <Lock className="size-4" /> Freeze &amp; complete market review
-            </button>
-            {blockers > 0 && (
-              <span className="text-xs text-muted-foreground">
-                {blockers} open item{blockers === 1 ? '' : 's'} to resolve first
-                (listings needing a call or evidence tasks).
-              </span>
-            )}
-          </>
+          <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+            <Lock className="size-4 shrink-0" /> Freeze this evidence from the
+            review tracker in the header once the open items are cleared.
+          </span>
         )}
       </div>
 

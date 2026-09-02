@@ -1,7 +1,7 @@
 'use client';
 /* oxlint-disable react/react-compiler */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
   ArrowRight,
@@ -241,18 +241,83 @@ export function MarketWorkbench({
     }
   }
 
-  function openNextAction() {
+  // Jump straight to the sub-tab that resolves a given milestone.
+  function gotoMilestone(key: string) {
     setSection('market');
-    setMarketTab(
-      run.reviews.length > 0
-        ? 'summary'
-        : pending > 0
-          ? 'review'
-          : unresolved > 0
-            ? 'tasks'
-            : 'summary',
-    );
+    if (key === 'flagged') setMarketTab('review');
+    else if (key === 'tasks') setMarketTab('tasks');
+    else setMarketTab('summary');
   }
+
+  // The single review spine: the real workflow states, in order, with the first
+  // unfinished one as "current". This is what the header tracker renders and what
+  // the header's primary CTA advances — so the completion flow lives in one place
+  // instead of being scattered across the overview, the pipeline and a buried
+  // version-control button.
+  const hasUnappliedReviews = run.reviews.length > 0;
+  const milestones = [
+    { key: 'analysed', label: 'Analysed', done: true },
+    { key: 'flagged', label: 'Flagged rows', done: pending === 0, count: pending },
+    {
+      key: 'tasks',
+      label: 'Evidence tasks',
+      done: unresolved === 0,
+      count: unresolved,
+    },
+    {
+      key: 'apply',
+      label: 'Apply judgments',
+      done: !hasUnappliedReviews,
+      count: run.reviews.length,
+    },
+    {
+      key: 'complete',
+      label: 'Freeze & complete',
+      done: Boolean(run.reviewClosure),
+    },
+  ];
+  const currentStep =
+    milestones.find((step) => !step.done) ?? milestones[milestones.length - 1];
+  const primaryAction = (() => {
+    switch (currentStep.key) {
+      case 'flagged':
+        return {
+          label: `Resolve ${pending} flagged row${pending === 1 ? '' : 's'}`,
+          icon: ArrowRight,
+          run: () => gotoMilestone('flagged'),
+          busy: false,
+        };
+      case 'tasks':
+        return {
+          label: `Resolve ${unresolved} evidence task${unresolved === 1 ? '' : 's'}`,
+          icon: ArrowRight,
+          run: () => gotoMilestone('tasks'),
+          busy: false,
+        };
+      case 'apply':
+        return {
+          label: `Apply judgments in v${run.versionNumber + 1}`,
+          icon: RefreshCw,
+          run: createChildRun,
+          busy: busyAction === 'rerun',
+        };
+      default:
+        return run.reviewClosure
+          ? {
+              label: 'View handoff',
+              icon: CheckCircle2,
+              run: () => setSection('overview'),
+              busy: false,
+            }
+          : {
+              label: 'Complete market review',
+              icon: ClipboardCheck,
+              run: () => setCompletionOpen(true),
+              busy: false,
+            };
+    }
+  })();
+  const PrimaryIcon = primaryAction.icon;
 
   return (
     <div className="min-h-screen bg-background lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
@@ -291,23 +356,28 @@ export function MarketWorkbench({
                   <Button variant="outline" onClick={onNew}>
                     Add new evidence
                   </Button>
-                  {assessment.state === 'ready_to_complete' ? (
-                    <Button onClick={() => setCompletionOpen(true)}>
-                      <ClipboardCheck /> Complete market review
-                    </Button>
-                  ) : assessment.state === 'complete' ? (
-                    <Button
-                      variant="outline"
-                      onClick={() => setSection('overview')}
-                    >
-                      <CheckCircle2 /> View handoff
-                    </Button>
-                  ) : (
-                    <Button onClick={openNextAction}>
-                      Continue review <ArrowRight />
-                    </Button>
-                  )}
+                  <Button
+                    onClick={primaryAction.run}
+                    disabled={primaryAction.busy}
+                  >
+                    {primaryAction.busy ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      <PrimaryIcon />
+                    )}
+                    {primaryAction.label}
+                  </Button>
                 </div>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                <MilestoneTracker
+                  steps={milestones}
+                  currentKey={currentStep.key}
+                  onGoto={gotoMilestone}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {assessment.nextAction}
+                </p>
               </div>
             </header>
 
@@ -351,7 +421,6 @@ export function MarketWorkbench({
                   unresolved={unresolved}
                   onOpenMarket={() => setSection('market')}
                   isComplete={Boolean(run.reviewClosure)}
-                  onComplete={() => setCompletionOpen(true)}
                 />
               </TabsContent>
               <TabsContent value="market" className="pt-5">
@@ -370,7 +439,6 @@ export function MarketWorkbench({
                   setSelected={setSelected}
                   busyAction={busyAction}
                   action={action}
-                  createChildRun={createChildRun}
                 />
               </TabsContent>
               <TabsContent value="occupancy" className="pt-5">
@@ -477,6 +545,75 @@ export function MarketWorkbench({
   );
 }
 
+// The single milestone spine for the whole review, rendered in the sticky header.
+// Done steps are teal ticks, the current step is highlighted amber, future steps
+// are muted. Flagged-rows and evidence-tasks steps are clickable to jump straight
+// to the sub-tab that clears them.
+function MilestoneTracker({
+  steps,
+  currentKey,
+  onGoto,
+}: {
+  steps: { key: string; label: string; done: boolean; count?: number }[];
+  currentKey: string;
+  onGoto: (key: string) => void;
+}) {
+  return (
+    <nav
+      aria-label="Market review progress"
+      className="flex flex-wrap items-center gap-x-1 gap-y-1.5"
+    >
+      {steps.map((step, index) => {
+        const current = step.key === currentKey;
+        const navigable =
+          !step.done && (step.key === 'flagged' || step.key === 'tasks');
+        const tone = step.done
+          ? 'border-teal-200 bg-teal-50 text-teal-900'
+          : current
+            ? 'border-amber-300 bg-amber-50 text-amber-900 ring-1 ring-amber-300'
+            : 'border-slate-200 bg-white text-muted-foreground';
+        const content = (
+          <>
+            {step.done ? (
+              <CheckCircle2 className="size-3.5 shrink-0" />
+            ) : current ? (
+              <CircleDot className="size-3.5 shrink-0" />
+            ) : (
+              <span className="size-3 shrink-0 rounded-full border border-current opacity-50" />
+            )}
+            {step.label}
+            {typeof step.count === 'number' && step.count > 0 && !step.done
+              ? ` · ${step.count}`
+              : ''}
+          </>
+        );
+        return (
+          <Fragment key={step.key}>
+            {index > 0 && (
+              <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/40" />
+            )}
+            {navigable ? (
+              <button
+                type="button"
+                onClick={() => onGoto(step.key)}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-shadow hover:shadow-sm ${tone}`}
+              >
+                {content}
+              </button>
+            ) : (
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${tone}`}
+              >
+                {content}
+              </span>
+            )}
+          </Fragment>
+        );
+      })}
+    </nav>
+  );
+}
+
 function StatusBadge({ state, label }: { state: string; label: string }) {
   const tone =
     state === 'complete'
@@ -502,7 +639,6 @@ function DealOverview({
   unresolved,
   onOpenMarket,
   isComplete,
-  onComplete,
 }: {
   run: StoredRun;
   assessment: ReturnType<typeof assessMarketReview>;
@@ -510,7 +646,6 @@ function DealOverview({
   unresolved: number;
   onOpenMarket: () => void;
   isComplete: boolean;
-  onComplete: () => void;
 }) {
   const [tileModal, setTileModal] = useState<null | 'trusted' | 'band'>(null);
   const trustedRows = run.rows.filter((r) => r.b2State === 'include');
@@ -625,11 +760,7 @@ function DealOverview({
           </CardContent>
         </Card>
       </div>
-      <NextSteps
-        isComplete={isComplete}
-        onComplete={onComplete}
-        blockers={pending + unresolved}
-      />
+      <NextSteps isComplete={isComplete} />
       <PendingByOwner
         requests={run.requests}
         pendingListings={pending}
@@ -758,20 +889,10 @@ function MarketWorkspace(props: {
   setSelected: (row: AuditRow) => void;
   busyAction: string | null;
   action: (body: Record<string, unknown>) => Promise<boolean>;
-  createChildRun: () => Promise<void>;
 }) {
   return (
     <div>
-      <MarketPipeline
-        run={props.run}
-        pending={props.pending}
-        unresolved={props.unresolved}
-      />
-      <Tabs
-        value={props.marketTab}
-        onValueChange={props.setMarketTab}
-        className="mt-5"
-      >
+      <Tabs value={props.marketTab} onValueChange={props.setMarketTab}>
         <div className="overflow-x-auto">
           <TabsList
             variant="line"
@@ -790,12 +911,7 @@ function MarketWorkspace(props: {
           </TabsList>
         </div>
         <TabsContent value="summary" className="pt-4">
-          <MarketSummary
-            run={props.run}
-            assessment={props.assessment}
-            createChildRun={props.createChildRun}
-            busy={props.busyAction !== null}
-          />
+          <MarketSummary run={props.run} assessment={props.assessment} />
         </TabsContent>
         <TabsContent value="comparables" className="pt-4">
           <Comparables
@@ -844,56 +960,12 @@ function MarketWorkspace(props: {
   );
 }
 
-function MarketPipeline({
-  run,
-  pending,
-  unresolved,
-}: {
-  run: StoredRun;
-  pending: number;
-  unresolved: number;
-}) {
-  const steps = [
-    ['Source captured', true],
-    ['Analysis completed', true],
-    ['Flagged rows resolved', pending === 0],
-    ['Evidence tasks', unresolved === 0],
-    ['Market review complete', Boolean(run.reviewClosure)],
-  ] as const;
-  return (
-    <div
-      aria-label="Market review workflow"
-      className="grid overflow-hidden rounded-xl border bg-white sm:grid-cols-5"
-    >
-      {steps.map(([label, done], index) => (
-        <div
-          key={label}
-          className={`relative flex min-h-14 items-center gap-2 border-b px-3 py-3 text-sm font-semibold last:border-b-0 sm:border-r sm:border-b-0 sm:last:border-r-0 ${done ? 'bg-teal-50/70 text-teal-950' : 'text-muted-foreground'}`}
-        >
-          {done ? (
-            <CheckCircle2 className="size-4 shrink-0" />
-          ) : (
-            <CircleDot className="size-4 shrink-0" />
-          )}
-          <span>
-            {index + 1}. {label}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function MarketSummary({
   run,
   assessment,
-  createChildRun,
-  busy,
 }: {
   run: StoredRun;
   assessment: ReturnType<typeof assessMarketReview>;
-  createChildRun: () => Promise<void>;
-  busy: boolean;
 }) {
   const b = run.summary.baselines;
   const [narrowOpen, setNarrowOpen] = useState(false);
@@ -1012,9 +1084,9 @@ function MarketSummary({
           </CardHeader>
           <CardContent className="space-y-4 py-5">
             <p className="text-sm leading-6 text-muted-foreground">
-              Human judgments never rewrite a completed result. Create a child
-              version to apply them, then complete the market review from that
-              exact version.
+              Human judgments never rewrite a completed result. Applying them
+              creates a new immutable version, which the review is then completed
+              from — you drive that from the tracker in the header.
             </p>
             <div className="grid gap-2 text-xs sm:grid-cols-2">
               <Fact
@@ -1026,23 +1098,20 @@ function MarketSummary({
                 value={String(run.reviews.length)}
               />
             </div>
-            <Button
-              disabled={
-                busy || run.reviews.length === 0 || Boolean(run.reviewClosure)
-              }
-              onClick={createChildRun}
-            >
-              <RefreshCw />
-              {busy
-                ? 'Creating version…'
-                : `Apply judgments in version ${run.versionNumber + 1}`}
-            </Button>
-            {assessment.state === 'ready_to_complete' && (
+            {run.reviews.length > 0 && !run.reviewClosure ? (
+              <p className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-900">
+                <RefreshCw className="size-3.5 shrink-0" />
+                {run.reviews.length} recorded judgment
+                {run.reviews.length === 1 ? '' : 's'} not yet applied — use
+                &ldquo;Apply judgments in v{run.versionNumber + 1}&rdquo; in the
+                header tracker.
+              </p>
+            ) : assessment.state === 'ready_to_complete' ? (
               <p className="text-xs font-semibold text-teal-800">
                 No unapplied judgments remain. This version is ready to
                 complete.
               </p>
-            )}
+            ) : null}
           </CardContent>
         </Card>
       </div>
