@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   AlertTriangle,
   Copy,
@@ -9,6 +10,11 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import type { StoredRun } from '@/lib/storage';
+import {
+  EvidenceModal,
+  REASON_META,
+  type EvidenceRow,
+} from './trust-vocabulary';
 
 // Problem 1 orientation + visual trust layer.
 //
@@ -247,12 +253,14 @@ const FLAGS: FlagDef[] = [
   },
 ];
 
-// Scannable chips: what junk the engine caught and kept out of the rate.
+// Scannable chips: what junk the engine caught and kept out of the rate. Each
+// chip is clickable to reveal exactly which listings triggered that flag.
 export function TrustSignals({
   rows,
 }: {
-  rows: { reasons: string[] }[];
+  rows: EvidenceRow[];
 }) {
+  const [openFlag, setOpenFlag] = useState<string | null>(null);
   const counts = new Map<string, number>();
   for (const row of rows)
     for (const reason of row.reasons)
@@ -261,6 +269,10 @@ export function TrustSignals({
     ...flag,
     count: counts.get(flag.code) ?? 0,
   })).filter((flag) => flag.count > 0);
+
+  const flaggedRows = (code: string) =>
+    rows.filter((r) => r.reasons.includes(code));
+  const active = FLAGS.find((f) => f.code === openFlag);
 
   return (
     <div className="rounded-xl border bg-white p-5">
@@ -275,20 +287,32 @@ export function TrustSignals({
       ) : (
         <div className="mt-3 flex flex-wrap gap-2">
           {present.map((flag) => (
-            <span
+            <button
               key={flag.code}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${flag.tone}`}
+              type="button"
+              onClick={() => setOpenFlag(flag.code)}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-shadow hover:shadow-sm ${flag.tone}`}
             >
               <flag.icon className="size-3.5" />
               {flag.count} {flag.label}
-            </span>
+            </button>
           ))}
         </div>
       )}
       <p className="mt-3 border-t pt-3 text-xs text-muted-foreground">
         Nothing here is deleted — each flagged listing stays in the review with its
-        reason, and you can overrule any call.
+        reason, and you can overrule any call. Tap a tag to see which listings.
       </p>
+
+      <EvidenceModal
+        open={openFlag !== null}
+        onOpenChange={(o) => !o && setOpenFlag(null)}
+        title={active ? `${flaggedRows(active.code).length} · ${active.label}` : ''}
+        description={
+          active ? REASON_META[active.code]?.meaning : undefined
+        }
+        rows={openFlag ? flaggedRows(openFlag) : []}
+      />
     </div>
   );
 }

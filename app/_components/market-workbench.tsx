@@ -1,6 +1,7 @@
 'use client';
 /* oxlint-disable react/react-compiler */
 
+import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
@@ -18,7 +19,6 @@ import {
   Search,
   ShieldCheck,
   UserRoundCheck,
-  Users,
 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -515,6 +515,7 @@ function DealOverview({
           trustedCount={run.summary.baselines.B2.count}
           portals={run.summary.observedPortalLabelCount}
           looMovementPct={run.summary.maximumLeaveOneOutMovementPct}
+          rows={run.rows}
         />
         <EvidenceFunnel
           all={run.summary.baselines.B0.count}
@@ -598,32 +599,45 @@ function DealOverview({
       </div>
       <Card>
         <CardHeader className="border-b">
-          <CardTitle>Cross-functional handoff</CardTitle>
+          <CardTitle>What this market evidence feeds into</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
-            Market review is one input into a broader acquisition decision.
+            Problem 1 produces one input — a trusted rate with its confidence and
+            caveats. Here’s where it goes and how people work on it together.
           </p>
         </CardHeader>
-        <CardContent className="grid gap-3 py-5 md:grid-cols-4">
-          <OwnerCard
-            teamRole="Market analyst"
-            responsibility="Comparable evidence and limitations"
-            status={run.reviewClosure ? 'Complete' : 'In progress'}
-          />
-          <OwnerCard
-            teamRole="Pricing / Revenue"
-            responsibility="Achievable rent and occupancy"
-            status="Input required"
-          />
-          <OwnerCard
-            teamRole="Property team"
-            responsibility="Condition and readiness"
-            status="Input required"
-          />
-          <OwnerCard
-            teamRole="Acquisition lead"
-            responsibility="Commercial decision and closing"
-            status="Waits for handoff"
-          />
+        <CardContent className="grid gap-4 py-5 md:grid-cols-3">
+          <div>
+            <p className="data-label">The handoff</p>
+            <p className="mt-1.5 text-sm leading-6">
+              Once complete, this run freezes into a versioned market-evidence
+              record — the rate, its confidence tier, the caveats, and any open
+              tasks — that the acquisition decision consumes. It never decides on
+              its own.
+            </p>
+          </div>
+          <div>
+            <p className="data-label">How people collaborate</p>
+            <p className="mt-1.5 text-sm leading-6">
+              Not a static sign-off chain. Anyone can overrule a listing (with a
+              recorded reason) or raise an evidence task with an owner — every
+              action is attributed in the history, so the review is genuinely
+              multi-person and auditable.
+            </p>
+          </div>
+          <div>
+            <p className="data-label">Downstream decision</p>
+            <p className="mt-1.5 text-sm leading-6">
+              The ACQUIRE / NEGOTIATE / HOLD / PASS call and the ask-vs-market
+              comparison live in the decision view — a separate problem that reads
+              this benchmark rather than recomputing it.
+            </p>
+            <Link
+              href="/decision"
+              className="mt-2 inline-block text-xs font-semibold text-[var(--flent-teal)] hover:underline"
+            >
+              See the decision view →
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -1521,28 +1535,6 @@ function Fact({ label, value }: { label: string; value: string }) {
       <dd className="mt-1.5 break-words text-sm font-semibold leading-5">
         {value}
       </dd>
-    </div>
-  );
-}
-function OwnerCard({
-  teamRole,
-  responsibility,
-  status,
-}: {
-  teamRole: string;
-  responsibility: string;
-  status: string;
-}) {
-  return (
-    <div className="rounded-lg border bg-slate-50/60 p-4">
-      <div className="flex items-center gap-2">
-        <Users className="size-4 text-teal-700" />
-        <strong className="text-sm">{teamRole}</strong>
-      </div>
-      <p className="mt-2 text-xs leading-5 text-muted-foreground">
-        {responsibility}
-      </p>
-      <p className="mt-3 text-xs font-semibold">{status}</p>
     </div>
   );
 }

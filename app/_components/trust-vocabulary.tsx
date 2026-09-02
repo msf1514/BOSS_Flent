@@ -1,5 +1,13 @@
 'use client';
 
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   AlertTriangle,
   CalendarClock,
@@ -107,6 +115,79 @@ export const REASON_META: Record<string, ReasonMeta> = {
 
 export function reasonLabel(code: string): string {
   return REASON_META[code]?.label ?? code.replace(/_/g, ' ');
+}
+
+// The minimal shape each surface needs to show the listings behind a number.
+export type EvidenceRow = {
+  listingId: string;
+  observed: {
+    source?: string | number | null;
+    society?: string | number | null;
+    rent?: string | number | null;
+    bhk?: string | number | null;
+    areaSqft?: string | number | null;
+  };
+  reasons: string[];
+  b2State: string;
+};
+
+const inr = (v: unknown) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? `₹${n.toLocaleString('en-IN')}` : '—';
+};
+
+// A single listing line inside an evidence modal.
+function ListingLine({ row }: { row: EvidenceRow }) {
+  return (
+    <li className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b py-2 last:border-0">
+      <span className="data-value text-sm font-semibold">{row.listingId}</span>
+      <span className="text-xs text-muted-foreground">
+        {String(row.observed.source ?? '—')} · {String(row.observed.bhk ?? '?')}BHK ·{' '}
+        {String(row.observed.areaSqft ?? '?')} sq ft
+      </span>
+      <span className="data-value text-sm">{inr(row.observed.rent)}</span>
+      {row.reasons.filter((r) => REASON_META[r]).length > 0 && (
+        <span className="w-full pt-1">
+          <ReasonChips reasons={row.reasons} />
+        </span>
+      )}
+    </li>
+  );
+}
+
+// Reusable modal: shows exactly which listings sit behind a headline number.
+export function EvidenceModal({
+  open,
+  onOpenChange,
+  title,
+  description,
+  rows,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description?: string;
+  rows: EvidenceRow[];
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          {description && <DialogDescription>{description}</DialogDescription>}
+        </DialogHeader>
+        {rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No listings to show.</p>
+        ) : (
+          <ul className="mt-1">
+            {rows.map((row) => (
+              <ListingLine key={row.listingId} row={row} />
+            ))}
+          </ul>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 // Inline chips for a single listing's reasons. Compact by default (the table),
@@ -291,26 +372,39 @@ export function ConfidenceDerivation({
   trustedCount,
   portals,
   looMovementPct,
+  rows,
 }: {
   confidence: Confidence;
   trustedCount: number;
   portals: number;
   looMovementPct: number | null;
+  rows?: EvidenceRow[];
 }) {
+  const [modal, setModal] = useState<null | 'trusted' | 'portals'>(null);
+  const trusted = (rows ?? []).filter((r) => r.b2State === 'include');
+  const portalNames = Array.from(
+    new Set(trusted.map((r) => String(r.observed.source ?? '—'))),
+  ).sort();
+
   const factors = [
     {
+      key: 'trusted' as const,
       label: 'Sample size',
       value: `${trustedCount} trusted listings`,
       ok: trustedCount >= 8,
       hint: 'More independent listings agreeing means a steadier rate.',
+      clickable: trusted.length > 0,
     },
     {
+      key: 'portals' as const,
       label: 'Source diversity',
       value: `${portals} portal${portals === 1 ? '' : 's'}`,
       ok: portals >= 3,
       hint: 'Several portals reduce any single source’s skew.',
+      clickable: portalNames.length > 0,
     },
     {
+      key: null,
       label: 'Stability',
       value:
         looMovementPct === null
@@ -318,14 +412,15 @@ export function ConfidenceDerivation({
           : `${looMovementPct}% if one row is dropped`,
       ok: looMovementPct !== null && looMovementPct <= 2.5,
       hint: 'A rate that barely moves when the biggest listing is removed is robust.',
+      clickable: false,
     },
   ];
   return (
     <div className="rounded-xl border bg-white p-5">
       <p className="data-label">Why this confidence level</p>
       <p className="mt-1 text-sm text-muted-foreground">
-        The tier isn’t asserted — it’s derived from three checks. This is what
-        makes the rate defensible.
+        The tier isn’t asserted — it’s derived from three checks. Tap a check to
+        see the exact listings behind it.
       </p>
       <div className="mt-4 space-y-3">
         {factors.map((f) => (
@@ -336,7 +431,18 @@ export function ConfidenceDerivation({
             />
             <div>
               <p className="text-sm font-semibold">
-                {f.label}: <span className="font-normal">{f.value}</span>
+                {f.label}:{' '}
+                {f.clickable && f.key ? (
+                  <button
+                    type="button"
+                    onClick={() => setModal(f.key)}
+                    className="font-normal text-[var(--flent-teal)] underline decoration-dotted underline-offset-2 hover:decoration-solid"
+                  >
+                    {f.value}
+                  </button>
+                ) : (
+                  <span className="font-normal">{f.value}</span>
+                )}
               </p>
               <p className="text-xs leading-5 text-muted-foreground">{f.hint}</p>
             </div>
@@ -349,6 +455,21 @@ export function ConfidenceDerivation({
         don’t hold, the rate is labelled lower-confidence — or, if there simply
         isn’t enough evidence, we say so instead of guessing.
       </p>
+
+      <EvidenceModal
+        open={modal === 'trusted'}
+        onOpenChange={(o) => !o && setModal(null)}
+        title={`${trusted.length} trusted listings`}
+        description="These are the listings that count toward the market rate."
+        rows={trusted}
+      />
+      <EvidenceModal
+        open={modal === 'portals'}
+        onOpenChange={(o) => !o && setModal(null)}
+        title={`${portalNames.length} sources in the rate`}
+        description={portalNames.join(' · ')}
+        rows={trusted}
+      />
     </div>
   );
 }
