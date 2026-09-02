@@ -1,11 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
   Copy,
   FileSpreadsheet,
   Gauge,
+  Lock,
   ShieldCheck,
   TriangleAlert,
 } from 'lucide-react';
@@ -313,6 +317,122 @@ export function TrustSignals({
         }
         rows={openFlag ? flaggedRows(openFlag) : []}
       />
+    </div>
+  );
+}
+
+// Answers three questions users kept asking: where does Problem 1 end, what are
+// the next steps, and how does it move to Problems 2 and 3. Problem 1 ends at a
+// frozen, versioned market-evidence record. That record is then consumed by the
+// decision (Problem 3), and — once the resulting deal's real outcome is known —
+// feeds the calibration loop (Problem 2). It's a hand-off then a loop, not a
+// linear march.
+export function NextSteps({
+  isComplete,
+  onComplete,
+  blockers,
+}: {
+  isComplete: boolean;
+  onComplete: () => void;
+  blockers: number;
+}) {
+  const steps = [
+    {
+      title: 'Market rate + confidence',
+      caption: 'This tool — you are here',
+      done: true,
+    },
+    {
+      title: 'Freeze the evidence',
+      caption: isComplete
+        ? 'Done — versioned & locked'
+        : 'Completes Problem 1',
+      done: isComplete,
+    },
+    {
+      title: 'Decision',
+      caption: 'ACQUIRE / NEGOTIATE / HOLD / PASS · Problem 3',
+      done: false,
+    },
+    {
+      title: 'Outcome → calibration',
+      caption: 'Real result improves future rates · Problem 2',
+      done: false,
+    },
+  ];
+  return (
+    <div className="rounded-xl border bg-white p-5">
+      <p className="data-label">Where this goes next</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Problem 1 ends when you freeze this market evidence. From there it feeds
+        the decision, and later the learning loop — it never decides on its own.
+      </p>
+
+      <ol className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-stretch">
+        {steps.map((step, i) => (
+          <li key={step.title} className="flex flex-1 items-stretch gap-2">
+            <div
+              className={`flex-1 rounded-lg border p-3 ${step.done ? 'border-teal-200 bg-teal-50/50' : 'bg-[var(--warm-canvas)]'}`}
+            >
+              <div className="flex items-center gap-1.5">
+                {step.done ? (
+                  <CheckCircle2 className="size-4 text-[var(--flent-teal)]" />
+                ) : (
+                  <span className="size-4 rounded-full border border-slate-300" />
+                )}
+                <p className="text-xs font-bold">{step.title}</p>
+              </div>
+              <p className="mt-1 text-[0.6875rem] leading-4 text-muted-foreground">
+                {step.caption}
+              </p>
+            </div>
+            {i < steps.length - 1 && (
+              <ArrowRight className="hidden size-4 shrink-0 self-center text-muted-foreground sm:block" />
+            )}
+          </li>
+        ))}
+      </ol>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3 border-t pt-4">
+        {isComplete ? (
+          <span className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-sm font-semibold text-teal-900">
+            <Lock className="size-4" /> Market evidence frozen — Problem 1
+            complete
+          </span>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={onComplete}
+              disabled={blockers > 0}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+            >
+              <Lock className="size-4" /> Freeze &amp; complete market review
+            </button>
+            {blockers > 0 && (
+              <span className="text-xs text-muted-foreground">
+                {blockers} open item{blockers === 1 ? '' : 's'} to resolve first
+                (listings needing a call or evidence tasks).
+              </span>
+            )}
+          </>
+        )}
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-4 text-xs">
+        <Link
+          href="/decision"
+          className="font-semibold text-[var(--flent-teal)] hover:underline"
+        >
+          Preview the decision (Problem 3) →
+        </Link>
+        <Link
+          href="/calibration"
+          className="font-semibold text-[var(--flent-teal)] hover:underline"
+        >
+          See the calibration loop (Problem 2) →
+        </Link>
+      </div>
     </div>
   );
 }

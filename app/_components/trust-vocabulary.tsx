@@ -380,31 +380,31 @@ export function ConfidenceDerivation({
   looMovementPct: number | null;
   rows?: EvidenceRow[];
 }) {
-  const [modal, setModal] = useState<null | 'trusted' | 'portals'>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const trusted = (rows ?? []).filter((r) => r.b2State === 'include');
-  const portalNames = Array.from(
-    new Set(trusted.map((r) => String(r.observed.source ?? '—'))),
-  ).sort();
+  const portalCounts = new Map<string, number>();
+  for (const r of trusted) {
+    const src = String(r.observed.source ?? '—');
+    portalCounts.set(src, (portalCounts.get(src) ?? 0) + 1);
+  }
+  const portalBreakdown = Array.from(portalCounts.entries()).sort((a, b) =>
+    a[0].localeCompare(b[0]),
+  );
 
   const factors = [
     {
-      key: 'trusted' as const,
       label: 'Sample size',
       value: `${trustedCount} trusted listings`,
       ok: trustedCount >= 8,
       hint: 'More independent listings agreeing means a steadier rate.',
-      clickable: trusted.length > 0,
     },
     {
-      key: 'portals' as const,
       label: 'Source diversity',
       value: `${portals} portal${portals === 1 ? '' : 's'}`,
       ok: portals >= 3,
       hint: 'Several portals reduce any single source’s skew.',
-      clickable: portalNames.length > 0,
     },
     {
-      key: null,
       label: 'Stability',
       value:
         looMovementPct === null
@@ -412,15 +412,28 @@ export function ConfidenceDerivation({
           : `${looMovementPct}% if one row is dropped`,
       ok: looMovementPct !== null && looMovementPct <= 2.5,
       hint: 'A rate that barely moves when the biggest listing is removed is robust.',
-      clickable: false,
     },
   ];
+  const canInspect = trusted.length > 0;
   return (
-    <div className="rounded-xl border bg-white p-5">
+    // oxlint-disable-next-line jsx-a11y/no-static-element-interactions
+    <div
+      className={`rounded-xl border bg-white p-5 ${canInspect ? 'cursor-pointer transition-shadow hover:shadow-sm' : ''}`}
+      onClick={canInspect ? () => setModalOpen(true) : undefined}
+      role={canInspect ? 'button' : undefined}
+      tabIndex={canInspect ? 0 : undefined}
+      onKeyDown={
+        canInspect
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') setModalOpen(true);
+            }
+          : undefined
+      }
+    >
       <p className="data-label">Why this confidence level</p>
       <p className="mt-1 text-sm text-muted-foreground">
-        The tier isn’t asserted — it’s derived from three checks. Tap a check to
-        see the exact listings behind it.
+        The tier isn’t asserted — it’s derived from three checks.
+        {canInspect ? ' Click to see the exact sources and listings behind it.' : ''}
       </p>
       <div className="mt-4 space-y-3">
         {factors.map((f) => (
@@ -431,18 +444,7 @@ export function ConfidenceDerivation({
             />
             <div>
               <p className="text-sm font-semibold">
-                {f.label}:{' '}
-                {f.clickable && f.key ? (
-                  <button
-                    type="button"
-                    onClick={() => setModal(f.key)}
-                    className="font-normal text-[var(--flent-teal)] underline decoration-dotted underline-offset-2 hover:decoration-solid"
-                  >
-                    {f.value}
-                  </button>
-                ) : (
-                  <span className="font-normal">{f.value}</span>
-                )}
+                {f.label}: <span className="font-normal">{f.value}</span>
               </p>
               <p className="text-xs leading-5 text-muted-foreground">{f.hint}</p>
             </div>
@@ -456,20 +458,61 @@ export function ConfidenceDerivation({
         isn’t enough evidence, we say so instead of guessing.
       </p>
 
-      <EvidenceModal
-        open={modal === 'trusted'}
-        onOpenChange={(o) => !o && setModal(null)}
-        title={`${trusted.length} trusted listings`}
-        description="These are the listings that count toward the market rate."
-        rows={trusted}
-      />
-      <EvidenceModal
-        open={modal === 'portals'}
-        onOpenChange={(o) => !o && setModal(null)}
-        title={`${portalNames.length} sources in the rate`}
-        description={portalNames.join(' · ')}
-        rows={trusted}
-      />
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent
+          className="max-h-[80vh] overflow-y-auto sm:max-w-lg"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DialogHeader>
+            <DialogTitle>The evidence behind this rate</DialogTitle>
+            <DialogDescription>
+              {trusted.length} trusted listings across {portalBreakdown.length}{' '}
+              sources.
+            </DialogDescription>
+          </DialogHeader>
+          <div>
+            <p className="data-label">Sources in the rate</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {portalBreakdown.map(([src, count]) => (
+                <span
+                  key={src}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-900"
+                >
+                  {src} · {count}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="mt-4">
+            <p className="data-label">Trusted listings</p>
+            <ul className="mt-1">
+              {trusted.map((row) => (
+                <li
+                  key={row.listingId}
+                  className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b py-2 text-sm last:border-0"
+                >
+                  <span className="data-value font-semibold">
+                    {row.listingId}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {String(row.observed.source ?? '—')} ·{' '}
+                    {String(row.observed.bhk ?? '?')}BHK ·{' '}
+                    {String(row.observed.areaSqft ?? '?')} sq ft
+                  </span>
+                  <span className="data-value">
+                    {(() => {
+                      const n = Number(row.observed.rent);
+                      return Number.isFinite(n)
+                        ? `₹${n.toLocaleString('en-IN')}`
+                        : '—';
+                    })()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

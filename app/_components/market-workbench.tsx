@@ -1,7 +1,6 @@
 'use client';
 /* oxlint-disable react/react-compiler */
 
-import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
@@ -43,6 +42,7 @@ import { MobileHeader, ProductRail } from './boss-shell';
 import {
   EvidenceFunnel,
   MarketAnswer,
+  NextSteps,
   ProblemOneOrientation,
   ScopeNote,
   TrustSignals,
@@ -342,6 +342,8 @@ export function MarketWorkbench({
                   pending={pending}
                   unresolved={unresolved}
                   onOpenMarket={() => setSection('market')}
+                  isComplete={Boolean(run.reviewClosure)}
+                  onComplete={() => setCompletionOpen(true)}
                 />
               </TabsContent>
               <TabsContent value="market" className="pt-5">
@@ -491,12 +493,16 @@ function DealOverview({
   pending,
   unresolved,
   onOpenMarket,
+  isComplete,
+  onComplete,
 }: {
   run: StoredRun;
   assessment: ReturnType<typeof assessMarketReview>;
   pending: number;
   unresolved: number;
   onOpenMarket: () => void;
+  isComplete: boolean;
+  onComplete: () => void;
 }) {
   const assessed = assessment.evidenceCoverage.filter(
     (item) => item.status === 'assessed',
@@ -599,47 +605,23 @@ function DealOverview({
           </CardContent>
         </Card>
       </div>
+      <NextSteps
+        isComplete={isComplete}
+        onComplete={onComplete}
+        blockers={pending + unresolved}
+      />
       <Card>
         <CardHeader className="border-b">
-          <CardTitle>What this market evidence feeds into</CardTitle>
+          <CardTitle>How people work on this together</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
-            Problem 1 produces one input — a trusted rate with its confidence and
-            caveats. Here’s where it goes and how people work on it together.
+            Not a static sign-off chain — real, attributed collaboration.
           </p>
         </CardHeader>
-        <CardContent className="grid gap-4 py-5 md:grid-cols-3">
-          <div>
-            <p className="data-label">The handoff</p>
-            <p className="mt-1.5 text-sm leading-6">
-              Once complete, this run freezes into a versioned market-evidence
-              record — the rate, its confidence tier, the caveats, and any open
-              tasks — that the acquisition decision consumes. It never decides on
-              its own.
-            </p>
-          </div>
-          <div>
-            <p className="data-label">How people collaborate</p>
-            <p className="mt-1.5 text-sm leading-6">
-              Not a static sign-off chain. Anyone can overrule a listing (with a
-              recorded reason) or raise an evidence task with an owner — every
-              action is attributed in the history, so the review is genuinely
-              multi-person and auditable.
-            </p>
-          </div>
-          <div>
-            <p className="data-label">Downstream decision</p>
-            <p className="mt-1.5 text-sm leading-6">
-              The ACQUIRE / NEGOTIATE / HOLD / PASS call and the ask-vs-market
-              comparison live in the decision view — a separate problem that reads
-              this benchmark rather than recomputing it.
-            </p>
-            <Link
-              href="/decision"
-              className="mt-2 inline-block text-xs font-semibold text-[var(--flent-teal)] hover:underline"
-            >
-              See the decision view →
-            </Link>
-          </div>
+        <CardContent className="py-5 text-sm leading-6">
+          Anyone can overrule a listing (with a recorded reason) or raise an
+          evidence task with an owner. Every action is attributed in the history,
+          so the review is genuinely multi-person and auditable — and completing
+          it freezes one versioned record the whole team can trust.
         </CardContent>
       </Card>
     </div>
