@@ -16,6 +16,7 @@ import {
   Loader2,
   RefreshCw,
   Search,
+  Send,
   ShieldCheck,
   UserRoundCheck,
 } from 'lucide-react';
@@ -716,14 +717,18 @@ function PendingByOwner({
                         <Badge
                           variant="outline"
                           className={
-                            task.status === 'blocked'
-                              ? 'shrink-0 border-red-200 bg-red-50 text-red-800'
-                              : 'shrink-0 border-amber-200 bg-amber-50 text-amber-900'
+                            task.assignee && task.notifiedAt
+                              ? 'shrink-0 border-teal-200 bg-teal-50 text-teal-900'
+                              : task.status === 'blocked'
+                                ? 'shrink-0 border-red-200 bg-red-50 text-red-800'
+                                : 'shrink-0 border-amber-200 bg-amber-50 text-amber-900'
                           }
                         >
-                          {task.owner && task.owner !== 'Unassigned'
-                            ? `With ${task.owner}`
-                            : 'Unassigned'}
+                          {task.assignee
+                            ? `With ${task.assignee}${task.notifiedAt ? ' · notified' : ' · not notified'}`
+                            : task.owner && task.owner !== 'Unassigned'
+                              ? task.owner
+                              : 'Unassigned'}
                         </Badge>
                       </button>
                     </li>
@@ -822,8 +827,12 @@ function MarketWorkspace(props: {
                 requestId: item.id,
                 status: item.status,
                 owner: item.owner,
+                assignee: item.assignee,
                 evidenceNote: item.evidenceNote,
               })
+            }
+            notify={(requestId) =>
+              props.action({ action: 'notify_request', requestId })
             }
           />
         </TabsContent>
@@ -1284,19 +1293,30 @@ function EvidenceTasks({
   busyId,
   locked,
   save,
+  notify,
 }: {
   items: EvidenceRequest[];
   busyId: string | null;
   locked: boolean;
   save: (item: EvidenceRequest) => Promise<unknown>;
+  notify: (requestId: string) => Promise<unknown>;
 }) {
   const [drafts, setDrafts] = useState(items);
+  const [notifyingId, setNotifyingId] = useState<string | null>(null);
   const change = (id: string, key: keyof EvidenceRequest, value: string) =>
     setDrafts((current) =>
       current.map((item) =>
         item.id === id ? { ...item, [key]: value } : item,
       ),
     );
+  async function runNotify(requestId: string) {
+    setNotifyingId(requestId);
+    try {
+      await notify(requestId);
+    } finally {
+      setNotifyingId(null);
+    }
+  }
   return (
     <div className="space-y-4">
       <Alert className="border-sky-200 bg-sky-50">
@@ -1304,8 +1324,9 @@ function EvidenceTasks({
         <AlertTitle>Why these follow-ups exist</AlertTitle>
         <AlertDescription>
           They track missing facts that cannot be resolved from the uploaded
-          listing fields. Each task names the decision impact, owner and
-          resolution evidence.
+          listing fields. Each names the decision impact, an accountable role and
+          the person it&apos;s assigned to — and every one must be resolved
+          before the market evidence can be frozen.
         </AlertDescription>
       </Alert>
       {locked && (
@@ -1318,31 +1339,69 @@ function EvidenceTasks({
           </AlertDescription>
         </Alert>
       )}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <ul className="space-y-3">
         {drafts.map((item) => {
           const purpose = requestPurpose(item);
+          // Server truth for the notification stamp (notify is a separate action;
+          // the draft only holds the editable fields).
+          const saved = items.find((i) => i.id === item.id);
+          const notifiedAt = saved?.notifiedAt ?? null;
+          const savedAssignee = saved?.assignee ?? '';
+          const assignee = item.assignee.trim();
+          const assigneeChanged = assignee !== savedAssignee.trim();
+          const saving = busyId === item.id;
+          const notifying = notifyingId === item.id;
           return (
-            <Card key={item.id}>
-              <CardHeader className="border-b">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <CardTitle className="text-base">{item.title}</CardTitle>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      {purpose.why}
-                    </p>
-                  </div>
-                  <TaskBadge status={item.status} />
+            <li key={item.id} className="rounded-lg border bg-white p-4">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold leading-5">
+                    {item.title}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    {purpose.why}
+                  </p>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4 py-5">
-                <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-950">
-                  <strong>Decision impact:</strong> {purpose.decisionImpact}
-                </div>
+                <TaskBadge status={item.status} />
+              </div>
+
+              <p className="mt-2 flex flex-wrap items-center gap-x-1.5 text-xs leading-5 text-amber-900">
+                <span className="rounded-full bg-amber-100 px-1.5 py-0.5 font-semibold">
+                  Decision impact
+                </span>
+                {purpose.decisionImpact}
+              </p>
+
+              {/* Assignment cue — who owns it and whether they've been told. */}
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                {!assignee ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-semibold text-slate-600">
+                    <UserRoundCheck className="size-3.5" /> Unassigned
+                  </span>
+                ) : notifiedAt && !assigneeChanged ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 font-semibold text-teal-900">
+                    <CheckCircle2 className="size-3.5" /> Assigned to {assignee} ·
+                    notified {dateTime(notifiedAt)}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 font-semibold text-amber-900">
+                    <Send className="size-3.5" /> Assigned to {assignee} ·{' '}
+                    {assigneeChanged ? 'save, then notify' : 'not yet notified'}
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-3 grid gap-3 md:grid-cols-[auto_1fr]">
                 <div>
-                  <Label htmlFor={`owner-${item.id}`}>Accountable role</Label>
+                  <Label
+                    htmlFor={`owner-${item.id}`}
+                    className="text-xs text-muted-foreground"
+                  >
+                    Accountable role
+                  </Label>
                   <select
                     id={`owner-${item.id}`}
-                    className="control-select mt-2"
+                    className="control-select mt-1.5"
                     value={item.owner}
                     disabled={locked}
                     onChange={(e) => change(item.id, 'owner', e.target.value)}
@@ -1355,57 +1414,105 @@ function EvidenceTasks({
                   </select>
                 </div>
                 <div>
-                  <Label htmlFor={`note-${item.id}`}>
-                    Evidence reference and resolution
+                  <Label
+                    htmlFor={`assignee-${item.id}`}
+                    className="text-xs text-muted-foreground"
+                  >
+                    Assigned person
                   </Label>
-                  <Textarea
-                    id={`note-${item.id}`}
-                    className="mt-2"
-                    value={item.evidenceNote}
+                  <Input
+                    id={`assignee-${item.id}`}
+                    className="mt-1.5"
+                    value={item.assignee}
                     disabled={locked}
                     onChange={(e) =>
-                      change(item.id, 'evidenceNote', e.target.value)
+                      change(item.id, 'assignee', e.target.value)
                     }
-                    placeholder="Name the source, what it proves, and any remaining limitation."
+                    placeholder="Name the person accountable, e.g. Priya Nair"
                   />
-                  <p className="mt-1.5 text-xs text-muted-foreground">
-                    Required before resolution · 12 characters minimum
-                  </p>
                 </div>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <select
-                    aria-label={`Status for ${item.title}`}
-                    className="control-select sm:w-auto"
-                    value={item.status}
-                    disabled={locked}
-                    onChange={(e) => change(item.id, 'status', e.target.value)}
-                  >
-                    <option value="open">To do</option>
-                    <option value="blocked">Blocked</option>
-                    <option value="resolved">Resolved</option>
-                  </select>
-                  <Button
-                    disabled={
-                      locked || busyId !== null || Boolean(!item.owner.trim())
-                    }
-                    onClick={() => save(item)}
-                  >
-                    {busyId === item.id ? (
-                      <Loader2 className="animate-spin" />
-                    ) : (
-                      <Check />
-                    )}{' '}
-                    {busyId === item.id ? 'Saving…' : 'Save task'}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Last updated {dateTime(item.updatedAt)}
+              </div>
+
+              <div className="mt-3">
+                <Label
+                  htmlFor={`note-${item.id}`}
+                  className="text-xs text-muted-foreground"
+                >
+                  Evidence reference and resolution
+                </Label>
+                <Textarea
+                  id={`note-${item.id}`}
+                  className="mt-1.5"
+                  rows={2}
+                  value={item.evidenceNote}
+                  disabled={locked}
+                  onChange={(e) =>
+                    change(item.id, 'evidenceNote', e.target.value)
+                  }
+                  placeholder="Name the source, what it proves, and any remaining limitation."
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Required before resolution · 12 characters minimum
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
+                <select
+                  aria-label={`Status for ${item.title}`}
+                  className="control-select sm:w-auto"
+                  value={item.status}
+                  disabled={locked}
+                  onChange={(e) => change(item.id, 'status', e.target.value)}
+                >
+                  <option value="open">To do</option>
+                  <option value="blocked">Blocked</option>
+                  <option value="resolved">Resolved</option>
+                </select>
+                <Button
+                  variant="outline"
+                  disabled={locked || saving || busyId !== null || !item.owner.trim()}
+                  onClick={() => save(item)}
+                >
+                  {saving ? <Loader2 className="animate-spin" /> : <Check />}
+                  {saving ? 'Saving…' : 'Save task'}
+                </Button>
+                <Button
+                  variant="outline"
+                  disabled={
+                    locked ||
+                    notifying ||
+                    !assignee ||
+                    assigneeChanged ||
+                    Boolean(notifiedAt)
+                  }
+                  onClick={() => runNotify(item.id)}
+                  title={
+                    assigneeChanged
+                      ? 'Save the new assignee before notifying'
+                      : notifiedAt
+                        ? 'Already notified'
+                        : 'Notify the assignee in BOSS'
+                  }
+                >
+                  {notifying ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <Send />
+                  )}
+                  {notifiedAt && !assigneeChanged
+                    ? 'Notified'
+                    : notifying
+                      ? 'Notifying…'
+                      : 'Notify'}
+                </Button>
+                <span className="ml-auto text-xs text-muted-foreground">
+                  Updated {dateTime(item.updatedAt)}
+                </span>
+              </div>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </div>
   );
 }

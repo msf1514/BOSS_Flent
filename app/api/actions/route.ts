@@ -107,11 +107,10 @@ export async function POST(request: Request) {
       const status = value('status');
       const owner =
         value('owner', 'Unassigned').trim().slice(0, 80) || 'Unassigned';
+      const assignee = value('assignee').trim().slice(0, 80);
       const evidenceNote = value('evidenceNote').trim().slice(0, 2000);
-      if (
-        !['open', 'blocked', 'resolved'].includes(status) ||
-        !run.requests.some((item) => item.id === requestId)
-      )
+      const existing = run.requests.find((item) => item.id === requestId);
+      if (!['open', 'blocked', 'resolved'].includes(status) || !existing)
         return json({ error: 'Invalid evidence request update.' }, 400);
       if (status === 'resolved' && evidenceNote.length < 12)
         return json(
@@ -129,13 +128,26 @@ export async function POST(request: Request) {
           },
           400,
         );
+      // Re-assigning to a different person invalidates the earlier "notified"
+      // stamp — the new person hasn't been told yet, so the cue must not claim it.
+      const clearNotified = existing.assignee !== assignee;
       const timestamp = now();
       await db().batch([
         db()
           .prepare(
-            `UPDATE evidence_requests SET owner=?,status=?,evidence_note=?,updated_at=? WHERE id=? AND run_id=?`,
+            clearNotified
+              ? `UPDATE evidence_requests SET owner=?,assignee=?,status=?,evidence_note=?,updated_at=?,notified_at=NULL WHERE id=? AND run_id=?`
+              : `UPDATE evidence_requests SET owner=?,assignee=?,status=?,evidence_note=?,updated_at=? WHERE id=? AND run_id=?`,
           )
-          .bind(owner, status, evidenceNote, timestamp, requestId, runId),
+          .bind(
+            owner,
+            assignee,
+            status,
+            evidenceNote,
+            timestamp,
+            requestId,
+            runId,
+          ),
         db()
           .prepare(
             `INSERT INTO audit_events(id,deal_id,run_id,event_type,entity_id,actor,payload_json,created_at) VALUES(?,?,?,?,?,?,?,?)`,
@@ -147,7 +159,54 @@ export async function POST(request: Request) {
             'evidence_request_updated',
             requestId,
             actor.label,
-            JSON.stringify({ actorId: actor.id, status, owner, evidenceNote }),
+            JSON.stringify({
+              actorId: actor.id,
+              status,
+              owner,
+              assignee,
+              evidenceNote,
+            }),
+            timestamp,
+          ),
+      ]);
+      return json({ run: await getRun(runId) });
+    }
+    if (body.action === 'notify_request') {
+      // Hand the task to its named assignee: record an in-app notification with a
+      // timestamp and an audit event. There is no external email/Slack here — the
+      // honest record is that the assignee was notified within BOSS.
+      const requestId = value('requestId').slice(0, 200);
+      const target = run.requests.find((item) => item.id === requestId);
+      if (!target)
+        return json({ error: 'Invalid evidence task.' }, 400);
+      if (!target.assignee.trim())
+        return json(
+          { error: 'Assign the task to a person before notifying them.' },
+          400,
+        );
+      const timestamp = now();
+      await db().batch([
+        db()
+          .prepare(
+            `UPDATE evidence_requests SET notified_at=?,updated_at=? WHERE id=? AND run_id=?`,
+          )
+          .bind(timestamp, timestamp, requestId, runId),
+        db()
+          .prepare(
+            `INSERT INTO audit_events(id,deal_id,run_id,event_type,entity_id,actor,payload_json,created_at) VALUES(?,?,?,?,?,?,?,?)`,
+          )
+          .bind(
+            id('evt'),
+            run.dealId,
+            runId,
+            'evidence_request_notified',
+            requestId,
+            actor.label,
+            JSON.stringify({
+              actorId: actor.id,
+              assignee: target.assignee,
+              title: target.title,
+            }),
             timestamp,
           ),
       ]);

@@ -1,5 +1,5 @@
 import { env } from 'cloudflare:workers';
-import { schemaStatements } from '@/db/schema';
+import { migrationStatements, schemaStatements } from '@/db/schema';
 import type { RequestActor } from '@/lib/auth';
 import {
   ENGINE_VERSION,
@@ -45,7 +45,13 @@ export type ReviewRecord = {
 export type EvidenceRequest = {
   id: string;
   title: string;
+  // The accountable role (Market analyst, Acquisition lead, …).
   owner: string;
+  // The named person the task is handed to. Empty until assigned.
+  assignee: string;
+  // ISO timestamp the assignee was notified, or null if not yet sent. Reset when
+  // the task is reassigned to a different person.
+  notifiedAt: string | null;
   status: 'open' | 'blocked' | 'resolved';
   evidenceNote: string;
   updatedAt: string;
@@ -77,6 +83,16 @@ export async function ensureSchema() {
   schemaReady ??= (async () => {
     for (const sql of schemaStatements) {
       await db().prepare(sql).run();
+    }
+    // Forward migrations: ADD COLUMN has no IF NOT EXISTS, so tolerate the
+    // "duplicate column name" case (column already present) and rethrow anything
+    // else. Idempotent and self-healing like the CREATE statements above.
+    for (const sql of migrationStatements) {
+      try {
+        await db().prepare(sql).run();
+      } catch (error) {
+        if (!/duplicate column name/i.test(String(error))) throw error;
+      }
     }
   })().catch((error) => {
     schemaReady = null;
@@ -145,6 +161,8 @@ export async function getRun(runId: string): Promise<StoredRun | null> {
     id: String(item.id),
     title: String(item.title),
     owner: String(item.owner),
+    assignee: (item.assignee as string | null) ?? '',
+    notifiedAt: (item.notified_at as string | null) ?? null,
     status: item.status as EvidenceRequest['status'],
     evidenceNote: String(item.evidence_note),
     updatedAt: String(item.updated_at),
@@ -419,13 +437,15 @@ export async function persistRun(input: {
     statements.push(
       db()
         .prepare(
-          `INSERT INTO evidence_requests(id,run_id,title,owner,status,evidence_note,updated_at,created_at) VALUES(?,?,?,?,?,?,?,?)`,
+          `INSERT INTO evidence_requests(id,run_id,title,owner,assignee,notified_at,status,evidence_note,updated_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)`,
         )
         .bind(
           id('req'),
           runId,
           item.title,
           item.owner,
+          item.assignee ?? '',
+          item.notifiedAt ?? null,
           item.status,
           item.evidenceNote,
           createdAt,

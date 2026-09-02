@@ -4,7 +4,7 @@ export const schemaStatements = [
   `CREATE TABLE IF NOT EXISTS runs (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL, upload_id TEXT NOT NULL, parent_run_id TEXT, version_number INTEGER NOT NULL CHECK(version_number > 0), engine_version TEXT NOT NULL, config_json TEXT NOT NULL, summary_json TEXT NOT NULL, validation_json TEXT NOT NULL, created_by TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS run_rows (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, listing_id TEXT NOT NULL, payload_json TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS review_actions (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, listing_id TEXT NOT NULL, decision TEXT NOT NULL CHECK(decision IN ('include','exclude','defer')), reason TEXT NOT NULL, actor TEXT NOT NULL, created_at TEXT NOT NULL)`,
-  `CREATE TABLE IF NOT EXISTS evidence_requests (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, title TEXT NOT NULL, owner TEXT NOT NULL, status TEXT NOT NULL CHECK(status IN ('open','blocked','resolved')), evidence_note TEXT NOT NULL, updated_at TEXT NOT NULL, created_at TEXT NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS evidence_requests (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, title TEXT NOT NULL, owner TEXT NOT NULL, assignee TEXT NOT NULL DEFAULT '', notified_at TEXT, status TEXT NOT NULL CHECK(status IN ('open','blocked','resolved')), evidence_note TEXT NOT NULL, updated_at TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS audit_events (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL, run_id TEXT, event_type TEXT NOT NULL, entity_id TEXT, actor TEXT NOT NULL, payload_json TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS run_operations (operation_key TEXT PRIMARY KEY, deal_id TEXT NOT NULL, run_id TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS market_review_closures (id TEXT PRIMARY KEY, deal_id TEXT NOT NULL UNIQUE, run_id TEXT NOT NULL, disposition TEXT NOT NULL CHECK(disposition IN ('usable_with_caveats','insufficient_evidence')), rationale TEXT NOT NULL, actor TEXT NOT NULL, created_at TEXT NOT NULL)`,
@@ -20,4 +20,14 @@ export const schemaStatements = [
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_evidence_artifacts_dedupe ON evidence_artifacts(deal_id, content_hash)`,
   `CREATE INDEX IF NOT EXISTS idx_evidence_artifacts_deal ON evidence_artifacts(deal_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_evidence_artifacts_kind ON evidence_artifacts(deal_id, kind)`,
+] as const;
+
+// Forward migrations for databases created before a column existed. SQLite's
+// `ALTER TABLE ... ADD COLUMN` has no `IF NOT EXISTS`, so each is run
+// individually and a "duplicate column name" error (the column already exists,
+// e.g. on a fresh DB that got it from CREATE TABLE above) is caught and ignored
+// in `ensureSchema`. Any other error still propagates.
+export const migrationStatements = [
+  `ALTER TABLE evidence_requests ADD COLUMN assignee TEXT NOT NULL DEFAULT ''`,
+  `ALTER TABLE evidence_requests ADD COLUMN notified_at TEXT`,
 ] as const;
