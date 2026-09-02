@@ -39,6 +39,7 @@ import type { AuditRow } from '@/lib/evidence-engine';
 import { assessMarketReview, requestPurpose } from '@/lib/market-review';
 import type { AuditEvent, EvidenceRequest, StoredRun } from '@/lib/storage';
 import { MobileHeader, ProductRail } from './boss-shell';
+import { InfoHint } from './info-hint';
 import {
   EvidenceFunnel,
   MarketAnswer,
@@ -548,6 +549,7 @@ function DealOverview({
           label="Trusted comparables"
           value={String(run.summary.baselines.B2.count)}
           note="Listings that count toward the rate"
+          info="How many listings survived every cleaning stage and now set the rate. This is the sample the median is taken from — the higher it is, the steadier the rate."
           onClick={
             trustedRows.length > 0 ? () => setTileModal('trusted') : undefined
           }
@@ -557,6 +559,7 @@ function DealOverview({
           label="Middle 50% of asking rents"
           value={`${money(run.summary.band.p25)} – ${money(run.summary.band.p75)}`}
           note="Where most comparable asks sit"
+          info="The interquartile range (25th to 75th percentile) of the trusted asks — the band the middle half of comparable listings fall in. A tight band means the comps agree; a wide one means asks are scattered, so treat the single median with more caution."
           onClick={
             bandRows.length > 0 ? () => setTileModal('band') : undefined
           }
@@ -566,6 +569,7 @@ function DealOverview({
           label="Work remaining"
           value={`${pending + unresolved}`}
           note={`${pending} listing decisions · ${unresolved} evidence tasks`}
+          info="What still has to clear before this market evidence can be frozen: flagged listings awaiting an include/exclude call, plus open evidence tasks. It must reach zero to complete the review."
           onClick={onOpenMarket}
           hint="Open the review"
         />
@@ -594,7 +598,10 @@ function DealOverview({
           }
         >
           <CardContent className="flex h-full flex-col py-6">
-            <p className="eyebrow">Current market posture</p>
+            <div className="flex items-center gap-1.5">
+              <p className="eyebrow">Current market posture</p>
+              <InfoHint label="Where this review stands right now and the single next thing to do to move it forward — from resolving flagged rows and evidence tasks, to applying your judgments into a new version, to freezing the packet. It mirrors the milestone tracker in the header." />
+            </div>
             <h2 className="mt-3 text-2xl font-bold tracking-[-0.035em]">
               {assessment.headline}
             </h2>
@@ -655,7 +662,10 @@ function PendingByOwner({
   return (
     <Card>
       <CardHeader className="border-b">
-        <CardTitle>What&apos;s pending, and with whom</CardTitle>
+        <div className="flex items-center gap-1.5">
+          <CardTitle>What&apos;s pending, and with whom</CardTitle>
+          <InfoHint label="Every open item blocking this review, grouped by who owns it: flagged listings needing a reviewer's call, and evidence tasks assigned to a named person. Nothing here is a generic 'people collaborate' note — each item must be resolved and is recorded in the history before the evidence can be frozen." />
+        </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Collaboration on a market review is concrete: these items must clear
           before the evidence can be frozen. Each is owned by a role and tracked
@@ -885,16 +895,19 @@ function MarketSummary({
           label="Current asking-rent median"
           value={money(b.B2.estimate)}
           note={`${b.B2.count} current comparables`}
+          info="The middle asking rent of the trusted comparables — the market rate. Median, not average, so one very high or low listing can't skew it. This is an asking benchmark, not an achieved or signed rent."
         />
         <Metric
           label="Middle 50% of asking rents"
           value={`${money(run.summary.band.p25)} – ${money(run.summary.band.p75)}`}
           note="25th to 75th percentile"
+          info="The band the middle half of trusted asks fall in (interquartile range). Tight means the comps agree; wide means asks are scattered and the single median deserves more caution."
         />
         <Metric
           label="Portals in the rate"
           value={String(run.summary.observedPortalLabelCount)}
           note="Different sources in the trusted set"
+          info="How many independent listing sources the trusted comparables span. More sources means less chance the rate is skewed by one portal's particular mix of listings — it directly feeds the confidence tier."
         />
         <Metric
           label="Reliance on one listing"
@@ -904,6 +917,7 @@ function MarketSummary({
               : `${run.summary.maximumLeaveOneOutMovementPct}%`
           }
           note="How much the rate moves if the most influential listing is dropped"
+          info="A stability check: we remove the single most influential listing and see how far the median shifts (leave-one-out). A small movement means no single listing is holding the rate up; a large one means the rate is fragile."
         />
       </div>
       <Card
@@ -933,6 +947,7 @@ function MarketSummary({
             count={b.B0.count}
             estimate={b.B0.estimate}
             detail="Every valid listing that matches the home's BHK."
+            info="Baseline B0: all structurally valid listings that share your home's BHK, before any society, area, furnishing or freshness rules. The widest, least-filtered view."
           />
           <ChevronRight className="hidden size-5 text-muted-foreground md:block" />
           <Stage
@@ -940,6 +955,7 @@ function MarketSummary({
             count={b.B1.count}
             estimate={b.B1.estimate}
             detail="Subject society, size, furnishing and freshness rules applied; likely duplicates collapsed."
+            info="Baseline B1: B0 narrowed to listings that actually match this home — right society, area within tolerance, same furnishing, recent enough — with cross-post duplicates collapsed to one."
           />
           <ChevronRight className="hidden size-5 text-muted-foreground md:block" />
           <Stage
@@ -947,6 +963,7 @@ function MarketSummary({
             count={b.B2.count}
             estimate={b.B2.estimate}
             detail="Policy-matched listings after recorded human judgments are incorporated."
+            info="Baseline B2: the trusted set that sets the rate — B1 with suspicious prices removed and your recorded include/exclude judgments applied. This is what the median is taken from."
           />
         </CardContent>
       </Card>
@@ -959,7 +976,10 @@ function MarketSummary({
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="border-amber-200">
           <CardHeader className="border-b border-amber-200">
-            <CardTitle>What this estimate can&apos;t tell you</CardTitle>
+            <div className="flex items-center gap-1.5">
+              <CardTitle>What this estimate can&apos;t tell you</CardTitle>
+              <InfoHint label="The honest limits of this number — what asking-rent listings can't establish (e.g. whether maintenance is included, or what rent was actually signed). These aren't excuses; they're the boundaries a reviewer must carry into the decision, so the rate isn't trusted for more than it proves." />
+            </div>
           </CardHeader>
           <CardContent className="space-y-3 py-5">
             {run.summary.limitations.map((item) => (
@@ -976,7 +996,10 @@ function MarketSummary({
         </Card>
         <Card>
           <CardHeader className="border-b">
-            <CardTitle>Version control</CardTitle>
+            <div className="flex items-center gap-1.5">
+              <CardTitle>Version control</CardTitle>
+              <InfoHint label="Why your changes never silently rewrite the answer. Each run is immutable; recorded include/exclude judgments don't take effect until you apply them into a new child version. That keeps a full, auditable history of what the rate was before and after every human call." />
+            </div>
           </CardHeader>
           <CardContent className="space-y-4 py-5">
             <p className="text-sm leading-6 text-muted-foreground">
@@ -1023,15 +1046,20 @@ function Stage({
   count,
   estimate,
   detail,
+  info,
 }: {
   label: string;
   count: number;
   estimate: number | null;
   detail: string;
+  info?: React.ReactNode;
 }) {
   return (
     <div className="rounded-lg border bg-slate-50/60 p-4">
-      <p className="data-label">{label}</p>
+      <p className="flex items-center gap-1.5 data-label">
+        {label}
+        {info && <InfoHint label={info} />}
+      </p>
       <div className="mt-2 flex items-baseline justify-between gap-3">
         <strong className="data-value text-xl">{count} rows</strong>
         <span className="data-value text-sm">{money(estimate)}</span>
@@ -1061,7 +1089,10 @@ function Comparables({
   return (
     <Card>
       <CardHeader className="border-b">
-        <CardTitle>Listing-by-listing review</CardTitle>
+        <div className="flex items-center gap-1.5">
+          <CardTitle>Listing-by-listing review</CardTitle>
+          <InfoHint label="Every listing the engine kept for inspection, with its state and the reasons behind it. Select any row to see why it counts, was collapsed as a duplicate, or was flagged — and to override that call with a recorded reason. This is where 'disagree with any single decision' happens." />
+        </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Every accepted row stays inspectable. Select a row to see why it is or
           is not influencing the current set.
@@ -1578,12 +1609,14 @@ function Metric({
   note,
   onClick,
   hint,
+  info,
 }: {
   label: string;
   value: string;
   note: string;
   onClick?: () => void;
   hint?: string;
+  info?: React.ReactNode;
 }) {
   const clickable = Boolean(onClick);
   return (
@@ -1603,7 +1636,10 @@ function Metric({
       }
     >
       <CardContent className="py-5">
-        <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+        <p className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+          {label}
+          {info && <InfoHint label={info} />}
+        </p>
         <p className="data-value mt-2 text-2xl font-semibold">{value}</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">{note}</p>
         {clickable && hint && (

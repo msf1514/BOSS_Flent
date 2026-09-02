@@ -19,6 +19,7 @@ import {
   Tag,
   TriangleAlert,
 } from 'lucide-react';
+import { InfoHint } from './info-hint';
 
 // The trust vocabulary, in one place. Every reason code the engine can attach to
 // a listing maps to a plain-language label, a short "what it means", a tone and
@@ -631,7 +632,10 @@ export function ConfidenceDerivation({
           : undefined
       }
     >
-      <p className="data-label">Why this confidence level</p>
+      <div className="flex items-center gap-1.5">
+        <p className="data-label">Why this confidence level</p>
+        <InfoHint label="The confidence tier (HIGH / MEDIUM / LOW / INSUFFICIENT) isn't a guess — it comes from three checks on the trusted set: how many listings agree, how many independent sources they span, and how much the rate moves if the single most influential listing is dropped. Weak checks lower the tier; too little evidence returns INSUFFICIENT instead of a number." />
+      </div>
       <p className="mt-1 text-sm text-muted-foreground">
         The tier isn’t asserted — it’s derived from three checks.
         {canInspect ? ' Click to see the exact sources and listings behind it.' : ''}

@@ -21,6 +21,7 @@ import {
   type Baseline,
   type EvidenceRow,
 } from './trust-vocabulary';
+import { InfoHint } from './info-hint';
 
 // Problem 1 orientation + visual trust layer.
 //
@@ -151,7 +152,12 @@ export function MarketAnswer({
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="data-label">Market rate for this home (asking median)</p>
+          <div className="flex items-center gap-1.5">
+            <p className="data-label">
+              Market rate for this home (asking median)
+            </p>
+            <InfoHint label="The middle (median) asking rent of the trusted comparable listings — half ask more, half ask less. We use the median, not the average, so one extreme listing can't drag the rate. It's an asking-rent benchmark, not an achieved or signed rent." />
+          </div>
           <p className={`mt-1 text-4xl font-bold tracking-[-0.04em] ${ui.text}`}>
             {median > 0 ? money(median) : '—'}
             <span className="text-lg font-semibold text-muted-foreground">
@@ -296,7 +302,10 @@ export function EvidenceFunnel({
           : undefined
       }
     >
-      <p className="data-label">How many listings survived cleaning</p>
+      <div className="flex items-center gap-1.5">
+        <p className="data-label">How many listings survived cleaning</p>
+        <InfoHint label="The funnel from every uploaded listing down to the few trusted for the rate: first keep only homes that match yours, then remove duplicates and flagged prices. A big drop is normal and healthy — it's the untrustworthy listings being taken out. Click the card for the full breakdown." />
+      </div>
       <p className="mt-1 text-sm text-muted-foreground">
         The number that matters isn&apos;t how many listings exist — it&apos;s how
         many you can actually trust.
@@ -429,6 +438,7 @@ export function TrustSignals({
       <div className="flex items-center gap-2">
         <ShieldCheck className="size-4 text-[var(--flent-teal)]" />
         <p className="data-label">What we caught and kept out of the rate</p>
+        <InfoHint label="The specific junk the engine detected and excluded from the rate: cross-post duplicates, suspected bait prices, aspirational asks, and mislabelled or impossible listings. Nothing is deleted — each stays in the review with its reason, and you can overrule any call." />
       </div>
       {!hasAny ? (
         <p className="mt-3 text-sm text-muted-foreground">
@@ -505,7 +515,10 @@ export function NextSteps({
   ];
   return (
     <div className="rounded-xl border bg-white p-5">
-      <p className="data-label">Where this goes next</p>
+      <div className="flex items-center gap-1.5">
+        <p className="data-label">Where this goes next</p>
+        <InfoHint label="How this market review fits the wider BOSS flow: Problem 1 ends by freezing a trusted market-evidence packet. That packet feeds the acquisition decision (Problem 3), and once the real deal outcome is known it feeds the calibration loop (Problem 2). This tool never makes the decision itself." />
+      </div>
       <p className="mt-1 text-sm text-muted-foreground">
         Problem 1 ends when you freeze this market evidence. From there it feeds
         the decision, and later the learning loop — it never decides on its own.
@@ -584,7 +597,10 @@ export function NextSteps({
 export function ScopeNote({ dimension }: { dimension: string }) {
   return (
     <div className="rounded-xl border border-dashed bg-[var(--warm-canvas)] p-6">
-      <p className="eyebrow">Not in this slice</p>
+      <div className="flex items-center gap-1.5">
+        <p className="eyebrow">Not in this slice</p>
+        <InfoHint label={`${dimension} is a real part of a BOSS acquisition decision, but it's owned by a different team and isn't scored from the listing data this tool has. Rather than invent a number from evidence we don't hold, we show it honestly as out of scope here.`} />
+      </div>
       <h3 className="mt-2 text-lg font-bold tracking-[-0.03em]">
         {dimension} is a separate part of the BOSS decision
       </h3>

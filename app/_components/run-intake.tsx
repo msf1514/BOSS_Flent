@@ -20,6 +20,7 @@ import type { RunConfig, ValidationIssue } from '@/lib/evidence-engine';
 import type { SourceInspection } from '@/lib/source-inspection';
 import type { StoredRun } from '@/lib/storage';
 import { MobileHeader, ProductRail } from './boss-shell';
+import { InfoHint } from './info-hint';
 
 type Notice = { kind: 'error' | 'success'; text: string } | null;
 
@@ -92,20 +93,37 @@ function TwoSourceExplainer() {
 // result screen then proves each stage with actual counts. Honest narration, not
 // fake progress: the messages advance for feel, the numbers arrive with the run.
 const ANALYSIS_STAGES = [
-  'Checking the file — validating every row',
-  'Matching listings to the home you’re pricing',
-  'Collapsing cross-posted duplicates',
-  'Flagging bait, aspirational and mislabelled prices',
-  'Scoring how much to trust the rate',
+  {
+    label: 'Checking the file — validating every row',
+    why: 'A bad row is caught here, not silently averaged into the rate.',
+  },
+  {
+    label: 'Matching listings to the home you’re pricing',
+    why: 'Only same-size, same-area, same-furnishing homes count as comparable.',
+  },
+  {
+    label: 'Collapsing cross-posted duplicates',
+    why: 'The same flat on three portals must count once, not three times.',
+  },
+  {
+    label: 'Flagging bait, aspirational and mislabelled prices',
+    why: 'Prices designed to mislead are pulled out for a human to check.',
+  },
+  {
+    label: 'Scoring how much to trust the rate',
+    why: 'Sample size, source diversity and stability set the confidence level.',
+  },
 ];
 
 function AnalysisPreloader() {
   const [stage, setStage] = useState(0);
-  // Advance through the stages, holding on the last until the run returns.
+  // Advance through the stages, holding on the last until the run returns. The
+  // cadence is deliberately unhurried: the point is to make the real cleaning
+  // work legible, not to fake a progress bar.
   useEffect(() => {
     const timer = setInterval(() => {
       setStage((s) => Math.min(s + 1, ANALYSIS_STAGES.length - 1));
-    }, 600);
+    }, 900);
     return () => clearInterval(timer);
   }, []);
   return (
@@ -120,29 +138,36 @@ function AnalysisPreloader() {
           first. Here’s what’s happening:
         </p>
         <ul className="mt-4 space-y-2.5">
-          {ANALYSIS_STAGES.map((label, index) => {
+          {ANALYSIS_STAGES.map((item, index) => {
             const done = index < stage;
             const active = index === stage;
             return (
-              <li key={label} className="flex items-center gap-2.5 text-sm">
-                {done ? (
-                  <CheckCircle2 className="size-4 shrink-0 text-[var(--flent-teal)]" />
-                ) : active ? (
-                  <Loader2 className="size-4 shrink-0 animate-spin text-[var(--flent-teal)]" />
-                ) : (
-                  <span className="size-4 shrink-0 rounded-full border border-slate-300" />
+              <li key={item.label} className="flex flex-col gap-1">
+                <div className="flex items-center gap-2.5 text-sm">
+                  {done ? (
+                    <CheckCircle2 className="size-4 shrink-0 text-[var(--flent-teal)]" />
+                  ) : active ? (
+                    <Loader2 className="size-4 shrink-0 animate-spin text-[var(--flent-teal)]" />
+                  ) : (
+                    <span className="size-4 shrink-0 rounded-full border border-slate-300" />
+                  )}
+                  <span
+                    className={
+                      done
+                        ? 'text-muted-foreground line-through decoration-teal-300'
+                        : active
+                          ? 'font-semibold'
+                          : 'text-muted-foreground'
+                    }
+                  >
+                    {item.label}
+                  </span>
+                </div>
+                {active && (
+                  <p className="ml-[1.625rem] text-xs leading-5 text-muted-foreground">
+                    {item.why}
+                  </p>
                 )}
-                <span
-                  className={
-                    done
-                      ? 'text-muted-foreground line-through decoration-teal-300'
-                      : active
-                        ? 'font-semibold'
-                        : 'text-muted-foreground'
-                  }
-                >
-                  {label}
-                </span>
               </li>
             );
           })}
@@ -160,12 +185,16 @@ function Field({
   label,
   htmlFor,
   helper,
+  info,
   children,
   state,
 }: {
   label: string;
   htmlFor: string;
   helper?: string;
+  // Plain-language explanation of what this field is and how it affects the
+  // comparable set — revealed on hover/focus of an info icon beside the label.
+  info?: React.ReactNode;
   children: React.ReactNode;
   // Colour psychology: 'needs' = a required field still empty (amber, draws the
   // eye); 'set' = a required field now filled (teal tick, reassures); undefined
@@ -187,6 +216,7 @@ function Field({
         className="data-label mb-2 flex items-center gap-1.5"
       >
         {label}
+        {info && <InfoHint label={info} />}
         {state === 'needs' && (
           <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[0.5625rem] font-bold tracking-normal text-amber-800">
             REQUIRED
@@ -356,7 +386,8 @@ export function RunIntake({
     // minimum window so its stages are actually visible — the point is to show
     // that we clean the evidence, not to hide a delay. Errors skip this wait.
     const startedAt = Date.now();
-    const MIN_PRELOADER_MS = 3000;
+    // Long enough that all five real stages (900ms cadence) are actually read.
+    const MIN_PRELOADER_MS = 5200;
     try {
       const body = new FormData();
       body.set('file', file);
@@ -504,43 +535,41 @@ export function RunIntake({
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="grid gap-4 py-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-                <div>
-                  <Label
-                    htmlFor="source-file"
-                    className="data-label mb-2 block"
-                  >
-                    Listing CSV
-                  </Label>
+              <CardContent className="py-5">
+                <Label htmlFor="source-file" className="data-label mb-2 block">
+                  Listing CSV
+                </Label>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <Input
                     ref={inputRef}
                     id="source-file"
                     type="file"
                     accept=".csv,text/csv"
-                    className="cursor-pointer bg-white file:cursor-pointer"
+                    className="h-11 min-w-0 flex-1 cursor-pointer bg-white file:cursor-pointer"
                     onChange={(event) =>
                       chooseFile(event.target.files?.[0] ?? null)
                     }
                   />
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    CSV only, up to 2 MB. The sample is a real 86-listing pull,
-                    anonymised.
-                  </p>
+                  <Button
+                    type="button"
+                    size="lg"
+                    variant="outline"
+                    className="shrink-0 sm:w-auto"
+                    disabled={!file || sourceBusy || runBusy}
+                    onClick={() => inspectSource()}
+                  >
+                    {sourceBusy ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      <FileSearch />
+                    )}
+                    {sourceBusy ? 'Checking…' : 'Check file'}
+                  </Button>
                 </div>
-                <Button
-                  type="button"
-                  size="lg"
-                  variant="outline"
-                  disabled={!file || sourceBusy || runBusy}
-                  onClick={() => inspectSource()}
-                >
-                  {sourceBusy ? (
-                    <Loader2 className="animate-spin" />
-                  ) : (
-                    <FileSearch />
-                  )}
-                  {sourceBusy ? 'Checking…' : 'Check file'}
-                </Button>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  CSV only, up to 2 MB. The sample is a real 86-listing pull,
+                  anonymised.
+                </p>
               </CardContent>
               {inspection && (
                 <CardContent className="grid gap-3 border-t bg-slate-50/60 py-4 sm:grid-cols-4">
@@ -596,6 +625,7 @@ export function RunIntake({
                     <Field
                       label="Society match"
                       htmlFor="society"
+                      info="The society or cluster name we match listings against. A listing must belong to this society family to count as comparable — it's how we keep out homes from unrelated buildings. Matched on the start of the name, so 'Lakeview' catches 'Lakeview Towers A/B'."
                       state={config.societyPrefix.trim() ? 'set' : 'needs'}
                     >
                       <Input
@@ -609,6 +639,7 @@ export function RunIntake({
                     <Field
                       label="BHK"
                       htmlFor="bhk"
+                      info="Bedrooms-Hall-Kitchen of the home you're pricing. Only listings with the same BHK enter the broad reference set — a 3BHK is never compared against your 2BHK. A listing wearing a different BHK label but matching your home's size is flagged as a possible mislabel rather than silently dropped."
                       state={config.bhk >= 1 ? 'set' : 'needs'}
                     >
                       <Input
@@ -622,6 +653,7 @@ export function RunIntake({
                     <Field
                       label="Area (sq ft)"
                       htmlFor="area"
+                      info="Built-up area of the home you're pricing, in square feet. Listings must fall within this area ± the tolerance below to count as comparable. It's also used to sanity-check listings: an area that's impossible for its BHK (e.g. a 1BHK at 2,100 sq ft) is flagged."
                       state={config.areaSqft >= 100 ? 'set' : 'needs'}
                     >
                       <Input
@@ -637,6 +669,7 @@ export function RunIntake({
                     <Field
                       label="Furnishing"
                       htmlFor="furnishing"
+                      info="Furnishing level of the home you're pricing. Furnishing moves rent a lot, so only listings at the same level are treated as directly comparable — a fully-furnished listing won't set the rate for your unfurnished home."
                       state={config.furnishing ? 'set' : 'needs'}
                     >
                       <select
@@ -664,14 +697,22 @@ export function RunIntake({
                       </span>
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                      <Field label="Deal name" htmlFor="deal-name">
+                      <Field
+                        label="Deal name"
+                        htmlFor="deal-name"
+                        info="A label for this market review so you can find it later in the deals list. It has no effect on the rate or which listings are trusted — it's just how this run is named."
+                      >
                         <Input
                           id="deal-name"
                           value={config.dealName}
                           onChange={(e) => update('dealName', e.target.value)}
                         />
                       </Field>
-                      <Field label="Evidence cutoff" htmlFor="cutoff">
+                      <Field
+                        label="Evidence cutoff"
+                        htmlFor="cutoff"
+                        info="The 'as of' date for this evidence. Listing age is measured from when a listing was last seen up to this date, so the run stays reproducible even if you re-open it weeks later. Usually the day you pulled the listings."
+                      >
                         <Input
                           id="cutoff"
                           type="date"
@@ -685,6 +726,7 @@ export function RunIntake({
                         label="Area tolerance"
                         htmlFor="tolerance"
                         helper="Allowed +/- from the home's area."
+                        info="How far a listing's area can differ from your home's and still count as comparable, in square feet. With area 1,175 and tolerance 100, listings from 1,075 to 1,275 sq ft qualify. Tighten it for a stricter, smaller comparable set; widen it to pull in more comps when the sample is thin."
                       >
                         <Input
                           id="tolerance"
@@ -700,6 +742,7 @@ export function RunIntake({
                         label="Maximum listing age"
                         htmlFor="age"
                         helper="Days from last seen to cutoff."
+                        info="The oldest a listing can be — measured as days between when it was last seen and the evidence cutoff — before it's dropped as stale. Older listings have usually already rented, so including them would price your home off homes that are no longer on the market."
                       >
                         <Input
                           id="age"
