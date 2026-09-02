@@ -371,10 +371,33 @@ export async function persistRun(input: {
         .bind(input.operationKey, input.dealId, runId, createdAt),
     );
   if (!input.parentRunId) {
-    for (const title of [
-      'Confirm whether maintenance is included in asking rents',
-      'Obtain achieved-rent or signed-lease evidence',
-    ])
+    // Evidence tasks are derived from what THIS run actually found, not a fixed
+    // list. Each names a real gap the uploaded listings can't resolve. We do NOT
+    // seed an 'achieved-rent' task: achieved rent is a Problem 2 concern, outside
+    // the Problem 1 (asking-rent) boundary.
+    const derived: string[] = [];
+    const rows = input.result.rows ?? [];
+    const reasonCount = (code: string) =>
+      rows.filter((r) => r.reasons?.includes(code)).length;
+    const suspicious =
+      reasonCount('suspected_bait_price') +
+      reasonCount('suspected_aspirational_ask');
+    const confidence = input.result.summary?.askingEvidenceConfidence;
+    const trusted = input.result.summary?.baselines?.B2?.count ?? 0;
+
+    if (suspicious > 0)
+      derived.push(
+        `Verify ${suspicious} suspicious price${suspicious === 1 ? '' : 's'} at source before trusting the rate`,
+      );
+    if (confidence === 'LOW' || confidence === 'INSUFFICIENT')
+      derived.push(
+        `Widen the comparable set — only ${trusted} trusted listing${trusted === 1 ? '' : 's'} survived; add sources or fresher listings`,
+      );
+    // Maintenance basis is genuinely never in a listings pull, so this stays a
+    // standing caveat on every run.
+    derived.push('Confirm whether maintenance is included in the asking rents');
+
+    for (const title of derived)
       statements.push(
         db()
           .prepare(

@@ -203,17 +203,23 @@ export function MarketAnswer({
   );
 }
 
-// The funnel: how many listings survived each honest cleaning stage.
+// The funnel: how many listings survived each honest cleaning stage. Clickable —
+// opens the list of listings that actually made it into the rate. Bars animate on
+// mount and the whole card lifts on hover.
 export function EvidenceFunnel({
   all,
   matched,
   trusted,
+  rows: dataRows,
 }: {
   all: number;
   matched: number;
   trusted: number;
+  rows?: EvidenceRow[];
 }) {
-  const rows = [
+  const [open, setOpen] = useState(false);
+  const trustedRows = (dataRows ?? []).filter((r) => r.b2State === 'include');
+  const stages = [
     {
       label: 'All uploaded listings',
       count: all,
@@ -234,30 +240,53 @@ export function EvidenceFunnel({
     },
   ];
   const max = Math.max(all, 1);
+  const canInspect = trustedRows.length > 0;
   return (
-    <div className="rounded-xl border bg-white p-5">
+    // oxlint-disable-next-line jsx-a11y/no-static-element-interactions
+    <div
+      className={`rounded-xl border bg-white p-5 ${canInspect ? 'cursor-pointer transition-shadow hover:shadow-sm' : ''}`}
+      onClick={canInspect && !open ? () => setOpen(true) : undefined}
+      role={canInspect ? 'button' : undefined}
+      tabIndex={canInspect ? 0 : undefined}
+      onKeyDown={
+        canInspect
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') setOpen(true);
+            }
+          : undefined
+      }
+    >
       <p className="data-label">How many listings survived cleaning</p>
       <p className="mt-1 text-sm text-muted-foreground">
         The number that matters isn&apos;t how many listings exist — it&apos;s how
         many you can actually trust.
+        {canInspect ? ' Click to see the ones that made it.' : ''}
       </p>
       <div className="mt-4 space-y-3">
-        {rows.map((row) => (
-          <div key={row.label}>
+        {stages.map((stage) => (
+          <div key={stage.label}>
             <div className="flex items-baseline justify-between text-sm">
-              <span className="font-semibold">{row.label}</span>
-              <span className="data-value">{row.count}</span>
+              <span className="font-semibold">{stage.label}</span>
+              <span className="data-value">{stage.count}</span>
             </div>
             <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-slate-100">
               <div
-                className={`h-full rounded-full ${row.tone}`}
-                style={{ width: `${Math.max((row.count / max) * 100, 2)}%` }}
+                className={`h-full rounded-full ${stage.tone} transition-[width] duration-700 ease-out`}
+                style={{ width: `${Math.max((stage.count / max) * 100, 2)}%` }}
               />
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">{row.note}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{stage.note}</p>
           </div>
         ))}
       </div>
+
+      <EvidenceModal
+        open={open}
+        onOpenChange={setOpen}
+        title={`${trustedRows.length} listings that made it into the rate`}
+        description="These are the trusted comparables the market rate is built from."
+        rows={trustedRows}
+      />
     </div>
   );
 }
@@ -328,7 +357,7 @@ export function TrustSignals({
     // oxlint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       className={`rounded-xl border bg-white p-5 ${hasAny ? 'cursor-pointer transition-shadow hover:shadow-sm' : ''}`}
-      onClick={hasAny ? () => setOpen(true) : undefined}
+      onClick={hasAny && !open ? () => setOpen(true) : undefined}
       role={hasAny ? 'button' : undefined}
       tabIndex={hasAny ? 0 : undefined}
       onKeyDown={

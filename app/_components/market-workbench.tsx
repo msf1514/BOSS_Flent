@@ -526,6 +526,7 @@ function DealOverview({
           all={run.summary.baselines.B0.count}
           matched={run.summary.baselines.B1.count}
           trusted={run.summary.baselines.B2.count}
+          rows={run.rows}
         />
       </div>
       <TrustSignals rows={run.rows} />

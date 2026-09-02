@@ -171,7 +171,10 @@ export function EvidenceModal({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent
+        className="max-h-[80vh] overflow-y-auto sm:max-w-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
@@ -419,7 +422,7 @@ export function ConfidenceDerivation({
     // oxlint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       className={`rounded-xl border bg-white p-5 ${canInspect ? 'cursor-pointer transition-shadow hover:shadow-sm' : ''}`}
-      onClick={canInspect ? () => setModalOpen(true) : undefined}
+      onClick={canInspect && !modalOpen ? () => setModalOpen(true) : undefined}
       role={canInspect ? 'button' : undefined}
       tabIndex={canInspect ? 0 : undefined}
       onKeyDown={
