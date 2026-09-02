@@ -27,9 +27,11 @@ export function BrandMark({ compact = false }: { compact?: boolean }) {
 export function ProductRail({
   current,
   onNew,
+  onDeals,
 }: {
   current: 'setup' | 'deals';
   onNew?: () => void;
+  onDeals?: () => void;
 }) {
   return (
     <aside className="sticky top-0 hidden h-screen flex-col border-r bg-white px-4 py-7 lg:flex">
@@ -37,11 +39,22 @@ export function ProductRail({
         <BrandMark />
       </div>
       <nav aria-label="BOSS navigation" className="mt-10 space-y-2">
-        <div
-          className={`flex min-h-12 items-center gap-3 rounded-xl px-4 text-sm font-semibold ${current === 'deals' ? 'rail-active' : 'text-muted-foreground'}`}
-        >
-          <FileCheck2 aria-hidden="true" className="size-5" /> Deals
-        </div>
+        {onDeals ? (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onDeals}
+            className={`min-h-12 w-full cursor-pointer justify-start gap-3 rounded-xl px-4 text-sm font-semibold ${current === 'deals' ? 'rail-active' : 'text-muted-foreground'}`}
+          >
+            <FileCheck2 aria-hidden="true" className="size-5" /> Deals
+          </Button>
+        ) : (
+          <div
+            className={`flex min-h-12 items-center gap-3 rounded-xl px-4 text-sm font-semibold ${current === 'deals' ? 'rail-active' : 'text-muted-foreground'}`}
+          >
+            <FileCheck2 aria-hidden="true" className="size-5" /> Deals
+          </div>
+        )}
         {onNew ? (
           <Button
             type="button"

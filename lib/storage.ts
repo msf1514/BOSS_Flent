@@ -241,7 +241,13 @@ export async function listRuns() {
   await ensureSchema();
   const result = await db()
     .prepare(
-      `SELECT r.id, r.deal_id, d.name deal_name, r.version_number, r.created_at, r.engine_version FROM runs r JOIN deals d ON d.id=r.deal_id ORDER BY r.created_at DESC LIMIT 30`,
+      `SELECT r.id, r.deal_id, d.name deal_name, r.version_number, r.created_at, r.engine_version, u.filename,
+              c.id closure_id
+       FROM runs r
+       JOIN deals d ON d.id=r.deal_id
+       JOIN uploads u ON u.id=r.upload_id
+       LEFT JOIN market_review_closures c ON c.run_id=r.id
+       ORDER BY r.created_at DESC LIMIT 30`,
     )
     .all<Record<string, unknown>>();
   return result.results.map((run) => ({
@@ -251,6 +257,8 @@ export async function listRuns() {
     versionNumber: Number(run.version_number),
     createdAt: String(run.created_at),
     engineVersion: String(run.engine_version),
+    filename: typeof run.filename === 'string' ? run.filename : '',
+    status: run.closure_id ? ('complete' as const) : ('in_progress' as const),
   }));
 }
 

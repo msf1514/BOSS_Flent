@@ -105,7 +105,7 @@ function AnalysisPreloader() {
   useEffect(() => {
     const timer = setInterval(() => {
       setStage((s) => Math.min(s + 1, ANALYSIS_STAGES.length - 1));
-    }, 700);
+    }, 600);
     return () => clearInterval(timer);
   }, []);
   return (
@@ -346,6 +346,11 @@ export function RunIntake({
     setRunBusy(true);
     setNotice(null);
     setIssues([]);
+    // The analysis often returns in well under a second. Hold the preloader for a
+    // minimum window so its stages are actually visible — the point is to show
+    // that we clean the evidence, not to hide a delay. Errors skip this wait.
+    const startedAt = Date.now();
+    const MIN_PRELOADER_MS = 3000;
     try {
       const body = new FormData();
       body.set('file', file);
@@ -372,6 +377,11 @@ export function RunIntake({
         );
         throw new Error(payload.error ?? 'Analysis failed.');
       }
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < MIN_PRELOADER_MS)
+        await new Promise((resolve) =>
+          setTimeout(resolve, MIN_PRELOADER_MS - elapsed),
+        );
       onCreated(payload.run);
     } catch (error) {
       setNotice({

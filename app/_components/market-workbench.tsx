@@ -83,9 +83,11 @@ const reviewLabel: Record<ReviewDecision, string> = {
 export function MarketWorkbench({
   initialRun,
   onNew,
+  onDeals,
 }: {
   initialRun: StoredRun;
   onNew: () => void;
+  onDeals?: () => void;
 }) {
   const [run, setRun] = useState(initialRun);
   const [section, setSection] = useState('overview');
@@ -249,7 +251,7 @@ export function MarketWorkbench({
       <a href="#deal-main" className="skip-link">
         Skip to deal
       </a>
-      <ProductRail current="deals" onNew={onNew} />
+      <ProductRail current="deals" onNew={onNew} onDeals={onDeals} />
       <div className="min-w-0">
         <MobileHeader version={run.versionNumber} />
         <main
