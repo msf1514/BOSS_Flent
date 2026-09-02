@@ -20,6 +20,7 @@
     --success:#087a55;
     --radius:0.85rem;
     --shadow:0 1px 2px rgba(28,27,41,.04), 0 10px 30px -14px rgba(28,27,41,.16);
+    --shot-shadow:0 2px 6px rgba(28,27,41,.08), 0 22px 48px -20px rgba(28,27,41,.32);
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -31,6 +32,7 @@
       --danger:#e0685a; --danger-fill:#2e1a17; --danger-line:#4b2b25;
       --success:#2faa7c;
       --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 34px -16px rgba(0,0,0,.6);
+      --shot-shadow:0 2px 8px rgba(0,0,0,.4), 0 26px 56px -22px rgba(0,0,0,.75);
     }
   }
   :root[data-theme="dark"] {
@@ -42,6 +44,7 @@
     --danger:#e0685a; --danger-fill:#2e1a17; --danger-line:#4b2b25;
     --success:#2faa7c;
     --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 34px -16px rgba(0,0,0,.6);
+    --shot-shadow:0 2px 8px rgba(0,0,0,.4), 0 26px 56px -22px rgba(0,0,0,.75);
   }
 
   * { box-sizing:border-box; }
@@ -51,8 +54,8 @@
     font-family:"Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
     font-weight:500; line-height:1.55; letter-spacing:-.01em; -webkit-font-smoothing:antialiased;
   }
-  img { max-width:100%; }
-  .deck { max-width:1160px; margin:0 auto; padding:32px 20px 64px; display:flex; flex-direction:column; gap:24px; }
+  img { max-width:100%; display:block; }
+  .deck { max-width:1180px; margin:0 auto; padding:32px 20px 64px; display:flex; flex-direction:column; gap:24px; }
 
   .slide {
     background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow);
@@ -60,7 +63,7 @@
   }
   .slide::before { content:""; position:absolute; inset:0 auto 0 0; width:5px; background:var(--teal); }
 
-  .chrome { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:24px; }
+  .chrome { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:22px; }
   .chrome .lead { display:flex; align-items:baseline; gap:14px; }
   .num { font-weight:700; font-size:.78rem; color:var(--teal); letter-spacing:.02em; font-variant-numeric:tabular-nums; }
   .eyebrow, .brandmark { text-transform:uppercase; letter-spacing:.16em; font-size:.64rem; font-weight:700; color:var(--ink-faint); }
@@ -68,94 +71,105 @@
 
   h1,h2,h3 { margin:0; color:var(--ink); text-wrap:balance; }
   .t-hero { font-size:clamp(2.5rem,5.4vw,4.1rem); font-weight:800; line-height:1.0; letter-spacing:-.045em; }
-  .t-slide { font-size:clamp(1.65rem,3.1vw,2.35rem); font-weight:800; line-height:1.08; letter-spacing:-.035em; margin-bottom:6px; }
+  .t-slide { font-size:clamp(1.6rem,3vw,2.3rem); font-weight:800; line-height:1.08; letter-spacing:-.035em; margin-bottom:6px; }
   .kicker { text-transform:uppercase; letter-spacing:.16em; font-size:.72rem; font-weight:700; color:var(--teal); margin-bottom:16px; }
-  .lede { font-size:1.05rem; color:var(--ink-soft); max-width:64ch; line-height:1.5; font-weight:500; }
+  .lede { font-size:1.02rem; color:var(--ink-soft); max-width:66ch; line-height:1.5; font-weight:500; }
   .body { flex:1; }
   p { margin:0 0 .7em; }
   strong { font-weight:700; color:var(--ink); }
   em { font-style:normal; color:var(--teal-deep); font-weight:600; }
   .tnum { font-variant-numeric:tabular-nums; }
-  .rupee { font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
 
-  .foot { margin-top:24px; padding-top:13px; border-top:1px solid var(--line-soft);
+  .foot { margin-top:22px; padding-top:13px; border-top:1px solid var(--line-soft);
           display:flex; justify-content:space-between; align-items:center; gap:12px;
           font-size:.68rem; letter-spacing:.02em; color:var(--ink-faint); font-weight:600; }
 
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
   .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-  .col { display:flex; flex-direction:column; gap:14px; }
+  .col { display:flex; flex-direction:column; gap:13px; }
 
   .card { background:var(--canvas); border:1px solid var(--line); border-radius:12px; padding:18px; }
   .card p { font-size:.9rem; color:var(--ink-soft); margin:0; line-height:1.46; }
   .label { text-transform:uppercase; font-size:.62rem; letter-spacing:.13em; color:var(--ink-faint); font-weight:700; margin-bottom:9px; }
 
   ul.clean { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px; }
-  ul.clean li { position:relative; padding-left:20px; font-size:.93rem; color:var(--ink-soft); line-height:1.46; }
+  ul.clean li { position:relative; padding-left:20px; font-size:.92rem; color:var(--ink-soft); line-height:1.46; }
   ul.clean li::before { content:""; position:absolute; left:2px; top:.5em; width:7px; height:7px; border-radius:2px; background:var(--teal); }
   ul.clean.no li::before { background:var(--danger); border-radius:50%; }
 
   .pill { display:inline-flex; align-items:center; gap:6px; padding:4px 11px; border-radius:999px;
           font-size:.7rem; font-weight:700; letter-spacing:.01em; border:1px solid var(--mint-line);
           background:var(--mint); color:var(--teal-deep); }
+  a.pill { text-decoration:none; }
 
   .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
   .stat { border:1px solid var(--line); border-radius:12px; padding:18px; background:var(--canvas); }
-  .stat .big { font-weight:800; font-size:2.15rem; line-height:1; letter-spacing:-.03em; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .stat .big { font-weight:800; font-size:2.1rem; line-height:1; letter-spacing:-.03em; color:var(--ink); font-variant-numeric:tabular-nums; }
   .stat .cap { margin-top:9px; font-size:.82rem; color:var(--ink-soft); line-height:1.42; }
 
-  .junk { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
-  .jc { border:1px solid var(--line); border-radius:11px; padding:14px 13px; background:var(--canvas); }
-  .jc .jt { font-weight:700; font-size:.88rem; margin-bottom:5px; display:flex; align-items:center; gap:7px; letter-spacing:-.01em; }
-  .jc .jd { font-size:.77rem; color:var(--ink-soft); line-height:1.38; }
-  .dot { width:9px; height:9px; border-radius:50%; flex:none; }
-
-  .lanes { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-  .lane { border:1px solid var(--line); border-radius:13px; padding:18px; background:var(--canvas); }
-  .lane.pub { border-color:var(--mint-line); }
-  .lane .lh { font-weight:700; font-size:.98rem; margin-bottom:3px; letter-spacing:-.015em; }
-  .lane .ls { font-size:.74rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em; font-weight:600; margin-bottom:12px; }
-  .lane .flow { display:flex; flex-direction:column; gap:7px; }
-  .step { font-size:.85rem; color:var(--ink-soft); padding:8px 11px; border:1px solid var(--line-soft); border-radius:8px; background:var(--surface); }
-  .converge { text-align:center; margin-top:14px; padding:12px 14px; border-radius:11px; background:var(--mint);
-              border:1px solid var(--mint-line); font-size:.85rem; color:var(--teal-deep); font-weight:600; }
+  /* product screenshot in a faux browser frame */
+  .shot { margin:0; border-radius:12px; overflow:hidden; border:1px solid var(--line); background:var(--canvas); box-shadow:var(--shot-shadow); }
+  .shot-bar { display:flex; align-items:center; gap:8px; padding:9px 12px; background:var(--canvas); border-bottom:1px solid var(--line); }
+  .shot-bar .dots { display:flex; gap:5px; }
+  .shot-bar .dots i { width:9px; height:9px; border-radius:50%; background:var(--line); display:block; }
+  .shot-bar .url { font-size:.68rem; color:var(--ink-faint); font-weight:600; letter-spacing:.01em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .shot img { width:100%; height:auto; }
+  figcaption { margin-top:9px; font-size:.76rem; color:var(--ink-faint); font-weight:600; }
+  /* keep tall shots framed to their most important region */
+  .shot.crop { max-height:430px; }
+  .shot.crop img { object-fit:cover; object-position:top center; height:430px; }
 
   .roles { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--line); border-radius:13px; overflow:hidden; background:var(--canvas); }
-  .role { padding:17px 18px; border-right:1px solid var(--line); }
+  .role { padding:16px 18px; border-right:1px solid var(--line); }
   .role:last-child { border-right:none; }
-  .role .rt { font-weight:700; font-size:.92rem; margin-bottom:9px; display:flex; align-items:center; gap:8px; letter-spacing:-.01em; }
-  .role .rt .tag { font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; border-radius:5px; font-weight:700; }
-  .role ul { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; }
-  .role li { font-size:.82rem; color:var(--ink-soft); line-height:1.4; padding-left:14px; position:relative; }
+  .role .rt { font-weight:700; font-size:.9rem; margin-bottom:8px; display:flex; align-items:center; gap:8px; letter-spacing:-.01em; }
+  .role .rt .tag { font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; border-radius:5px; font-weight:700; }
+  .role ul { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:5px; }
+  .role li { font-size:.8rem; color:var(--ink-soft); line-height:1.38; padding-left:14px; position:relative; }
   .role li::before { content:"–"; position:absolute; left:0; color:var(--ink-faint); }
 
-  .ba { display:grid; grid-template-columns:1fr auto 1fr; gap:18px; align-items:stretch; }
-  .panel { border:1px solid var(--line); border-radius:13px; padding:20px; background:var(--canvas); }
-  .panel.bad { border-color:var(--danger-line); background:linear-gradient(180deg, var(--danger-fill), var(--canvas) 62%); }
-  .panel.good { border-color:var(--mint-line); background:linear-gradient(180deg, var(--mint), var(--canvas) 62%); }
-  .panel .ph { font-size:.64rem; letter-spacing:.12em; text-transform:uppercase; font-weight:700; margin-bottom:10px; }
-  .panel.bad .ph { color:var(--danger); }
-  .panel.good .ph { color:var(--teal); }
-  .panel .rate { font-weight:800; font-size:2.5rem; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-.04em; }
-  .panel .rlabel { font-size:.8rem; color:var(--ink-soft); margin-top:6px; }
-  .panel ul { margin:14px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px; }
-  .panel li { font-size:.82rem; color:var(--ink-soft); padding-left:17px; position:relative; line-height:1.4; }
-  .panel.bad li::before { content:"✕"; position:absolute; left:0; color:var(--danger); font-size:.72rem; top:1px; }
-  .panel.good li::before { content:"✓"; position:absolute; left:0; color:var(--teal); font-size:.78rem; top:0; }
-  .arrowcol { display:flex; align-items:center; justify-content:center; color:var(--teal); }
-  .arrowcol svg { width:32px; height:32px; }
+  .lanes { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .lane { border:1px solid var(--line); border-radius:13px; padding:16px 18px; background:var(--canvas); }
+  .lane.pub { border-color:var(--mint-line); }
+  .lane .lh { font-weight:700; font-size:.96rem; margin-bottom:2px; letter-spacing:-.015em; }
+  .lane .ls { font-size:.72rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em; font-weight:600; margin-bottom:11px; }
+  .lane .flow { display:flex; flex-direction:column; gap:6px; }
+  .step { font-size:.83rem; color:var(--ink-soft); padding:8px 11px; border:1px solid var(--line-soft); border-radius:8px; background:var(--surface); }
+  .converge { text-align:center; margin-top:12px; padding:11px 14px; border-radius:11px; background:var(--mint);
+              border:1px solid var(--mint-line); font-size:.83rem; color:var(--teal-deep); font-weight:600; }
 
-  .callout { border-left:3px solid var(--teal); background:var(--mint); border-radius:0 10px 10px 0; padding:14px 16px; font-size:.9rem; color:var(--teal-deep); font-weight:600; }
+  .junk { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+  .jc { border:1px solid var(--line); border-radius:11px; padding:12px 12px; background:var(--canvas); }
+  .jc .jt { font-weight:700; font-size:.84rem; margin-bottom:5px; display:flex; align-items:center; gap:6px; letter-spacing:-.01em; }
+  .jc .jd { font-size:.73rem; color:var(--ink-soft); line-height:1.35; }
+  .dot { width:8px; height:8px; border-radius:50%; flex:none; }
+
+  .ba { display:grid; grid-template-columns:340px 1fr; gap:22px; align-items:start; }
+  .panel { border:1px solid var(--line); border-radius:13px; padding:18px; background:var(--canvas); }
+  .panel.bad { border-color:var(--danger-line); background:linear-gradient(180deg, var(--danger-fill), var(--canvas) 66%); }
+  .panel .ph { font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; font-weight:700; margin-bottom:9px; }
+  .panel.bad .ph { color:var(--danger); }
+  .panel .rate { font-weight:800; font-size:2.3rem; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-.04em; }
+  .panel .rlabel { font-size:.78rem; color:var(--ink-soft); margin-top:6px; }
+  .panel ul { margin:13px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px; }
+  .panel li { font-size:.8rem; color:var(--ink-soft); padding-left:17px; position:relative; line-height:1.4; }
+  .panel.bad li::before { content:"✕"; position:absolute; left:0; color:var(--danger); font-size:.72rem; top:1px; }
+
+  .callout { border-left:3px solid var(--teal); background:var(--mint); border-radius:0 10px 10px 0; padding:13px 16px; font-size:.88rem; color:var(--teal-deep); font-weight:600; }
   .callout.warn { border-color:var(--amber); background:var(--amber-fill); color:var(--amber); }
 
-  .kv { display:flex; flex-direction:column; gap:11px; }
-  .kv .row { display:grid; grid-template-columns:140px 1fr; gap:14px; align-items:start; }
-  .kv .k { font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--teal); font-weight:700; padding-top:3px; }
-  .kv .v { font-size:.88rem; color:var(--ink-soft); line-height:1.44; }
+  .kv { display:flex; flex-direction:column; gap:10px; }
+  .kv .row { display:grid; grid-template-columns:130px 1fr; gap:12px; align-items:start; }
+  .kv .k { font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:var(--teal); font-weight:700; padding-top:3px; }
+  .kv .v { font-size:.86rem; color:var(--ink-soft); line-height:1.42; }
 
-  .funnel { display:flex; flex-direction:column; align-items:center; gap:3px; }
-  .fbar { text-align:center; color:#fff; border-radius:7px; padding:8px 4px; font-size:.8rem; font-weight:700; font-variant-numeric:tabular-nums; }
-  .fnote { font-size:.68rem; color:var(--ink-faint); font-weight:600; }
+  .trybar { display:flex; flex-wrap:wrap; align-items:center; gap:14px; padding:16px 18px; border-radius:13px;
+            background:var(--mint); border:1px solid var(--mint-line); }
+  .trybar .lock { width:40px; height:40px; border-radius:10px; background:var(--surface); border:1px solid var(--mint-line);
+                  display:flex; align-items:center; justify-content:center; color:var(--teal); flex:none; }
+  .trylink { margin-left:auto; display:inline-flex; align-items:center; gap:8px; text-decoration:none; font-weight:700;
+             font-size:.82rem; color:#fff; background:var(--teal); border:1px solid var(--teal-deep); padding:10px 16px; border-radius:999px; }
+  .trylink:hover { background:var(--teal-deep); }
 
   .printbtn { position:fixed; right:16px; bottom:16px; z-index:50; font-size:.72rem; font-weight:700; letter-spacing:.02em;
               padding:10px 16px; border-radius:999px; border:1px solid var(--teal); background:var(--teal); color:#fff;
@@ -164,18 +178,19 @@
   a { color:var(--teal); }
   :focus-visible { outline:2px solid var(--teal); outline-offset:2px; border-radius:3px; }
 
-  @media (max-width:820px) {
+  @media (max-width:860px) {
     .slide { padding:28px 22px; min-height:0; }
-    .grid2,.ba,.stats,.grid3,.junk,.lanes,.roles { grid-template-columns:1fr; }
-    .roles .role { border-right:none; border-bottom:1px solid var(--line); }
+    .grid2,.stats,.grid3,.junk,.lanes,.roles,.ba { grid-template-columns:1fr; }
+    .roles .role,.role { border-right:none; border-bottom:1px solid var(--line); }
     .roles .role:last-child { border-bottom:none; }
     .kv .row { grid-template-columns:1fr; gap:3px; }
-    .ba .arrowcol svg { transform:rotate(90deg); }
+    .trylink { margin-left:0; }
   }
   @media print {
     body { background:#fff; }
     .deck { max-width:none; gap:0; padding:0; }
     .slide { break-inside:avoid; page-break-after:always; border-radius:0; border:none; box-shadow:none; min-height:96vh; }
+    .shot { box-shadow:none; }
     .printbtn { display:none; }
   }
   @media (prefers-reduced-motion:reduce) { * { animation:none!important; transition:none!important; } }
@@ -197,30 +212,31 @@
       <p class="lede" style="margin-top:22px;">
         Scraped rental listings are full of duplicates, stale inventory, bait and optimistic asks —
         yet a bad median rent looks exactly as precise on a dashboard as a good one. BOSS Problem&nbsp;1
-        turns a noisy pull of comparable listings into a <strong>defensible market rate with an explicit
-        confidence level</strong>, where every keep-or-drop decision is visible with its reason and can
-        be overruled by a human.
+        turns a noisy listing pull into a <strong>defensible market rate with an explicit confidence
+        level</strong>, where every keep-or-drop decision is visible with its reason and can be
+        overruled by a human.
       </p>
-      <div style="margin-top:26px; display:flex; gap:10px; flex-wrap:wrap;">
+      <div style="margin-top:26px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
         <span class="pill">Capture ≠ calculate</span>
         <span class="pill">Missing ≠ zero</span>
         <span class="pill">Says “insufficient” when it is</span>
+        <a class="pill" href="https://mohsufboss.msf1514.workers.dev/" style="border-color:var(--teal); background:var(--teal); color:#fff;">Live prototype ↗</a>
       </div>
     </div>
     <div class="foot"><span>Rate + confidence. It does not decide.</span><span>Urban Bangalore · monthly rent · INR</span></div>
   </section>
 
-  <!-- 02 — THE PROBLEM -->
+  <!-- 02 — THE PROBLEM (BEFORE) -->
   <section class="slide">
     <div class="chrome">
-      <div class="lead"><span class="num">02 / 08</span><span class="eyebrow">The problem, in our words</span></div>
+      <div class="lead"><span class="num">02 / 08</span><span class="eyebrow">Before · the problem in our words</span></div>
       <span class="brandmark"><b>BOSS</b> · Problem 1</span>
     </div>
     <h2 class="t-slide">It’s a trust problem, not a maths problem.</h2>
     <p class="lede">Flent carries the vacancy risk on every home it signs. The rate we anchor to comes
       from a median of nearby listings — and that median is quietly built on evidence that often isn’t true.</p>
     <div class="body" style="margin-top:22px;">
-      <div class="stats" style="margin-bottom:22px;">
+      <div class="stats" style="margin-bottom:20px;">
         <div class="stat"><div class="big">~27,000</div><div class="cap">Bangalore listings behind the benchmark — comparables chosen by society, then config &amp; furnishing.</div></div>
         <div class="stat"><div class="big">30 → 4</div><div class="cap">Once the junk is removed, an area that looked like 30 comparables can hold just four.</div></div>
         <div class="stat"><div class="big">~1 month</div><div class="cap">of breakeven pushed back by ~10 extra vacant days — the cost of anchoring to a wrong rate.</div></div>
@@ -231,46 +247,45 @@
           <p><strong>The Supply / acquisition reviewer</strong> who signs a multi-year lease, and the P&amp;L behind them. At a sample of four, one bad listing moves the estimate by thousands of rupees.</p>
         </div>
         <div class="card">
-          <div class="label">Why it’s dangerous</div>
-          <p>A confident-looking number built on bad evidence is worse than an honest blank. The failure is invisible: the dashboard shows the same clean figure whether the sample was trustworthy or not.</p>
+          <div class="label" style="color:var(--danger);">Why it’s dangerous</div>
+          <p>A confident-looking number built on bad evidence is worse than an honest blank. The failure is invisible — the dashboard shows the same clean figure whether the sample was trustworthy or not.</p>
         </div>
       </div>
     </div>
     <div class="foot"><span>“Not a black box. Not a spreadsheet where opinions quietly become numbers.”</span><span>— the brief</span></div>
   </section>
 
-  <!-- 03 — APPROACH + NOT SOLVING -->
+  <!-- 03 — BEFORE → AFTER (product showcase) -->
   <section class="slide">
     <div class="chrome">
-      <div class="lead"><span class="num">03 / 08</span><span class="eyebrow">Approach · and what we won’t solve</span></div>
+      <div class="lead"><span class="num">03 / 08</span><span class="eyebrow">Before → after · what changed</span></div>
       <span class="brandmark"><b>BOSS</b> · Problem 1</span>
     </div>
-    <h2 class="t-slide">Clean honestly, then say how much to trust it.</h2>
-    <div class="body" style="margin-top:18px;">
-      <div class="grid2">
-        <div class="col">
-          <div class="label">What we build</div>
-          <ul class="clean">
-            <li><strong>Staged, deterministic cleaning</strong> — every valid listing → matches this home → trusted, so you see what each stage removed and why.</li>
-            <li><strong>A named reason on every row</strong> — duplicate, bait, aspirational, mislabel, stale — flagged for a human, never silently dropped.</li>
-            <li><strong>An explicit confidence tier</strong> — HIGH / MEDIUM / LOW / INSUFFICIENT, derived, not asserted.</li>
-            <li><strong>Row-level override</strong> — include, exclude or defer any listing with a required reason; the prior engine state is recorded.</li>
-            <li><strong>A frozen, versioned handoff</strong> — one immutable market-evidence packet for the wider deal.</li>
+    <h2 class="t-slide">Same 86-row pull. A number you can defend.</h2>
+    <div class="body" style="margin-top:16px;">
+      <div class="ba">
+        <div class="panel bad">
+          <div class="ph">Before · naive median</div>
+          <div class="rate">₹58,250</div>
+          <div class="rlabel"><span class="pill" style="border-color:var(--danger-line); background:var(--danger-fill); color:var(--danger);">HIGH confidence</span></div>
+          <ul>
+            <li>0 cross-posts collapsed — the same flat counted several times</li>
+            <li>Bait (<span class="tnum">₹12k</span>) &amp; aspirational (<span class="tnum">₹185k</span>) still in the sample</li>
+            <li>A 3BHK that is really this 2BHK, silently included</li>
+            <li>Looks precise. Isn’t.</li>
           </ul>
         </div>
-        <div class="col">
-          <div class="label" style="color:var(--danger);">What we deliberately don’t solve</div>
-          <ul class="clean no">
-            <li><strong>The verdict.</strong> No ACQUIRE / NEGOTIATE / HOLD / PASS, no blended deal score — that’s Problem 3.</li>
-            <li><strong>Achieved rent.</strong> Listings are <em>asking</em> prices; signed-lease reality is Problem 2. Achievable-rent confidence is hard-coded LOW.</li>
-            <li><strong>Photos, comments, outcomes into the number.</strong> Captured and attributed — never entered into the median.</li>
-            <li><strong>Live scraping in the graded path.</strong> The seam is designed; a real crawler is a drop-in later, so runs stay reproducible.</li>
-          </ul>
-          <div class="callout" style="margin-top:2px;">Going deep on one narrow slice beats going shallow on all of BOSS.</div>
+        <div>
+          <figure class="shot">
+            <div class="shot-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">mohsufboss.msf1514.workers.dev — Overview</span></div>
+            <img src="assets/shot-overview.png" alt="BOSS Problem 1 overview: a review-progress tracker in the header, the market rate with a confidence tier, the confidence derivation, and the listings-survived-cleaning funnel.">
+          </figure>
+          <figcaption>After · the trust layer. Rate + confidence tier, a review tracker in the header, the derivation behind the tier, and the funnel from 84 listings down to 8 trusted — each drop inspectable.</figcaption>
         </div>
       </div>
+      <div class="callout" style="margin-top:16px;">The estimate barely moved — the win isn’t a different number, it’s a <strong>defensible sample</strong> where every excluded row carries a reason a human can overrule.</div>
     </div>
-    <div class="foot"><span>Riskiest assumption proven end-to-end · everything else scoped as a plan</span><span>03 / 08</span></div>
+    <div class="foot"><span>Honest cleaning changes the answer’s trustworthiness, not just its cosmetics</span><span>03 / 08</span></div>
   </section>
 
   <!-- 04 — SHAPE OF THE SYSTEM -->
@@ -281,7 +296,7 @@
     </div>
     <h2 class="t-slide">Two lanes, one wall between capture and calculate.</h2>
     <p class="lede">Every input has an origin, and the origin dictates the pipeline. Public listings and
-      private deal terms fail differently, so they’re handled differently — and they meet only where a
+      private deal terms fail differently — so they’re handled differently, and they meet only where a
       named human decides.</p>
     <div class="body" style="margin-top:16px;">
       <div class="lanes">
@@ -304,15 +319,15 @@
           </div>
         </div>
       </div>
-      <div class="converge">The two lanes meet <strong>only at the human decision layer</strong> — maintenance, capex and landlord ask are absent from Lane 1 by construction, so a scraper can never invent them onto a listing.</div>
-      <div class="roles" style="margin-top:18px;">
+      <div class="converge">Maintenance, capex and landlord ask are absent from Lane 1 by construction — a scraper can never invent them onto a listing. The lanes meet only at the human decision layer.</div>
+      <div class="roles" style="margin-top:16px;">
         <div class="role">
           <div class="rt"><span class="tag" style="background:var(--mint); color:var(--teal-deep);">Human</span> judges</div>
-          <ul><li>Override any row, with a reason</li><li>Resolve evidence tasks</li><li>Signs the completion</li></ul>
+          <ul><li>Override any row, with a reason</li><li>Owns &amp; resolves evidence tasks</li><li>Signs the completion</li></ul>
         </div>
         <div class="role">
           <div class="rt"><span class="tag" style="background:var(--amber-fill); color:var(--amber);">AI</span> assists</div>
-          <ul><li>Reads messy inputs, extracts</li><li>Suggests structured values + source</li><li>Never commits silently</li></ul>
+          <ul><li>Reads messy inputs, extracts</li><li>Suggests values + a source</li><li>Never commits silently</li></ul>
         </div>
         <div class="role">
           <div class="rt"><span class="tag" style="background:var(--line-soft); color:var(--ink-soft);">Code</span> does maths</div>
@@ -323,151 +338,150 @@
     <div class="foot"><span>An automation nobody can audit is just a faster way to be wrong.</span><span>04 / 08</span></div>
   </section>
 
-  <!-- 05 — MESSY EVIDENCE -->
+  <!-- 05 — TRACEABLE, NOTHING DELETED (+ funnel screenshot) -->
   <section class="slide">
     <div class="chrome">
       <div class="lead"><span class="num">05 / 08</span><span class="eyebrow">Missing · stale · conflicting · unreliable</span></div>
       <span class="brandmark"><b>BOSS</b> · Problem 1</span>
     </div>
-    <h2 class="t-slide">Every kind of junk gets a name, not a shrug.</h2>
-    <p class="lede">The brief’s five failure modes each become a specific, inspectable reason attached to
-      the listing — routed to a human, never silently included or silently deleted.</p>
-    <div class="body" style="margin-top:18px;">
-      <div class="junk" style="margin-bottom:20px;">
+    <h2 class="t-slide">Every kind of junk gets a name — and stays inspectable.</h2>
+    <div class="body" style="margin-top:14px;">
+      <div class="junk" style="margin-bottom:18px;">
         <div class="jc"><div class="jt"><span class="dot" style="background:var(--ink-faint);"></span>Duplicate</div><div class="jd">Same flat re-posted across portals — kept once so it can’t inflate the sample.</div></div>
         <div class="jc"><div class="jt"><span class="dot" style="background:var(--danger);"></span>Bait price</div><div class="jd">Priced far below market to harvest enquiries. Pulled from the rate.</div></div>
-        <div class="jc"><div class="jt"><span class="dot" style="background:var(--amber);"></span>Aspirational</div><div class="jd">Optimistic ask that rarely transacts — often the only number in the dataset.</div></div>
+        <div class="jc"><div class="jt"><span class="dot" style="background:var(--amber);"></span>Aspirational</div><div class="jd">Optimistic ask that rarely transacts — often the only number in the data.</div></div>
         <div class="jc"><div class="jt"><span class="dot" style="background:var(--amber);"></span>Mislabel</div><div class="jd">Wrong BHK / furnishing / society, inconsistent across platforms.</div></div>
         <div class="jc"><div class="jt"><span class="dot" style="background:var(--ink-faint);"></span>Stale</div><div class="jd">Rented weeks ago, still live — measured against the evidence cutoff.</div></div>
       </div>
-      <div class="grid3">
-        <div class="card"><div class="label">Missing ≠ zero</div><p>A blank stays blank and is shown as unknown. We never score a missing observation as 0 to keep a formula running.</p></div>
-        <div class="card"><div class="label">Disagreement shown</div><p>A reviewer can re-include or exclude any row; conflicting calls stay visible in the audit. We don’t average disagreement away.</p></div>
-        <div class="card"><div class="label" style="color:var(--danger);">The one hard no</div><p>Inventing evidence. No synthetic row poses as real; no fabricated number fills a gap. If it isn’t in the packet, it’s a labelled assumption.</p></div>
+      <div class="ba" style="grid-template-columns:1fr 380px;">
+        <div class="col">
+          <div class="card"><div class="label">Missing ≠ zero</div><p>A blank stays blank and is shown as unknown. We never score a missing observation as 0 to keep a formula running.</p></div>
+          <div class="card"><div class="label">Disagreement shown, not averaged</div><p>A reviewer can re-include or exclude any row; conflicting calls stay visible in the audit trail.</p></div>
+          <div class="card" style="border-color:var(--danger-line);"><div class="label" style="color:var(--danger);">The one hard no</div><p>Inventing evidence. No synthetic row poses as real; no fabricated number fills a gap. If it isn’t in the packet, it’s a labelled assumption.</p></div>
+        </div>
+        <div>
+          <figure class="shot">
+            <div class="shot-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">Funnel breakdown — every drop → its listings</span></div>
+            <img src="assets/shot-funnel.png" alt="The funnel breakdown modal: each stage from all uploaded listings to trusted, with each removed group expandable into the exact listings and the reason they were dropped.">
+          </figure>
+          <figcaption>Clicking any number opens the listings behind it — here, exactly which rows dropped at each stage, grouped by reason.</figcaption>
+        </div>
       </div>
     </div>
-    <div class="foot"><span>Thresholds are chosen, documented and testable — not production hurdles.</span><span>05 / 08</span></div>
+    <div class="foot"><span>Nothing is deleted — each flagged listing stays reviewable, and you can overrule any call.</span><span>05 / 08</span></div>
   </section>
 
-  <!-- 06 — PROOF / RISKIEST ASSUMPTION -->
+  <!-- 06 — TRY IT WITH YOUR OWN DATA (anonymous) -->
   <section class="slide">
     <div class="chrome">
-      <div class="lead"><span class="num">06 / 08</span><span class="eyebrow">The riskiest assumption, proven</span></div>
-      <span class="brandmark"><b>BOSS</b> · Proof of work</span>
-    </div>
-    <h2 class="t-slide">Honest cleaning changes the answer’s trustworthiness — not just its cosmetics.</h2>
-    <p class="lede">Run on the real 86-row packet. If cleaning only moved decimals, the trust layer wouldn’t
-      be worth building. It doesn’t — it changes what you can defend.</p>
-    <div class="body" style="margin-top:18px;">
-      <div class="ba">
-        <div class="panel bad">
-          <div class="ph">Naive pipeline</div>
-          <div class="rate rupee">₹58,250</div>
-          <div class="rlabel"><span class="pill" style="border-color:var(--danger-line); background:var(--danger-fill); color:var(--danger);">HIGH confidence</span></div>
-          <ul>
-            <li>0 cross-posts collapsed — the same flat counted several times</li>
-            <li>Bait (<span class="tnum">₹12k</span>) &amp; aspirational (<span class="tnum">₹185k</span>) still in the sample</li>
-            <li>A 3BHK that is really this 2BHK, silently included</li>
-            <li>Looks precise. Isn’t.</li>
-          </ul>
-        </div>
-        <div class="arrowcol">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-            <path d="M4 12h15" stroke-linecap="round"/><path d="M13 6l7 6-7 6" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="panel good">
-          <div class="ph">Trust layer</div>
-          <div class="rate">Defensible</div>
-          <div class="rlabel">a sample every excluded row can justify</div>
-          <ul>
-            <li>Cross-posts collapsed (CP-0071 / CP-0075) → one representative</li>
-            <li>Bait, aspirational, mislabel, impossible-area each flagged with a reason</li>
-            <li>Confidence from sample size, source diversity &amp; leave-one-out stability</li>
-            <li>Every call a human can overrule</li>
-          </ul>
-        </div>
-      </div>
-      <div class="callout warn" style="margin-top:18px;">
-        <strong>The required failure case →</strong> feed a deliberately thin, contradictory pull and the
-        system returns <strong>INSUFFICIENT</strong> — it says “we can’t say yet” instead of manufacturing a number.
-      </div>
-    </div>
-    <div class="foot"><span>Raw CSV in → structured, reviewable market evidence out</span><span>06 / 08</span></div>
-  </section>
-
-  <!-- 07 — ASSUMPTIONS / SCOPE / TRADE-OFFS -->
-  <section class="slide">
-    <div class="chrome">
-      <div class="lead"><span class="num">07 / 08</span><span class="eyebrow">Assumptions · scope cuts · trade-offs</span></div>
+      <div class="lead"><span class="num">06 / 08</span><span class="eyebrow">Try it with your own data</span></div>
       <span class="brandmark"><b>BOSS</b> · Problem 1</span>
     </div>
-    <h2 class="t-slide">Labelled calls, made on purpose.</h2>
+    <h2 class="t-slide">Run your own listings — nothing ever leaves your browser.</h2>
+    <div class="body" style="margin-top:14px;">
+      <div class="ba" style="grid-template-columns:1fr 420px;">
+        <div class="col">
+          <p class="lede" style="max-width:none;">Point the trust layer at your own pull and watch it work. In <strong>anonymous mode</strong> the
+            CSV is parsed and analysed <em>entirely in your browser</em> — it is never uploaded, never
+            written to our database, and nothing is retained when you leave the page. We can’t leak
+            what we never receive.</p>
+          <ul class="clean">
+            <li>Pure, deterministic engine runs client-side — <strong>no network call</strong> carries your data.</li>
+            <li>You see the same rate, confidence, funnel and flagged rows as a saved review.</li>
+            <li>A read-only look by design: overrides, evidence tasks and a frozen packet belong to a saved review.</li>
+          </ul>
+          <div class="trybar">
+            <span class="lock" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            </span>
+            <div style="min-width:180px;">
+              <p style="margin:0; font-weight:700; font-size:.86rem; color:var(--teal-deep);">Try the live prototype</p>
+              <p style="margin:0; font-size:.76rem; color:var(--teal-deep);">Deals → “Try anonymously”</p>
+            </div>
+            <a class="trylink" href="https://mohsufboss.msf1514.workers.dev/">mohsufboss.msf1514.workers.dev ↗</a>
+          </div>
+        </div>
+        <div>
+          <figure class="shot">
+            <div class="shot-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">Anonymous market-trust check</span></div>
+            <img src="assets/shot-anon-result.png" alt="Anonymous market-trust check: a banner stating the data never leaves the browser, above the market rate, confidence derivation, funnel and flagged-listing chips computed from an uploaded CSV.">
+          </figure>
+          <figcaption>Analysed in-browser — the privacy banner, the rate, and the full trust breakdown, with nothing saved on our side.</figcaption>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>The honest version of “try it with your own data”: privacy by construction.</span><span>06 / 08</span></div>
+  </section>
+
+  <!-- 07 — PROOF + FAILURE CASE -->
+  <section class="slide">
+    <div class="chrome">
+      <div class="lead"><span class="num">07 / 08</span><span class="eyebrow">The riskiest assumption, proven</span></div>
+      <span class="brandmark"><b>BOSS</b> · Proof of work</span>
+    </div>
+    <h2 class="t-slide">And when the evidence runs out, it says so.</h2>
+    <p class="lede">The assumption the whole system rests on: that honest cleaning changes what you can
+      trust, not just the decimals. Proven on the real packet — and paired with the failure case the
+      brief asks for.</p>
+    <div class="body" style="margin-top:18px;">
+      <div class="grid2">
+        <div class="card" style="border-color:var(--mint-line);">
+          <div class="label" style="color:var(--teal);">Proven — the win is trust, not the number</div>
+          <ul class="clean" style="margin-top:2px;">
+            <li>Cross-posts collapsed (CP-0071 / CP-0075) → one representative.</li>
+            <li>Bait, aspirational, mislabel &amp; impossible-area each flagged with a reason.</li>
+            <li>Confidence <em>derived</em> from sample size, source diversity &amp; leave-one-out stability.</li>
+            <li>Deterministic: identical inputs → an identical run, asserted in tests.</li>
+          </ul>
+        </div>
+        <div class="card" style="border-color:var(--amber-line);">
+          <div class="label" style="color:var(--amber);">The required failure case</div>
+          <p style="margin-bottom:10px;">Feed a deliberately thin, contradictory pull and the tier returns
+            <strong>INSUFFICIENT</strong> — the honest “we can’t say yet” instead of a manufactured number.</p>
+          <div class="callout warn" style="font-weight:600;">A confident-looking number on bad evidence is the exact failure we refuse to ship.</div>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:16px;">Raw CSV in → structured, reviewable market evidence out, in five minutes — with the reason behind every decision preserved.</div>
+    </div>
+    <div class="foot"><span>Start with the case packet · deliberately include one failure case — done</span><span>07 / 08</span></div>
+  </section>
+
+  <!-- 08 — SCOPE / ASSUMPTIONS / METRIC / AI -->
+  <section class="slide">
+    <div class="chrome">
+      <div class="lead"><span class="num">08 / 08</span><span class="eyebrow">Scope · assumptions · what we’d watch</span></div>
+      <span class="brandmark"><b>BOSS</b> · Problem 1</span>
+    </div>
+    <h2 class="t-slide">What we cut on purpose, and how we’d know it works.</h2>
     <div class="body" style="margin-top:16px;">
       <div class="grid2">
         <div class="col">
-          <div class="label">Assumptions (labelled)</div>
+          <div class="label">Deliberately not solved</div>
+          <ul class="clean no">
+            <li><strong>The verdict</strong> (ACQUIRE / NEGOTIATE / HOLD / PASS) &amp; any blended score — Problem 3.</li>
+            <li><strong>Achieved rent</strong> — listings are asking prices; signed reality is Problem 2.</li>
+            <li><strong>Photos, comments, outcomes into the number</strong> — captured, never calculated from.</li>
+            <li><strong>Live scraping in the graded path</strong> — the seam is designed; a crawler is a drop-in later.</li>
+          </ul>
+          <div class="label" style="margin-top:6px;">Assumptions (labelled)</div>
           <div class="kv">
-            <div class="row"><div class="k">Comparability</div><div class="v">Same BHK &amp; furnishing, society-family match, built-up area within a set tolerance, seen within a max age of the evidence cutoff.</div></div>
-            <div class="row"><div class="k">Median</div><div class="v">Positional median over mean — one extreme listing can’t drag the rate.</div></div>
-            <div class="row"><div class="k">Duplicate</div><div class="v">Same config + area within tolerance + identical deposit → one representative (owner / freshest wins).</div></div>
+            <div class="row"><div class="k">Comparability</div><div class="v">Same BHK &amp; furnishing, society match, area within tolerance, seen within a max age.</div></div>
+            <div class="row"><div class="k">Median</div><div class="v">Positional median over mean — one extreme can’t drag the rate.</div></div>
             <div class="row"><div class="k">Thresholds</div><div class="v">Sensible, documented numbers — not Flent’s real internal cutoffs.</div></div>
           </div>
         </div>
         <div class="col">
-          <div class="label">Scope cuts &amp; trade-offs</div>
-          <ul class="clean">
-            <li><strong>Problems 2 &amp; 3</strong> ship as an approach + a static, clearly-labelled preview — not code.</li>
-            <li><strong>Comment / photo / outcome ingestion</strong> is captured by the evidence registry but calculated from nothing.</li>
-            <li><strong>Lane 2 (deal terms)</strong> is a designed, stubbed contract — the shape is honest and complete, the workflow is Problem 3.</li>
-            <li><strong>Trade-off:</strong> a smaller, defensible sample over a larger, impressive-looking one. Four trustworthy comps beat thirty noisy ones.</li>
-          </ul>
-        </div>
-      </div>
-      <div class="callout" style="margin-top:18px;">When in doubt, we prefer the honest, narrower answer over the impressive-looking one. That instinct is the whole submission.</div>
-    </div>
-    <div class="foot"><span>Reasoned disagreement with the framing is part of the judgment</span><span>07 / 08</span></div>
-  </section>
-
-  <!-- 08 — VALIDATE / METRIC / AI -->
-  <section class="slide">
-    <div class="chrome">
-      <div class="lead"><span class="num">08 / 08</span><span class="eyebrow">Validate first · the metric · AI use</span></div>
-      <span class="brandmark"><b>BOSS</b> · Problem 1</span>
-    </div>
-    <h2 class="t-slide">What we’d watch, and how we’d know it works.</h2>
-    <div class="body" style="margin-top:16px;">
-      <div class="grid2">
-        <div class="col">
-          <div class="card">
-            <div class="label">First thing to validate</div>
-            <p>That the reviewer <strong>agrees with the engine’s keep/drop set</strong> on real pulls — the trust layer only earns its place if humans accept its calls more often than they overturn them.</p>
-          </div>
-          <div class="card">
+          <div class="card" style="border-color:var(--mint-line);">
             <div class="label" style="color:var(--teal);">First metric to watch</div>
-            <p><strong>Share of runs accepted without override</strong> (a trust proxy), tracked beside the <strong>median shift caused by overrides</strong>. If reviewers constantly overturn the engine, the rules are wrong — not the reviewers.</p>
+            <p><strong>Share of runs a reviewer accepts without override</strong> (a trust proxy), tracked beside the <strong>median shift caused by overrides</strong>. If reviewers constantly overturn the engine, the rules are wrong — not the reviewers.</p>
           </div>
-          <div class="funnel" style="margin-top:2px;">
-            <div class="fbar" style="width:100%; background:var(--ink-faint);">86 · all uploaded</div>
-            <div class="fnote">▾ matched to the home</div>
-            <div class="fbar" style="width:62%; background:var(--teal-bright);">policy-matched</div>
-            <div class="fnote">▾ dedup &amp; flagged prices removed</div>
-            <div class="fbar" style="width:40%; background:var(--teal);">trusted for the rate</div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card" style="background:var(--surface);">
-            <div class="label">Convincing evidence</div>
-            <ul class="clean" style="margin-top:2px;">
-              <li>Deterministic: identical inputs → an identical run (asserted in tests).</li>
-              <li>Every flag traces to a rule; no invented values.</li>
-              <li>A thin input reliably returns INSUFFICIENT.</li>
-              <li>Overrides are auditable and re-run the median.</li>
-            </ul>
+          <div class="card">
+            <div class="label">Trade-off we chose</div>
+            <p>A smaller, defensible sample over a larger, impressive-looking one. Four trustworthy comps beat thirty noisy ones — and where nothing qualifies, we say so.</p>
           </div>
           <div class="card">
             <div class="label">How AI was used</div>
-            <p>AI scaffolded modules and the UI, ran an adversarial code-review pass on each change, and pressure-tested the framing — “is this capturing or calculating?”. <strong>Judgment stayed human on the boundaries</strong>: what enters the median, where to say INSUFFICIENT, and what to deliberately not build.</p>
+            <p>AI scaffolded the modules and UI, ran an adversarial code-review pass on each change, and pressure-tested the framing — “is this capturing or calculating?”. <strong>Judgment stayed human on the boundaries.</strong></p>
           </div>
         </div>
       </div>
