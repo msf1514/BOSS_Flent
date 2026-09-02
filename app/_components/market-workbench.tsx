@@ -504,9 +504,6 @@ function DealOverview({
   isComplete: boolean;
   onComplete: () => void;
 }) {
-  const assessed = assessment.evidenceCoverage.filter(
-    (item) => item.status === 'assessed',
-  ).length;
   return (
     <div className="space-y-4">
       <ProblemOneOrientation run={run} />
@@ -549,7 +546,7 @@ function DealOverview({
           note={`${pending} listing decisions · ${unresolved} evidence tasks`}
         />
       </div>
-      <div className="grid gap-4 xl:grid-cols-[minmax(300px,0.72fr)_minmax(0,1.28fr)]">
+      <div>
         <Card
           className={
             assessment.state === 'complete'
@@ -580,92 +577,112 @@ function DealOverview({
             </Button>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="border-b">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <CardTitle>Decision evidence coverage</CardTitle>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  The five things a full decision needs. We fill in Market here; the
-                  rest stay honestly blank until their owners weigh in.
-                </p>
-              </div>
-              <Badge
-                variant="outline"
-                className="rounded-full border-slate-300 bg-slate-50"
-              >
-                {assessed} of 5 assessed here
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="divide-y py-0">
-            {assessment.evidenceCoverage.map((item) => (
-              <CoverageRow key={item.id} item={item} />
-            ))}
-          </CardContent>
-        </Card>
       </div>
       <NextSteps
         isComplete={isComplete}
         onComplete={onComplete}
         blockers={pending + unresolved}
       />
-      <Card>
-        <CardHeader className="border-b">
-          <CardTitle>How people work on this together</CardTitle>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Not a static sign-off chain — real, attributed collaboration.
-          </p>
-        </CardHeader>
-        <CardContent className="py-5 text-sm leading-6">
-          Anyone can overrule a listing (with a recorded reason) or raise an
-          evidence task with an owner. Every action is attributed in the history,
-          so the review is genuinely multi-person and auditable — and completing
-          it freezes one versioned record the whole team can trust.
-        </CardContent>
-      </Card>
+      <PendingByOwner
+        requests={run.requests}
+        pendingListings={pending}
+        onOpenMarket={onOpenMarket}
+      />
     </div>
   );
 }
 
-function CoverageRow({
-  item,
+// Real cross-functional model for a market review: the open evidence tasks that
+// still block this market evidence, grouped by who owns them. This replaces the
+// generic 'people collaborate' blurb — it shows exactly what is pending, with
+// whom, and that it must clear before the evidence can be frozen.
+function PendingByOwner({
+  requests,
+  pendingListings,
+  onOpenMarket,
 }: {
-  item: ReturnType<typeof assessMarketReview>['evidenceCoverage'][number];
+  requests: StoredRun['requests'];
+  pendingListings: number;
+  onOpenMarket: () => void;
 }) {
-  const meta =
-    item.status === 'assessed'
-      ? {
-          label: 'Assessed',
-          tone: 'text-emerald-800 bg-emerald-50 border-emerald-200',
-          icon: CheckCircle2,
-        }
-      : item.status === 'context_only'
-        ? {
-            label: 'Context only',
-            tone: 'text-amber-900 bg-amber-50 border-amber-200',
-            icon: AlertCircle,
-          }
-        : {
-            label: 'Not assessed',
-            tone: 'text-slate-700 bg-slate-50 border-slate-200',
-            icon: CircleDot,
-          };
-  const Icon = meta.icon;
+  const openTasks = requests.filter((r) => r.status !== 'resolved');
+  const byOwner = new Map<string, typeof openTasks>();
+  for (const task of openTasks) {
+    const owner = task.owner || 'Unassigned';
+    byOwner.set(owner, [...(byOwner.get(owner) ?? []), task]);
+  }
+  const nothingPending = openTasks.length === 0 && pendingListings === 0;
+
   return (
-    <div className="grid gap-2 py-3.5 sm:grid-cols-[minmax(150px,0.75fr)_minmax(0,1.5fr)_auto] sm:items-center">
-      <div className="flex items-center gap-2 font-semibold">
-        <Icon className="size-4" />
-        {item.label}
-      </div>
-      <p className="text-sm leading-5 text-muted-foreground">{item.detail}</p>
-      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-        <Badge variant="outline" className={meta.tone}>
-          {meta.label}
-        </Badge>
-        <span className="text-xs text-muted-foreground">{item.owner}</span>
-      </div>
-    </div>
+    <Card>
+      <CardHeader className="border-b">
+        <CardTitle>What&apos;s pending, and with whom</CardTitle>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Collaboration on a market review is concrete: these items must clear
+          before the evidence can be frozen. Each is owned by a role and tracked
+          in the history.
+        </p>
+      </CardHeader>
+      <CardContent className="py-5">
+        {nothingPending ? (
+          <p className="text-sm text-muted-foreground">
+            Nothing is pending — every listing has been reviewed and no evidence
+            task is open. This market evidence is ready to freeze.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {pendingListings > 0 && (
+              <div className="flex items-start justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50/50 p-3">
+                <div>
+                  <p className="text-sm font-semibold">
+                    Market reviewer · {pendingListings} listing
+                    {pendingListings === 1 ? '' : 's'} need a call
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Flagged rows awaiting an include / exclude decision.
+                  </p>
+                </div>
+                <Button size="sm" variant="outline" onClick={onOpenMarket}>
+                  Review
+                </Button>
+              </div>
+            )}
+            {Array.from(byOwner.entries()).map(([owner, tasks]) => (
+              <div key={owner} className="rounded-lg border p-3">
+                <p className="text-sm font-semibold">
+                  {owner}
+                  <span className="ml-2 font-normal text-muted-foreground">
+                    · {tasks.length} pending
+                  </span>
+                </p>
+                <ul className="mt-2 space-y-1.5">
+                  {tasks.map((task) => (
+                    <li
+                      key={task.id}
+                      className="flex items-center justify-between gap-3 text-sm"
+                    >
+                      <span>{task.title}</span>
+                      <Badge
+                        variant="outline"
+                        className={
+                          task.status === 'blocked'
+                            ? 'shrink-0 border-red-200 bg-red-50 text-red-800'
+                            : 'shrink-0 border-amber-200 bg-amber-50 text-amber-900'
+                        }
+                      >
+                        {task.owner && task.owner !== 'Unassigned'
+                          ? `With ${task.owner}`
+                          : 'Unassigned'}
+                      </Badge>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

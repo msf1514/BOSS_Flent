@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   ArrowRight,
   CheckCircle2,
+  ChevronDown,
   Copy,
   FileSpreadsheet,
   Gauge,
@@ -16,7 +17,6 @@ import {
 import type { StoredRun } from '@/lib/storage';
 import {
   EvidenceModal,
-  REASON_META,
   type EvidenceRow,
 } from './trust-vocabulary';
 
@@ -76,28 +76,38 @@ const money = (value: number) =>
 // One-line orientation: what BOSS is, what this slice does, where data comes in.
 export function ProblemOneOrientation({ run }: { run: StoredRun }) {
   return (
-    <section className="rounded-xl border bg-white p-5">
-      <p className="eyebrow">Problem 1 · Market trust</p>
-      <h2 className="mt-2 text-lg font-bold tracking-[-0.03em]">
-        Is the landlord&apos;s ask in line with the market — and can we prove it?
-      </h2>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-        BOSS turns a messy acquisition into structured, sourced evidence. This is
-        the <strong>market slice</strong>: it takes a raw listing pull and returns
-        a rent benchmark you can trust and defend, listing by listing — because on
-        a dashboard a bad market rate looks exactly as precise as a good one.
-      </p>
-      <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-4 text-xs text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5 rounded-full border bg-[var(--warm-canvas)] px-2.5 py-1 font-semibold">
-          <FileSpreadsheet className="size-3.5" /> Evidence in: {run.filename}
-        </span>
-        <span>
-          A portal listings export (comparable homes nearby). No live scraping, no
-          invented numbers — only what was uploaded, cleaned and shown with its
-          reason.
-        </span>
+    <details className="group rounded-xl border bg-white">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4">
+        <div className="flex items-center gap-2">
+          <span className="eyebrow">Problem 1 · Market trust</span>
+          <span className="text-sm font-semibold">
+            What this is &amp; where the data comes from
+          </span>
+        </div>
+        <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="border-t p-4 pt-4">
+        <h2 className="text-base font-bold tracking-[-0.03em]">
+          Is the landlord&apos;s ask in line with the market — and can we prove it?
+        </h2>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+          BOSS turns a messy acquisition into structured, sourced evidence. This
+          is the <strong>market slice</strong>: it takes a raw listing pull and
+          returns a rent benchmark you can trust and defend, listing by listing —
+          because on a dashboard a bad market rate looks exactly as precise as a
+          good one.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-4 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5 rounded-full border bg-[var(--warm-canvas)] px-2.5 py-1 font-semibold">
+            <FileSpreadsheet className="size-3.5" /> Evidence in: {run.filename}
+          </span>
+          <span>
+            A portal listings export (comparable homes nearby). Asking rents, not
+            achieved rents — no live scraping, no invented numbers.
+          </span>
+        </div>
       </div>
-    </section>
+    </details>
   );
 }
 
@@ -154,6 +164,41 @@ export function MarketAnswer({
           if the most influential listing is removed
         </span>
       </div>
+      {(confidence === 'LOW' || confidence === 'INSUFFICIENT') && (
+        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50/60 p-3">
+          <p className="text-sm font-semibold text-amber-950">
+            Can this be made trustworthy? Here&apos;s what would help:
+          </p>
+          <ul className="mt-2 space-y-1 text-xs leading-5 text-amber-950">
+            {trustedCount < 8 && (
+              <li>
+                • <strong>Add more comparable listings</strong> — the trusted set
+                is thin ({trustedCount}). A wider or fresher pull, or relaxing the
+                area tolerance slightly, brings in more comps.
+              </li>
+            )}
+            {portals < 3 && (
+              <li>
+                • <strong>Add more sources</strong> — only {portals} portal
+                {portals === 1 ? '' : 's'} here. Pulling the same market from more
+                portals reduces single-source skew.
+              </li>
+            )}
+            <li>
+              • <strong>Check the flagged rows</strong> — verify or re-include any
+              wrongly-excluded listings (each has a resolve option in its detail).
+            </li>
+            <li>
+              • <strong>Confirm the home&apos;s facts match the data</strong> — a
+              society, BHK, area or furnishing mismatch filters out real comps.
+            </li>
+          </ul>
+          <p className="mt-2 text-xs text-amber-900">
+            If none of these change the picture, the honest answer stays
+            &ldquo;not enough evidence&rdquo; — better than a confident guess.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -257,14 +302,15 @@ const FLAGS: FlagDef[] = [
   },
 ];
 
-// Scannable chips: what junk the engine caught and kept out of the rate. Each
-// chip is clickable to reveal exactly which listings triggered that flag.
+// Scannable chips: what junk the engine caught and kept out of the rate. The
+// whole card is clickable and opens one modal listing every flagged listing
+// (each row carries its own reason chips), consistent with the confidence card.
 export function TrustSignals({
   rows,
 }: {
   rows: EvidenceRow[];
 }) {
-  const [openFlag, setOpenFlag] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   const counts = new Map<string, number>();
   for (const row of rows)
     for (const reason of row.reasons)
@@ -273,49 +319,59 @@ export function TrustSignals({
     ...flag,
     count: counts.get(flag.code) ?? 0,
   })).filter((flag) => flag.count > 0);
-
-  const flaggedRows = (code: string) =>
-    rows.filter((r) => r.reasons.includes(code));
-  const active = FLAGS.find((f) => f.code === openFlag);
+  const flaggedRows = rows.filter((r) =>
+    r.reasons.some((code) => FLAGS.some((f) => f.code === code)),
+  );
+  const hasAny = flaggedRows.length > 0;
 
   return (
-    <div className="rounded-xl border bg-white p-5">
+    // oxlint-disable-next-line jsx-a11y/no-static-element-interactions
+    <div
+      className={`rounded-xl border bg-white p-5 ${hasAny ? 'cursor-pointer transition-shadow hover:shadow-sm' : ''}`}
+      onClick={hasAny ? () => setOpen(true) : undefined}
+      role={hasAny ? 'button' : undefined}
+      tabIndex={hasAny ? 0 : undefined}
+      onKeyDown={
+        hasAny
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') setOpen(true);
+            }
+          : undefined
+      }
+    >
       <div className="flex items-center gap-2">
         <ShieldCheck className="size-4 text-[var(--flent-teal)]" />
         <p className="data-label">What we caught and kept out of the rate</p>
       </div>
-      {present.length === 0 ? (
+      {!hasAny ? (
         <p className="mt-3 text-sm text-muted-foreground">
           No duplicate or suspicious-price listings were found in the trusted set.
         </p>
       ) : (
         <div className="mt-3 flex flex-wrap gap-2">
           {present.map((flag) => (
-            <button
+            <span
               key={flag.code}
-              type="button"
-              onClick={() => setOpenFlag(flag.code)}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-shadow hover:shadow-sm ${flag.tone}`}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${flag.tone}`}
             >
               <flag.icon className="size-3.5" />
               {flag.count} {flag.label}
-            </button>
+            </span>
           ))}
         </div>
       )}
       <p className="mt-3 border-t pt-3 text-xs text-muted-foreground">
         Nothing here is deleted — each flagged listing stays in the review with its
-        reason, and you can overrule any call. Tap a tag to see which listings.
+        reason, and you can overrule any call.{' '}
+        {hasAny ? 'Click to see exactly which listings.' : ''}
       </p>
 
       <EvidenceModal
-        open={openFlag !== null}
-        onOpenChange={(o) => !o && setOpenFlag(null)}
-        title={active ? `${flaggedRows(active.code).length} · ${active.label}` : ''}
-        description={
-          active ? REASON_META[active.code]?.meaning : undefined
-        }
-        rows={openFlag ? flaggedRows(openFlag) : []}
+        open={open}
+        onOpenChange={setOpen}
+        title="What we caught and kept out of the rate"
+        description="Every flagged listing, with the reason we flagged it. None is deleted — each stays reviewable."
+        rows={flaggedRows}
       />
     </div>
   );
