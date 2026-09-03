@@ -1,7 +1,7 @@
 // Pure, deterministic listing-trust signals for Problem 1.
 //
-// Every function here is a plain function of its inputs — same inputs, same
-// output, no IO — so the market engine stays reproducible and every flag it
+// Every function here is a plain function of its inputs, same inputs, same
+// output, no IO, so the market engine stays reproducible and every flag it
 // raises can be explained to a human reviewing listing-by-listing. Thresholds
 // are named constants with a rationale, per the brief's instruction to "choose
 // sensible numbers and explain why". None of these detectors delete a row; they
@@ -25,7 +25,7 @@ export type SignalRow = {
 // society name spelled differently and sometimes at a slightly different rent.
 // Exact-field matching misses these. We treat two rows as the same unit when
 // they share configuration and built-up area AND carry an identical, specific
-// security deposit — a deposit is a precise rupee figure that is very unlikely
+// security deposit, a deposit is a precise rupee figure that is very unlikely
 // to collide by chance between two genuinely distinct units. Rent is allowed to
 // differ, because the brief explicitly describes "the same flat posted by
 // several brokers at different rents".
@@ -141,7 +141,7 @@ export function priceSignal(
 // or a "1BHK" at an impossible area. Two deterministic checks:
 //  1. Implausible area-per-bedroom (independent of the subject deal).
 //  2. A configuration that differs from the subject yet whose area AND rent sit
-//     squarely inside the subject's comparable band — i.e. it looks like the
+//     squarely inside the subject's comparable band, i.e. it looks like the
 //     subject in disguise.
 export const MIN_AREA_PER_BHK = 300;
 export const MAX_AREA_PER_BHK = 1200;

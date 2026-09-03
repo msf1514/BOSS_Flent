@@ -4,16 +4,16 @@ import type {
   SourceAdapter,
 } from './source-adapter.ts';
 
-// A working, deterministic mock of Lane 1 — clearly synthetic, never claiming to
+// A working, deterministic mock of Lane 1, clearly synthetic, never claiming to
 // be live portal data. Its job is to PROVE the seam: adapter output, run through
 // the same normaliser and validation, is indistinguishable to the engine from an
 // uploaded CSV. It is seeded (no randomness) so a given query always yields the
-// same set — reproducibility, the brief's explicit requirement.
+// same set, reproducibility, the brief's explicit requirement.
 //
 // It intentionally emits a cross-post (the same unit on two portals) and one
 // bait price, so a demo run shows the trust engine catching adapter-produced
 // junk exactly as it does with the uploaded sample. It does NOT reproduce the
-// anonymised packet's specific rows — that would be fabricating the graded data.
+// anonymised packet's specific rows, that would be fabricating the graded data.
 
 // Small seeded PRNG so output is deterministic and reproducible.
 function seeded(seedText: string) {

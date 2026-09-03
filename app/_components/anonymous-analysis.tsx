@@ -27,7 +27,7 @@ import { EvidenceFunnel, MarketAnswer, TrustSignals } from './problem-one-overvi
 import { ConfidenceDerivation } from './trust-vocabulary';
 
 // Anonymous, client-side market-trust check. The whole point: a reviewer can try
-// the trust layer on THEIR OWN listing pull and see whether it behaves — without
+// the trust layer on THEIR OWN listing pull and see whether it behaves, without
 // the data ever leaving their browser. The CSV is read with FileReader, the pure
 // engine runs in the tab, and nothing is uploaded or written to D1/R2. This is
 // the honest version of "try it with your own data": we can't leak what we never
@@ -58,7 +58,7 @@ function PrivacyBanner() {
       <Lock className="mt-0.5 size-5 shrink-0 text-[var(--flent-teal)]" />
       <div>
         <p className="text-sm font-bold text-teal-950">
-          Anonymous — your data never leaves this browser
+          Anonymous, your data never leaves this browser
         </p>
         <p className="mt-1 text-sm leading-6 text-teal-900">
           The CSV is read and analysed entirely on your device. It is{' '}
@@ -112,7 +112,7 @@ export function AnonymousAnalysis({ onExit }: { onExit: () => void }) {
         setError(parsed.issues[0]?.message ?? 'Check the home details.');
         return;
       }
-      // Read locally — no network. The engine is pure and runs in the tab.
+      // Read locally, no network. The engine is pure and runs in the tab.
       const csv = await file.text();
       const engineResult = await runEvidenceEngine(csv, parsed.value, [], {});
       if (!engineResult.rows.length && engineResult.validation.errorCount) {
@@ -148,7 +148,7 @@ export function AnonymousAnalysis({ onExit }: { onExit: () => void }) {
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                   Run your own listing pull through the trust layer and see the
-                  rate, the confidence and every flagged listing — with nothing
+                  rate, the confidence and every flagged listing, with nothing
                   saved on our side.
                 </p>
               </div>
@@ -264,7 +264,7 @@ export function AnonymousAnalysis({ onExit }: { onExit: () => void }) {
                 <CardContent className="flex flex-col gap-3 border-t bg-slate-50/60 py-4 sm:flex-row sm:items-center sm:justify-between">
                   <p className="max-w-xl text-xs leading-5 text-muted-foreground">
                     {ready
-                      ? 'Ready. This runs entirely in your browser — nothing is uploaded.'
+                      ? 'Ready. This runs entirely in your browser, nothing is uploaded.'
                       : 'Add a CSV and the four home facts to run the check.'}
                   </p>
                   <Button size="lg" disabled={!ready || busy} onClick={analyse}>

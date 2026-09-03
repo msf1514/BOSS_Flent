@@ -60,14 +60,14 @@ export const REASON_META: Record<string, ReasonMeta> = {
   suspected_aspirational_ask: {
     label: 'Aspirational ask',
     meaning:
-      'Priced far above the market — an optimistic ask that rarely transacts.',
+      'Priced far above the market, an optimistic ask that rarely transacts.',
     tone: 'caution',
     icon: AlertTriangle,
   },
   suspected_mislabel_configuration: {
     label: 'Mislabelled',
     meaning:
-      'Wears a different BHK label but looks like this home — likely a wrong-label copy.',
+      'Wears a different BHK label but looks like this home, likely a wrong-label copy.',
     tone: 'caution',
     icon: Tag,
   },
@@ -79,7 +79,7 @@ export const REASON_META: Record<string, ReasonMeta> = {
   },
   old_last_seen: {
     label: 'Stale',
-    meaning: 'Not seen recently enough — likely already rented.',
+    meaning: 'Not seen recently enough, likely already rented.',
     tone: 'neutral',
     icon: CalendarClock,
   },
@@ -198,7 +198,7 @@ export function EvidenceModal({
 }
 
 // The full funnel, broken down: how many listings survived each honest cleaning
-// stage, WHAT was removed between stages, and WHY — every drop drilling down to the
+// stage, WHAT was removed between stages, and WHY, every drop drilling down to the
 // exact listings and their reasons, ending in the trusted survivors. This is the
 // "every number reveals the listings behind it" principle applied to the funnel,
 // and it works even when nothing survived (the honest-failure story).
@@ -337,7 +337,7 @@ export function FunnelBreakdownModal({
                     <summary className="flex cursor-pointer list-none items-center justify-center gap-1 text-[0.6875rem] font-medium text-muted-foreground">
                       <ChevronDown className="size-3.5 transition-transform group-open/drop:rotate-180" />
                       <span>
-                        {dropped.length} removed —{' '}
+                        {dropped.length} removed,{' '}
                         {i === 1
                           ? 'not a match for this home'
                           : 'duplicates & flagged prices'}
@@ -376,7 +376,7 @@ export function FunnelBreakdownModal({
           </p>
           {trusted.length === 0 ? (
             <p className="mt-1 text-sm text-muted-foreground">
-              No listings survived to the trusted set — the honest answer is
+              No listings survived to the trusted set, the honest answer is
               &ldquo;not enough evidence&rdquo; rather than a confident guess.
             </p>
           ) : (
@@ -450,7 +450,7 @@ export function ReasonChips({
 
 // How to legitimately resolve each flag. Deliberately NO "trust it anyway"
 // action: distrust is only ever resolved by documented judgment, new evidence,
-// or a corrected source — never by a naked toggle that would let someone game
+// or a corrected source, never by a naked toggle that would let someone game
 // the rate greener. `lane` tells the UI which action to surface.
 type Remedy = {
   headline: string;
@@ -469,7 +469,7 @@ export const REMEDY: Record<string, Remedy> = {
   suspected_bait_price: {
     headline: 'Verify the price at source before trusting it',
     detail:
-      'Bait prices harvest enquiries. Raise a task to confirm the rent with the poster/broker. Only include it if verified — never to lift the sample.',
+      'Bait prices harvest enquiries. Raise a task to confirm the rent with the poster/broker. Only include it if verified, never to lift the sample.',
     lane: 'task',
     taskTitle: 'Verify suspected bait price with source',
   },
@@ -483,7 +483,7 @@ export const REMEDY: Record<string, Remedy> = {
   suspected_mislabel_configuration: {
     headline: 'Correct the label at the source',
     detail:
-      'If the BHK/attributes are wrong, fix them in the source data and re-upload — editing evidence in-app would break its provenance.',
+      'If the BHK/attributes are wrong, fix them in the source data and re-upload, editing evidence in-app would break its provenance.',
     lane: 'reupload',
   },
   implausible_area_for_bhk: {
@@ -502,7 +502,7 @@ export const REMEDY: Record<string, Remedy> = {
   missing_required_field: {
     headline: 'Supply the missing value at the source',
     detail:
-      'A required field is blank, so it can’t be trusted. Fill it in the source data and re-upload — don’t invent the value.',
+      'A required field is blank, so it can’t be trusted. Fill it in the source data and re-upload, don’t invent the value.',
     lane: 'reupload',
   },
 };
@@ -634,10 +634,10 @@ export function ConfidenceDerivation({
     >
       <div className="flex items-center gap-1.5">
         <p className="data-label">Why this confidence level</p>
-        <InfoHint label="The confidence tier (HIGH / MEDIUM / LOW / INSUFFICIENT) isn't a guess — it comes from three checks on the trusted set: how many listings agree, how many independent sources they span, and how much the rate moves if the single most influential listing is dropped. Weak checks lower the tier; too little evidence returns INSUFFICIENT instead of a number." />
+        <InfoHint label="The confidence tier (HIGH / MEDIUM / LOW / INSUFFICIENT) isn't a guess, it comes from three checks on the trusted set: how many listings agree, how many independent sources they span, and how much the rate moves if the single most influential listing is dropped. Weak checks lower the tier; too little evidence returns INSUFFICIENT instead of a number." />
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        The tier isn’t asserted — it’s derived from three checks.
+        The tier isn’t asserted, it’s derived from three checks.
         {canInspect ? ' Click to see the exact sources and listings behind it.' : ''}
       </p>
       <div className="mt-4 space-y-3">
@@ -659,7 +659,7 @@ export function ConfidenceDerivation({
       <p className="mt-4 border-t pt-3 text-xs text-muted-foreground">
         Overall:{' '}
         <strong className="text-foreground">{confidence}</strong>. When the checks
-        don’t hold, the rate is labelled lower-confidence — or, if there simply
+        don’t hold, the rate is labelled lower-confidence, or, if there simply
         isn’t enough evidence, we say so instead of guessing.
       </p>
 

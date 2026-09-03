@@ -62,7 +62,7 @@ export function parseRunConfig(input: unknown): ConfigParseResult {
   };
 
   // Commercial-context fields are retained in the model but no longer collected
-  // in the Problem 1 intake (they don't affect the market median — see the
+  // in the Problem 1 intake (they don't affect the market median, see the
   // Problem 1 vs Problem 3 split). Accept whatever is present without ever
   // raising a validation issue, so their absence can't block a market run.
   const optionalInteger = (field: keyof RunConfig, maximum: number) => {

@@ -25,7 +25,7 @@ export type ManifestEntry = {
 
 // What a complete BOSS case packet is expected to contain. Drives the
 // received / missing view. `consumedByProblem1` records whether the market
-// engine is *allowed* to read the artifact — the capture/calculate boundary.
+// engine is *allowed* to read the artifact, the capture/calculate boundary.
 export const PACKET_MANIFEST: ManifestEntry[] = [
   {
     kind: 'listing_csv',
@@ -65,7 +65,7 @@ export const PACKET_MANIFEST: ManifestEntry[] = [
     packetSource: 'outcomes.csv',
     required: false,
     multiple: false,
-    consumedByProblem1: false, // Problem 2 only — never the current median
+    consumedByProblem1: false, // Problem 2 only, never the current median
   },
   {
     kind: 'reference_assessment',
@@ -73,7 +73,7 @@ export const PACKET_MANIFEST: ManifestEntry[] = [
     packetSource: 'boss-assessment.md',
     required: false,
     multiple: false,
-    consumedByProblem1: false, // Problem 3 reference — leakage guard
+    consumedByProblem1: false, // Problem 3 reference, leakage guard
   },
 ];
 
@@ -85,7 +85,7 @@ type AcceptedType = {
 };
 
 // Explicit accept policy. Anything outside this maps to `unsupported` and is
-// still preserved and flagged — never silently ignored (acceptance criterion).
+// still preserved and flagged, never silently ignored (acceptance criterion).
 const ACCEPT: Record<string, AcceptedType> = {
   csv: {
     extensions: ['.csv'],

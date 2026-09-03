@@ -3,10 +3,10 @@ import {
   type ListingRecord,
 } from './contract.ts';
 
-// Lane 1 — market comparables (public, scraped).
+// Lane 1, market comparables (public, scraped).
 //
 // A SourceAdapter turns one portal's raw output into loosely-typed records. It
-// knows nothing about the engine or the registry — it only produces raw rows for
+// knows nothing about the engine or the registry, it only produces raw rows for
 // its own source. Adapters are swappable and independently testable; adding a
 // portal is adding an adapter, never touching the engine.
 
@@ -18,7 +18,7 @@ export type AdapterQuery = {
   asOf: string;
 };
 
-// Loose shape: whatever a portal exposes. Fields may be missing or dirty — that
+// Loose shape: whatever a portal exposes. Fields may be missing or dirty, that
 // is expected, and is exactly why the trust engine exists downstream.
 export type RawListing = {
   externalId: string;
@@ -45,7 +45,7 @@ const str = (value: string | number | undefined) =>
 
 // Normalize one source's raw rows to the shared contract, stamping provenance.
 // This is the ONLY place raw adapter output becomes contract rows, so every
-// producer is held to the same schema — the guarantee that scraped data matches
+// producer is held to the same schema, the guarantee that scraped data matches
 // the uploaded shape.
 export function normalize(
   source: string,
@@ -71,7 +71,7 @@ export function normalize(
 // Bias resistance is a design property, not an afterthought.
 //
 // If a market set is built from too few independent sources, it inherits that
-// source's skew. We do NOT try to "correct" the bias — we surface it: a set
+// source's skew. We do NOT try to "correct" the bias, we surface it: a set
 // below MIN_SOURCES is flagged low-diversity, and because the market engine
 // already lowers its confidence tier when portal diversity is thin, a
 // single-source scrape automatically presents as *lower confidence* rather than
@@ -110,7 +110,7 @@ export async function assembleListingSet(
     rowCount: rows.length,
     diversityOk,
     diversityNote: diversityOk
-      ? `${sourcesUsed.length} independent sources — diversity sufficient.`
+      ? `${sourcesUsed.length} independent sources, diversity sufficient.`
       : `Only ${sourcesUsed.length} source(s). Below the ${MIN_SOURCES}-source floor: treat the resulting rate as low-confidence until more portals are added.`,
   };
 }

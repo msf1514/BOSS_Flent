@@ -251,7 +251,7 @@ export function MarketWorkbench({
 
   // The single review spine: the real workflow states, in order, with the first
   // unfinished one as "current". This is what the header tracker renders and what
-  // the header's primary CTA advances — so the completion flow lives in one place
+  // the header's primary CTA advances, so the completion flow lives in one place
   // instead of being scattered across the overview, the pipeline and a buried
   // version-control button.
   const hasUnappliedReviews = run.reviews.length > 0;
@@ -685,7 +685,7 @@ function DealOverview({
           label="Trusted comparables"
           value={String(run.summary.baselines.B2.count)}
           note="Listings that count toward the rate"
-          info="How many listings survived every cleaning stage and now set the rate. This is the sample the median is taken from — the higher it is, the steadier the rate."
+          info="How many listings survived every cleaning stage and now set the rate. This is the sample the median is taken from, the higher it is, the steadier the rate."
           onClick={
             trustedRows.length > 0 ? () => setTileModal('trusted') : undefined
           }
@@ -695,7 +695,7 @@ function DealOverview({
           label="Middle 50% of asking rents"
           value={`${money(run.summary.band.p25)} – ${money(run.summary.band.p75)}`}
           note="Where most comparable asks sit"
-          info="The interquartile range (25th to 75th percentile) of the trusted asks — the band the middle half of comparable listings fall in. A tight band means the comps agree; a wide one means asks are scattered, so treat the single median with more caution."
+          info="The interquartile range (25th to 75th percentile) of the trusted asks, the band the middle half of comparable listings fall in. A tight band means the comps agree; a wide one means asks are scattered, so treat the single median with more caution."
           onClick={
             bandRows.length > 0 ? () => setTileModal('band') : undefined
           }
@@ -736,7 +736,7 @@ function DealOverview({
           <CardContent className="flex h-full flex-col py-6">
             <div className="flex items-center gap-1.5">
               <p className="eyebrow">Current market posture</p>
-              <InfoHint label="Where this review stands right now and the single next thing to do to move it forward — from resolving flagged rows and evidence tasks, to applying your judgments into a new version, to freezing the packet. It mirrors the milestone tracker in the header." />
+              <InfoHint label="Where this review stands right now and the single next thing to do to move it forward, from resolving flagged rows and evidence tasks, to applying your judgments into a new version, to freezing the packet. It mirrors the milestone tracker in the header." />
             </div>
             <h2 className="mt-3 text-2xl font-bold tracking-[-0.035em]">
               {assessment.headline}
@@ -772,7 +772,7 @@ function DealOverview({
 
 // Real cross-functional model for a market review: the open evidence tasks that
 // still block this market evidence, grouped by who owns them. This replaces the
-// generic 'people collaborate' blurb — it shows exactly what is pending, with
+// generic 'people collaborate' blurb, it shows exactly what is pending, with
 // whom, and that it must clear before the evidence can be frozen.
 function PendingByOwner({
   requests,
@@ -796,7 +796,7 @@ function PendingByOwner({
       <CardHeader className="border-b">
         <div className="flex items-center gap-1.5">
           <CardTitle>What&apos;s pending, and with whom</CardTitle>
-          <InfoHint label="Every open item blocking this review, grouped by who owns it: flagged listings needing a reviewer's call, and evidence tasks assigned to a named person. Nothing here is a generic 'people collaborate' note — each item must be resolved and is recorded in the history before the evidence can be frozen." />
+          <InfoHint label="Every open item blocking this review, grouped by who owns it: flagged listings needing a reviewer's call, and evidence tasks assigned to a named person. Nothing here is a generic 'people collaborate' note, each item must be resolved and is recorded in the history before the evidence can be frozen." />
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Collaboration on a market review is concrete: these items must clear
@@ -807,7 +807,7 @@ function PendingByOwner({
       <CardContent className="py-5">
         {nothingPending ? (
           <p className="text-sm text-muted-foreground">
-            Nothing is pending — every listing has been reviewed and no evidence
+            Nothing is pending, every listing has been reviewed and no evidence
             task is open. This market evidence is ready to freeze.
           </p>
         ) : (
@@ -976,7 +976,7 @@ function MarketSummary({
           label="Current asking-rent median"
           value={money(b.B2.estimate)}
           note={`${b.B2.count} current comparables`}
-          info="The middle asking rent of the trusted comparables — the market rate. Median, not average, so one very high or low listing can't skew it. This is an asking benchmark, not an achieved or signed rent."
+          info="The middle asking rent of the trusted comparables, the market rate. Median, not average, so one very high or low listing can't skew it. This is an asking benchmark, not an achieved or signed rent."
         />
         <Metric
           label="Middle 50% of asking rents"
@@ -988,7 +988,7 @@ function MarketSummary({
           label="Portals in the rate"
           value={String(run.summary.observedPortalLabelCount)}
           note="Different sources in the trusted set"
-          info="How many independent listing sources the trusted comparables span. More sources means less chance the rate is skewed by one portal's particular mix of listings — it directly feeds the confidence tier."
+          info="How many independent listing sources the trusted comparables span. More sources means less chance the rate is skewed by one portal's particular mix of listings, it directly feeds the confidence tier."
         />
         <Metric
           label="Reliance on one listing"
@@ -1036,7 +1036,7 @@ function MarketSummary({
             count={b.B1.count}
             estimate={b.B1.estimate}
             detail="Subject society, size, furnishing and freshness rules applied; likely duplicates collapsed."
-            info="Baseline B1: B0 narrowed to listings that actually match this home — right society, area within tolerance, same furnishing, recent enough — with cross-post duplicates collapsed to one."
+            info="Baseline B1: B0 narrowed to listings that actually match this home, right society, area within tolerance, same furnishing, recent enough, with cross-post duplicates collapsed to one."
           />
           <ChevronRight className="hidden size-5 text-muted-foreground md:block" />
           <Stage
@@ -1044,7 +1044,7 @@ function MarketSummary({
             count={b.B2.count}
             estimate={b.B2.estimate}
             detail="Policy-matched listings after recorded human judgments are incorporated."
-            info="Baseline B2: the trusted set that sets the rate — B1 with suspicious prices removed and your recorded include/exclude judgments applied. This is what the median is taken from."
+            info="Baseline B2: the trusted set that sets the rate, B1 with suspicious prices removed and your recorded include/exclude judgments applied. This is what the median is taken from."
           />
         </CardContent>
       </Card>
@@ -1059,7 +1059,7 @@ function MarketSummary({
           <CardHeader className="border-b border-amber-200">
             <div className="flex items-center gap-1.5">
               <CardTitle>What this estimate can&apos;t tell you</CardTitle>
-              <InfoHint label="The honest limits of this number — what asking-rent listings can't establish (e.g. whether maintenance is included, or what rent was actually signed). These aren't excuses; they're the boundaries a reviewer must carry into the decision, so the rate isn't trusted for more than it proves." />
+              <InfoHint label="The honest limits of this number, what asking-rent listings can't establish (e.g. whether maintenance is included, or what rent was actually signed). These aren't excuses; they're the boundaries a reviewer must carry into the decision, so the rate isn't trusted for more than it proves." />
             </div>
           </CardHeader>
           <CardContent className="space-y-3 py-5">
@@ -1086,7 +1086,7 @@ function MarketSummary({
             <p className="text-sm leading-6 text-muted-foreground">
               Human judgments never rewrite a completed result. Applying them
               creates a new immutable version, which the review is then completed
-              from — you drive that from the tracker in the header.
+              from, you drive that from the tracker in the header.
             </p>
             <div className="grid gap-2 text-xs sm:grid-cols-2">
               <Fact
@@ -1102,7 +1102,7 @@ function MarketSummary({
               <p className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-900">
                 <RefreshCw className="size-3.5 shrink-0" />
                 {run.reviews.length} recorded judgment
-                {run.reviews.length === 1 ? '' : 's'} not yet applied — use
+                {run.reviews.length === 1 ? '' : 's'} not yet applied, use
                 &ldquo;Apply judgments in v{run.versionNumber + 1}&rdquo; in the
                 header tracker.
               </p>
@@ -1169,7 +1169,7 @@ function Comparables({
       <CardHeader className="border-b">
         <div className="flex items-center gap-1.5">
           <CardTitle>Listing-by-listing review</CardTitle>
-          <InfoHint label="Every listing the engine kept for inspection, with its state and the reasons behind it. Select any row to see why it counts, was collapsed as a duplicate, or was flagged — and to override that call with a recorded reason. This is where 'disagree with any single decision' happens." />
+          <InfoHint label="Every listing the engine kept for inspection, with its state and the reasons behind it. Select any row to see why it counts, was collapsed as a duplicate, or was flagged, and to override that call with a recorded reason. This is where 'disagree with any single decision' happens." />
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Every accepted row stays inspectable. Select a row to see why it is or
@@ -1303,7 +1303,7 @@ function ComparableReview({
         <CardTitle>Listings that need your call</CardTitle>
         <p className="mt-1 text-sm text-muted-foreground">
           Decide whether flagged listings should influence the current evidence
-          set. This is human judgment about ambiguous rows—not general task
+          set. This is human judgment about ambiguous rows, not general task
           management.
         </p>
       </CardHeader>
@@ -1394,7 +1394,7 @@ function EvidenceTasks({
         <AlertDescription>
           They track missing facts that cannot be resolved from the uploaded
           listing fields. Each names the decision impact, an accountable role and
-          the person it&apos;s assigned to — and every one must be resolved
+          the person it&apos;s assigned to, and every one must be resolved
           before the market evidence can be frozen.
         </AlertDescription>
       </Alert>
@@ -1441,7 +1441,7 @@ function EvidenceTasks({
                 {purpose.decisionImpact}
               </p>
 
-              {/* Assignment cue — who owns it and whether they've been told. */}
+              {/* Assignment cue, who owns it and whether they've been told. */}
               <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
                 {!assignee ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-semibold text-slate-600">

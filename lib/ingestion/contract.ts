@@ -2,14 +2,14 @@ import { requiredColumns } from '../evidence-engine.ts';
 
 // The single ingestion contract for Lane 1 (market comparables).
 //
-// Whatever the origin — a hand-uploaded CSV or a scraper adapter — every market
+// Whatever the origin, a hand-uploaded CSV or a scraper adapter, every market
 // listing must arrive as these exact columns, in this exact order. The market
 // engine already validates against `requiredColumns`; this module makes that
 // contract the one gate all producers pass through, so a scrape is provably
 // indistinguishable from an upload by the time it reaches the engine.
 //
 // Note what is deliberately ABSENT: maintenance, landlord terms, capex. Those
-// are never public/scrapeable — they are negotiated deal facts and belong to
+// are never public/scrapeable, they are negotiated deal facts and belong to
 // Lane 2 (see deal-terms-adapter.ts). Keeping them out of this contract is what
 // structurally prevents a private, unverified number from leaking into the
 // market median.

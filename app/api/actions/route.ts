@@ -52,9 +52,9 @@ export async function POST(request: Request) {
       const row = run.rows.find((item) => item.listingId === listingId);
       if (!row)
         return json({ error: 'Listing does not belong to this run.' }, 400);
-      // A reviewer may disagree with ANY engine decision — re-include a row the
+      // A reviewer may disagree with ANY engine decision, re-include a row the
       // engine auto-excluded (stale, duplicate, mislabel) or exclude one it kept
-      // — provided they give a specific reason. The prior engine state is
+      //, provided they give a specific reason. The prior engine state is
       // recorded so every override is a traceable, auditable disagreement rather
       // than a silent edit. (Brief: "inspect listing by listing and disagree".)
       if (
@@ -129,7 +129,7 @@ export async function POST(request: Request) {
           400,
         );
       // Re-assigning to a different person invalidates the earlier "notified"
-      // stamp — the new person hasn't been told yet, so the cue must not claim it.
+      // stamp, the new person hasn't been told yet, so the cue must not claim it.
       const clearNotified = existing.assignee !== assignee;
       const timestamp = now();
       await db().batch([
@@ -173,7 +173,7 @@ export async function POST(request: Request) {
     }
     if (body.action === 'notify_request') {
       // Hand the task to its named assignee: record an in-app notification with a
-      // timestamp and an audit event. There is no external email/Slack here — the
+      // timestamp and an audit event. There is no external email/Slack here, the
       // honest record is that the assignee was notified within BOSS.
       const requestId = value('requestId').slice(0, 200);
       const target = run.requests.find((item) => item.id === requestId);
@@ -213,7 +213,7 @@ export async function POST(request: Request) {
       return json({ run: await getRun(runId) });
     }
     if (body.action === 'create_request') {
-      // Raise a new evidence task — the honest path to resolving distrust that
+      // Raise a new evidence task, the honest path to resolving distrust that
       // needs evidence we don't yet have (verify a price, confirm a duplicate).
       const title = value('title').trim().slice(0, 200);
       const owner =

@@ -26,7 +26,7 @@ import { InfoHint } from './info-hint';
 // Problem 1 orientation + visual trust layer.
 //
 // Purpose: a first-time user should understand, before any table, WHAT this is,
-// WHY the data exists, and WHERE it came from — then see the answer (a rent
+// WHY the data exists, and WHERE it came from, then see the answer (a rent
 // benchmark) with an honest, colour-coded confidence cue, the funnel that shows
 // how many listings survived cleaning, and scannable chips for the junk we
 // caught. No invented scores; every number is the engine's own output.
@@ -91,12 +91,12 @@ export function ProblemOneOrientation({ run }: { run: StoredRun }) {
       </summary>
       <div className="border-t p-4 pt-4">
         <h2 className="text-base font-bold tracking-[-0.03em]">
-          Is the landlord&apos;s ask in line with the market — and can we prove it?
+          Is the landlord&apos;s ask in line with the market, and can we prove it?
         </h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
           BOSS turns a messy acquisition into structured, sourced evidence. This
           is the <strong>market slice</strong>: it takes a raw listing pull and
-          returns a rent benchmark you can trust and defend, listing by listing —
+          returns a rent benchmark you can trust and defend, listing by listing,
           because on a dashboard a bad market rate looks exactly as precise as a
           good one.
         </p>
@@ -106,7 +106,7 @@ export function ProblemOneOrientation({ run }: { run: StoredRun }) {
           </span>
           <span>
             A portal listings export (comparable homes nearby). Asking rents, not
-            achieved rents — no live scraping, no invented numbers.
+            achieved rents, no live scraping, no invented numbers.
           </span>
         </div>
       </div>
@@ -156,7 +156,7 @@ export function MarketAnswer({
             <p className="data-label">
               Market rate for this home (asking median)
             </p>
-            <InfoHint label="The middle (median) asking rent of the trusted comparable listings — half ask more, half ask less. We use the median, not the average, so one extreme listing can't drag the rate. It's an asking-rent benchmark, not an achieved or signed rent." />
+            <InfoHint label="The middle (median) asking rent of the trusted comparable listings, half ask more, half ask less. We use the median, not the average, so one extreme listing can't drag the rate. It's an asking-rent benchmark, not an achieved or signed rent." />
           </div>
           <p className={`mt-1 text-4xl font-bold tracking-[-0.04em] ${ui.text}`}>
             {median > 0 ? money(median) : '—'}
@@ -199,30 +199,30 @@ export function MarketAnswer({
           <ul className="mt-2 space-y-1 text-xs leading-5 text-amber-950">
             {trustedCount < 8 && (
               <li>
-                • <strong>Add more comparable listings</strong> — the trusted set
+                • <strong>Add more comparable listings</strong>, the trusted set
                 is thin ({trustedCount}). A wider or fresher pull, or relaxing the
                 area tolerance slightly, brings in more comps.
               </li>
             )}
             {portals < 3 && (
               <li>
-                • <strong>Add more sources</strong> — only {portals} portal
+                • <strong>Add more sources</strong>, only {portals} portal
                 {portals === 1 ? '' : 's'} here. Pulling the same market from more
                 portals reduces single-source skew.
               </li>
             )}
             <li>
-              • <strong>Check the flagged rows</strong> — verify or re-include any
+              • <strong>Check the flagged rows</strong>, verify or re-include any
               wrongly-excluded listings (each has a resolve option in its detail).
             </li>
             <li>
-              • <strong>Confirm the home&apos;s facts match the data</strong> — a
+              • <strong>Confirm the home&apos;s facts match the data</strong>, a
               society, BHK, area or furnishing mismatch filters out real comps.
             </li>
           </ul>
           <p className="mt-2 text-xs text-amber-900">
             If none of these change the picture, the honest answer stays
-            &ldquo;not enough evidence&rdquo; — better than a confident guess.
+            &ldquo;not enough evidence&rdquo;, better than a confident guess.
           </p>
         </div>
       )}
@@ -304,10 +304,10 @@ export function EvidenceFunnel({
     >
       <div className="flex items-center gap-1.5">
         <p className="data-label">How many listings survived cleaning</p>
-        <InfoHint label="The funnel from every uploaded listing down to the few trusted for the rate: first keep only homes that match yours, then remove duplicates and flagged prices. A big drop is normal and healthy — it's the untrustworthy listings being taken out. Click the card for the full breakdown." />
+        <InfoHint label="The funnel from every uploaded listing down to the few trusted for the rate: first keep only homes that match yours, then remove duplicates and flagged prices. A big drop is normal and healthy, it's the untrustworthy listings being taken out. Click the card for the full breakdown." />
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        The number that matters isn&apos;t how many listings exist — it&apos;s how
+        The number that matters isn&apos;t how many listings exist, it&apos;s how
         many you can actually trust.
         {canInspect ? ' Click to see the full breakdown.' : ''}
       </p>
@@ -321,7 +321,7 @@ export function EvidenceFunnel({
                 <div className="flex items-center justify-center py-1.5 text-[0.6875rem] font-medium text-muted-foreground">
                   <ChevronDown className="size-3.5" />
                   <span className="ml-1">
-                    {dropped} removed —{' '}
+                    {dropped} removed,{' '}
                     {i === 1
                       ? 'wrong size, area, furnishing, off-society or stale'
                       : 'duplicates & flagged prices'}
@@ -438,7 +438,7 @@ export function TrustSignals({
       <div className="flex items-center gap-2">
         <ShieldCheck className="size-4 text-[var(--flent-teal)]" />
         <p className="data-label">What we caught and kept out of the rate</p>
-        <InfoHint label="The specific junk the engine detected and excluded from the rate: cross-post duplicates, suspected bait prices, aspirational asks, and mislabelled or impossible listings. Nothing is deleted — each stays in the review with its reason, and you can overrule any call." />
+        <InfoHint label="The specific junk the engine detected and excluded from the rate: cross-post duplicates, suspected bait prices, aspirational asks, and mislabelled or impossible listings. Nothing is deleted, each stays in the review with its reason, and you can overrule any call." />
       </div>
       {!hasAny ? (
         <p className="mt-3 text-sm text-muted-foreground">
@@ -458,7 +458,7 @@ export function TrustSignals({
         </div>
       )}
       <p className="mt-3 border-t pt-3 text-xs text-muted-foreground">
-        Nothing here is deleted — each flagged listing stays in the review with its
+        Nothing here is deleted, each flagged listing stays in the review with its
         reason, and you can overrule any call.{' '}
         {hasAny ? 'Click to see exactly which listings.' : ''}
       </p>
@@ -467,7 +467,7 @@ export function TrustSignals({
         open={open}
         onOpenChange={setOpen}
         title="What we caught and kept out of the rate"
-        description="Every flagged listing, with the reason we flagged it. None is deleted — each stays reviewable."
+        description="Every flagged listing, with the reason we flagged it. None is deleted, each stays reviewable."
         rows={flaggedRows}
       />
     </div>
@@ -477,20 +477,20 @@ export function TrustSignals({
 // Answers three questions users kept asking: where does Problem 1 end, what are
 // the next steps, and how does it move to Problems 2 and 3. Problem 1 ends at a
 // frozen, versioned market-evidence record. That record is then consumed by the
-// decision (Problem 3), and — once the resulting deal's real outcome is known —
+// decision (Problem 3), and, once the resulting deal's real outcome is known —
 // feeds the calibration loop (Problem 2). It's a hand-off then a loop, not a
 // linear march.
 export function NextSteps({ isComplete }: { isComplete: boolean }) {
   const steps = [
     {
       title: 'Market rate + confidence',
-      caption: 'This tool — you are here',
+      caption: 'This tool, you are here',
       done: true,
     },
     {
       title: 'Freeze the evidence',
       caption: isComplete
-        ? 'Done — versioned & locked'
+        ? 'Done, versioned & locked'
         : 'Completes Problem 1',
       done: isComplete,
     },
@@ -513,7 +513,7 @@ export function NextSteps({ isComplete }: { isComplete: boolean }) {
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
         Problem 1 ends when you freeze this market evidence. From there it feeds
-        the decision, and later the learning loop — it never decides on its own.
+        the decision, and later the learning loop, it never decides on its own.
       </p>
 
       <ol className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-stretch">
@@ -544,7 +544,7 @@ export function NextSteps({ isComplete }: { isComplete: boolean }) {
       <div className="mt-4 flex flex-wrap items-center gap-3 border-t pt-4">
         {isComplete ? (
           <span className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-sm font-semibold text-teal-900">
-            <Lock className="size-4" /> Market evidence frozen — Problem 1
+            <Lock className="size-4" /> Market evidence frozen, Problem 1
             complete
           </span>
         ) : (
@@ -585,8 +585,8 @@ export function ScopeNote({ dimension }: { dimension: string }) {
         {dimension} is a separate part of the BOSS decision
       </h3>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-        This build deliberately goes deep on one problem — <strong>market
-        trust</strong> — rather than shallow on all of them. {dimension} is
+        This build deliberately goes deep on one problem, <strong>market
+        trust</strong>, rather than shallow on all of them. {dimension} is
         captured as evidence elsewhere in BOSS and owned by a different team; we
         don&apos;t score it here from data we don&apos;t have, because a
         confident-looking number built on missing evidence is worse than an honest

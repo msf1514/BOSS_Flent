@@ -1,7 +1,7 @@
-// Lane 2 — deal terms (private, negotiated). DESIGNED AND STUBBED, not built.
+// Lane 2, deal terms (private, negotiated). DESIGNED AND STUBBED, not built.
 //
-// This is the second, structurally-separate lane. Deal terms — landlord ask,
-// maintenance, deposit, capex, escalation, lock-in — are NOT public and NOT
+// This is the second, structurally-separate lane. Deal terms, landlord ask,
+// maintenance, deposit, capex, escalation, lock-in, are NOT public and NOT
 // scrapeable. They come from a deal record (deal.md), Slack, or a human, and
 // they fail differently from listings: a term goes stale or stays unconfirmed,
 // it is not duplicated or bait. So it needs a *confirmation* model, not a *trust*
@@ -10,7 +10,7 @@
 // It is stubbed on purpose: fully building a terms-confirmation workflow is
 // Problem 3 territory. What matters architecturally is that the interface and
 // contract exist, so the system's shape is honest and complete, and the two
-// lanes meet only at the human decision layer — never in a shared number.
+// lanes meet only at the human decision layer, never in a shared number.
 
 export type EvidenceStatus =
   | 'confirmed' // signed / in writing

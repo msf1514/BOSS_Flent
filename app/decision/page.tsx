@@ -12,12 +12,12 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-// Problem 3 — decision page, static preview.
+// Problem 3, decision page, static preview.
 //
 // Every value is taken verbatim from the exercise packet: the provisional
 // assessment (`boss-assessment.md`), the deal record, and the internal comment
 // thread. Nothing is invented and no verdict is computed here. Crucially, the
-// prior assessment is shown as a reference to *explain* — it is never fed back
+// prior assessment is shown as a reference to *explain*, it is never fed back
 // as an input, which would make the system reproduce its own answer.
 
 const SCENARIOS = [
@@ -58,11 +58,11 @@ const EVIDENCE = [
   { item: 'Landlord vs tenant deposits', status: '₹1,00,000 gap', kind: 'assumed', effect: 'Estimated cash exposure before capex.' },
 ];
 
-// Comments routed to the domain that owns them — the point of capture is that a
+// Comments routed to the domain that owns them, the point of capture is that a
 // demand or property note never silently moves the market number.
 const DISAGREEMENTS = [
   { domain: 'Supply / Terms', claim: 'Owner may accept ₹54,000 if we keep the full deposit and sign this week.', treatment: 'Unconfirmed negotiation scenario. Does not replace the recorded ask.' },
-  { domain: 'Property', claim: 'Damp patch on the utility wall; weak master-bath exhaust.', treatment: 'Diligence items with an owner and a photo — not a quality score.' },
+  { domain: 'Property', claim: 'Damp patch on the utility wall; weak master-bath exhaust.', treatment: 'Diligence items with an owner and a photo, not a quality score.' },
   { domain: 'Demand', claim: '11 enquiries in 14 days, only 4 for comparable sharing homes.', treatment: 'Directional demand evidence with an explicit sample limit.' },
   { domain: 'Pricing', claim: '₹38k + ₹34k room ladder = ₹72k; room 2 may land near ₹31k.', treatment: 'Achievable-rent hypothesis, not achieved revenue.' },
   { domain: 'Finance', claim: '₹1,00,000 of landlord deposit is uncovered before capex.', treatment: 'Capital-exposure claim shown separately from monthly margin.' },
@@ -101,14 +101,48 @@ export default function DecisionPreview() {
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             One view for the person signing: what drove the recommendation, what
             is confirmed versus assumed, where teams disagree, and exactly what
-            new evidence would flip the answer — without opening another
+            new evidence would flip the answer, without opening another
             spreadsheet.
           </p>
         </div>
 
+        <Card>
+          <CardHeader className="border-b">
+            <CardTitle>How the decision page works</CardTitle>
+            <p className="mt-1 text-sm text-muted-foreground">
+              The step right after Problem 1. It consumes the frozen market
+              evidence and the deal terms, then presents the call for a human to
+              sign. BOSS recommends, a person authorises.
+            </p>
+          </CardHeader>
+          <CardContent className="grid gap-4 py-5 md:grid-cols-3">
+            {[
+              {
+                title: '1 · Read, do not recompute',
+                body: 'It reads the frozen Problem 1 benchmark and the confirmed deal terms. It never re-derives the rate, so the market number has one owner.',
+              },
+              {
+                title: '2 · Route every claim',
+                body: 'Each comment goes to the domain that owns it (Supply, Property, Demand, Pricing, Finance), so a demand note never silently moves the market number.',
+              },
+              {
+                title: '3 · Separate fact from guess',
+                body: 'Confirmed, assumed and missing are labelled, so a call built on three guesses cannot look like one built on five confirmed facts.',
+              },
+            ].map((s) => (
+              <div key={s.title} className="rounded-lg border bg-white p-4">
+                <p className="text-sm font-semibold">{s.title}</p>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                  {s.body}
+                </p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
         <Alert className="border-amber-200 bg-amber-50">
           <AlertCircle />
-          <AlertTitle>Illustrative preview — reference, not an engine output</AlertTitle>
+          <AlertTitle>Illustrative preview for reference, not an engine output</AlertTitle>
           <AlertDescription>
             Assembled from the packet&apos;s provisional assessment, deal record
             and comment thread. The prior assessment is shown here to be
@@ -131,7 +165,7 @@ export default function DecisionPreview() {
               The home may work on better terms, but the current evidence
               isn&apos;t strong enough to authorise an acquisition.{' '}
               <strong>HOLD here means &ldquo;resolve the evidence&rdquo;, not
-              &ldquo;reject the home&rdquo;</strong> — the inputs that dominate
+              &ldquo;reject the home&rdquo;</strong>. The inputs that dominate
               the answer are still estimates.
             </p>
           </CardContent>
@@ -201,7 +235,7 @@ export default function DecisionPreview() {
             <CardHeader className="border-b">
               <CardTitle>Where teams disagree</CardTitle>
               <p className="mt-1 text-sm text-muted-foreground">
-                Each comment routed to the domain that owns it — shown, not
+                Each comment routed to the domain that owns it, shown, not
                 averaged away.
               </p>
             </CardHeader>

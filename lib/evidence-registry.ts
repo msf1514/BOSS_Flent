@@ -12,7 +12,7 @@ import { db, ensureSchema, evidence, id, now } from '@/lib/storage';
 
 // The registry captures every artifact. It never calculates. Routing an
 // artifact's *content* into a decision model is a later (P1) concern and is
-// deliberately not done here — see docs/CASE_PACKET_COVERAGE_AND_NEXT_WORK.md.
+// deliberately not done here, see docs/CASE_PACKET_COVERAGE_AND_NEXT_WORK.md.
 export const REGISTRY_PARSER_VERSION = 'registry-1';
 
 const uniqueConflict = (error: unknown) =>
@@ -242,7 +242,7 @@ export type Inventory = {
 };
 
 // Deal-scoped read. Tenant isolation is enforced by requiring a dealId and
-// never joining across deals — no query in this module returns another deal's
+// never joining across deals, no query in this module returns another deal's
 // evidence. (Per-user/team access control is Open Decision #2, not P0.)
 export async function listInventory(dealId: string): Promise<Inventory> {
   await ensureSchema();
@@ -322,7 +322,7 @@ export type MutationOutcome =
   | { ok: false; reason: 'not_found' | 'invalid_state' };
 
 // Soft-delete: the row and its R2 object are preserved (audit/retention), only
-// the status flips. Idempotent — deleting an already-deleted artifact is a
+// the status flips. Idempotent, deleting an already-deleted artifact is a
 // no-op success, not an error and not a second audit event.
 export async function deleteArtifact(input: {
   dealId: string;

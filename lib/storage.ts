@@ -76,7 +76,7 @@ export async function ensureSchema() {
   // Create tables/indexes one statement at a time rather than in a single
   // db().batch(). D1's batch is one all-or-nothing transaction, so a single
   // problematic statement (e.g. an index created alongside its table) rolls the
-  // whole thing back and leaves the database with NO tables — after which every
+  // whole thing back and leaves the database with NO tables, after which every
   // write silently fails. Every statement here is CREATE ... IF NOT EXISTS, so
   // running them individually is safe, idempotent and self-healing, and partial
   // progress is kept. Only a fully successful pass is cached.
@@ -409,7 +409,7 @@ export async function persistRun(input: {
       );
     if (confidence === 'LOW' || confidence === 'INSUFFICIENT')
       derived.push(
-        `Widen the comparable set — only ${trusted} trusted listing${trusted === 1 ? '' : 's'} survived; add sources or fresher listings`,
+        `Widen the comparable set, only ${trusted} trusted listing${trusted === 1 ? '' : 's'} survived; add sources or fresher listings`,
       );
     // Maintenance basis is genuinely never in a listings pull, so this stays a
     // standing caveat on every run.

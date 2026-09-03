@@ -31,7 +31,7 @@ export function actorFromRequest(request: Request): RequestActor | null {
   // Take-home demo: this pilot is deployed without an auth provider, so there
   // are no real user accounts to sign in with. Rather than block every reviewer
   // behind a login wall they cannot pass, the deployed app treats each visitor
-  // as a shared demo reviewer. This is a deliberate demo choice — production
+  // as a shared demo reviewer. This is a deliberate demo choice, production
   // would remove this fallback and require a real authenticated user (see
   // Open Decision #2 on tenancy/access control).
   return { id: 'demo-reviewer', label: 'Demo reviewer' };
@@ -42,7 +42,7 @@ export function actorFromRequest(request: Request): RequestActor | null {
 // Today this only confirms an authenticated actor: there is no deal-ownership
 // or team-membership model in the pilot (Open Decision #2 in
 // docs/CASE_PACKET_COVERAGE_AND_NEXT_WORK.md), so any signed-in user can read
-// any deal they can name. That is an accepted, documented limitation — NOT
+// any deal they can name. That is an accepted, documented limitation, NOT
 // per-user isolation. When a tenancy model lands, enforce it here alone and
 // every evidence route inherits it. Returns true when access is permitted.
 export function authorizeDealAccess(

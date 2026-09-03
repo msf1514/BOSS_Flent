@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MobileHeader, ProductRail } from './boss-shell';
 
-// Every run persists — complete or not — and every one is listed here and
+// Every run persists, complete or not, and every one is listed here and
 // reopenable. This is the home screen: the record of market reviews, not just
 // the latest one.
 
@@ -68,7 +68,7 @@ export function DealsList({
                   Deals
                 </h1>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Every market review you&apos;ve run — finished or still in
+                  Every market review you&apos;ve run, finished or still in
                   progress. Open one to see its evidence.
                 </p>
               </div>
@@ -95,7 +95,7 @@ export function DealsList({
                 <p className="mt-3 font-semibold">No market reviews yet</p>
                 <p className="mt-1 max-w-sm text-sm text-muted-foreground">
                   Upload a listings CSV to run your first market review. It will
-                  be saved here — complete or not — so you can return to it.
+                  be saved here, complete or not, so you can return to it.
                 </p>
                 <Button className="mt-4" onClick={onNew}>
                   <FilePlus2 /> New market review

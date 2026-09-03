@@ -67,7 +67,7 @@ function TwoSourceExplainer() {
         </div>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
           Many <strong>other</strong> homes nearby, pulled from portals. These set
-          the market rate — after we clean out the untrustworthy ones.
+          the market rate, after we clean out the untrustworthy ones.
         </p>
       </div>
       <div className="rounded-lg border bg-[var(--warm-canvas)] p-3">
@@ -88,13 +88,13 @@ function TwoSourceExplainer() {
 }
 
 // Shown while the analysis runs. The stages describe the REAL categories of work
-// the engine performs on every run — validate, match, de-duplicate, flag prices,
-// score confidence — so the wait explains what "cleaning the evidence" means. The
+// the engine performs on every run, validate, match, de-duplicate, flag prices,
+// score confidence, so the wait explains what "cleaning the evidence" means. The
 // result screen then proves each stage with actual counts. Honest narration, not
 // fake progress: the messages advance for feel, the numbers arrive with the run.
 const ANALYSIS_STAGES = [
   {
-    label: 'Checking the file — validating every row',
+    label: 'Checking the file, validating every row',
     why: 'A bad row is caught here, not silently averaged into the rate.',
   },
   {
@@ -134,7 +134,7 @@ function AnalysisPreloader() {
           <p className="text-sm font-bold">Cleaning the market evidence…</p>
         </div>
         <p className="mt-2 text-xs leading-5 text-muted-foreground">
-          We don’t just average the listings — we work out which ones to trust
+          We don’t just average the listings, we work out which ones to trust
           first. Here’s what’s happening:
         </p>
         <ul className="mt-4 space-y-2.5">
@@ -173,7 +173,7 @@ function AnalysisPreloader() {
           })}
         </ul>
         <p className="mt-4 border-t pt-3 text-xs text-muted-foreground">
-          Every decision is kept with its reason — you’ll see them all on the next
+          Every decision is kept with its reason, you’ll see them all on the next
           screen.
         </p>
       </div>
@@ -193,7 +193,7 @@ function Field({
   htmlFor: string;
   helper?: string;
   // Plain-language explanation of what this field is and how it affects the
-  // comparable set — revealed on hover/focus of an info icon beside the label.
+  // comparable set, revealed on hover/focus of an info icon beside the label.
   info?: React.ReactNode;
   children: React.ReactNode;
   // Colour psychology: 'needs' = a required field still empty (amber, draws the
@@ -258,7 +258,7 @@ export function RunIntake({
 
   // Only the facts that define the comparable set gate analysis. Commercial
   // context (landlord ask, maintenance, deposit, capex) does NOT affect the
-  // market median — it is a decision-layer concern (Problem 3) — so it never
+  // market median, it is a decision-layer concern (Problem 3), so it never
   // blocks a Problem 1 run. The fields remain in the data model but are no
   // longer collected in this intake.
   const missingConfigCount = [
@@ -383,7 +383,7 @@ export function RunIntake({
     setNotice(null);
     setIssues([]);
     // The analysis often returns in well under a second. Hold the preloader for a
-    // minimum window so its stages are actually visible — the point is to show
+    // minimum window so its stages are actually visible, the point is to show
     // that we clean the evidence, not to hide a delay. Errors skip this wait.
     const startedAt = Date.now();
     // Long enough that all five real stages (900ms cadence) are actually read.
@@ -462,7 +462,7 @@ export function RunIntake({
                 {initialConfig && (
                   <div className="mt-3 rounded-lg border border-teal-200 bg-teal-50/60 p-3 text-sm text-teal-900">
                     <strong>Facts carried over.</strong> The home&apos;s details
-                    below are prefilled from your last review — just add the new
+                    below are prefilled from your last review, just add the new
                     listings CSV and adjust anything that changed.
                   </div>
                 )}
@@ -614,18 +614,18 @@ export function RunIntake({
                 <fieldset disabled={!inspection?.validStructure || runBusy}>
                   <legend className="sr-only">Run configuration</legend>
 
-                  {/* Required group — specific to this home, can't be guessed. */}
+                  {/* Required group, specific to this home, can't be guessed. */}
                   <div className="mb-3 flex flex-wrap items-center gap-2">
                     <h3 className="text-sm font-bold">The home you&apos;re pricing</h3>
                     <span className="text-xs text-muted-foreground">
-                      Sets which listings count as comparable — please fill these in.
+                      Sets which listings count as comparable, please fill these in.
                     </span>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Field
                       label="Society match"
                       htmlFor="society"
-                      info="The society or cluster name we match listings against. A listing must belong to this society family to count as comparable — it's how we keep out homes from unrelated buildings. Matched on the start of the name, so 'Lakeview' catches 'Lakeview Towers A/B'."
+                      info="The society or cluster name we match listings against. A listing must belong to this society family to count as comparable, it's how we keep out homes from unrelated buildings. Matched on the start of the name, so 'Lakeview' catches 'Lakeview Towers A/B'."
                       state={config.societyPrefix.trim() ? 'set' : 'needs'}
                     >
                       <Input
@@ -639,7 +639,7 @@ export function RunIntake({
                     <Field
                       label="BHK"
                       htmlFor="bhk"
-                      info="Bedrooms-Hall-Kitchen of the home you're pricing. Only listings with the same BHK enter the broad reference set — a 3BHK is never compared against your 2BHK. A listing wearing a different BHK label but matching your home's size is flagged as a possible mislabel rather than silently dropped."
+                      info="Bedrooms-Hall-Kitchen of the home you're pricing. Only listings with the same BHK enter the broad reference set, a 3BHK is never compared against your 2BHK. A listing wearing a different BHK label but matching your home's size is flagged as a possible mislabel rather than silently dropped."
                       state={config.bhk >= 1 ? 'set' : 'needs'}
                     >
                       <Input
@@ -669,7 +669,7 @@ export function RunIntake({
                     <Field
                       label="Furnishing"
                       htmlFor="furnishing"
-                      info="Furnishing level of the home you're pricing. Furnishing moves rent a lot, so only listings at the same level are treated as directly comparable — a fully-furnished listing won't set the rate for your unfurnished home."
+                      info="Furnishing level of the home you're pricing. Furnishing moves rent a lot, so only listings at the same level are treated as directly comparable, a fully-furnished listing won't set the rate for your unfurnished home."
                       state={config.furnishing ? 'set' : 'needs'}
                     >
                       <select
@@ -686,7 +686,7 @@ export function RunIntake({
                     </Field>
                   </div>
 
-                  {/* Pre-filled defaults — sensible values, adjust only if needed. */}
+                  {/* Pre-filled defaults, sensible values, adjust only if needed. */}
                   <div className="mt-6 border-t pt-5">
                     <div className="mb-3 flex flex-wrap items-center gap-2">
                       <h3 className="text-sm font-bold">
@@ -700,7 +700,7 @@ export function RunIntake({
                       <Field
                         label="Deal name"
                         htmlFor="deal-name"
-                        info="A label for this market review so you can find it later in the deals list. It has no effect on the rate or which listings are trusted — it's just how this run is named."
+                        info="A label for this market review so you can find it later in the deals list. It has no effect on the rate or which listings are trusted, it's just how this run is named."
                       >
                         <Input
                           id="deal-name"
@@ -742,7 +742,7 @@ export function RunIntake({
                         label="Maximum listing age"
                         htmlFor="age"
                         helper="Days from last seen to cutoff."
-                        info="The oldest a listing can be — measured as days between when it was last seen and the evidence cutoff — before it's dropped as stale. Older listings have usually already rented, so including them would price your home off homes that are no longer on the market."
+                        info="The oldest a listing can be, measured as days between when it was last seen and the evidence cutoff, before it's dropped as stale. Older listings have usually already rented, so including them would price your home off homes that are no longer on the market."
                       >
                         <Input
                           id="age"

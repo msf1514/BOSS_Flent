@@ -12,11 +12,11 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-// Problem 2 — feedback loop, static preview.
+// Problem 2, feedback loop, static preview.
 //
 // Every figure below is taken verbatim from the exercise packet's real
 // `outcomes.csv` (14 anonymised historical cases). Nothing is invented. The
-// bias numbers are computed here from the observed cases only — censored
+// bias numbers are computed here from the observed cases only, censored
 // records are excluded from the error stats, never treated as zero. This is an
 // illustrative read, not a live model.
 
@@ -85,6 +85,17 @@ export default function CalibrationPreview() {
     (o) => (o.actPayback as number) > o.predPayback,
   ).length;
 
+  // Fill-time error per observed case (actual minus predicted days). Positive
+  // means the home filled slower than we forecast, the costly direction.
+  const fillErrors = scorable
+    .map((o) => ({
+      id: o.id,
+      mm: o.micromarket,
+      err: (o.actFill as number) - o.predFill,
+    }))
+    .sort((a, b) => b.err - a.err);
+  const maxAbs = Math.max(...fillErrors.map((e) => Math.abs(e.err)), 1);
+
   return (
     <div className="workbench-grid min-h-screen">
       <header className="border-b bg-white">
@@ -106,21 +117,63 @@ export default function CalibrationPreview() {
             Did our predictions come true?
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Every home we sign makes predictions — rent, fill time, payback. This
+            Every home we sign predicts a rent, a fill time and a payback. This
             view puts what we forecast next to what actually happened by day 90,
             so we can see where we run high, where we run low, and where the
             comparison simply isn&apos;t possible yet.
           </p>
         </div>
 
+        <Card>
+          <CardHeader className="border-b">
+            <CardTitle>How the feedback loop works</CardTitle>
+            <p className="mt-1 text-sm text-muted-foreground">
+              It closes the loop after Problem 1 froze the market evidence and
+              Problem 3 made the call. The lesson feeds a better Problem 1 next
+              time.
+            </p>
+          </CardHeader>
+          <CardContent className="grid gap-4 py-5 md:grid-cols-3">
+            {[
+              {
+                title: '1 · Capture the outcome',
+                body: "Every signed home's day-90 result lands back on the same evidence registry as the prediction we made at acquisition.",
+              },
+              {
+                title: '2 · Compare, honestly',
+                body: 'Join prediction to actual, but exclude censored cases (cancelled, still filling, not mature) from the error stats. A blank is never a zero.',
+              },
+              {
+                title: '3 · Report the bias',
+                body: 'Show where estimates run systematically high or low, per micromarket, and where there is no clean ground truth to score against.',
+              },
+            ].map((s) => (
+              <div key={s.title} className="rounded-lg border bg-white p-4">
+                <p className="text-sm font-semibold">{s.title}</p>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                  {s.body}
+                </p>
+              </div>
+            ))}
+          </CardContent>
+          <CardContent className="border-t bg-slate-50/60 py-4">
+            <p className="text-xs leading-5 text-muted-foreground">
+              <strong className="text-foreground">The circularity guard:</strong>{' '}
+              the prior assessment and past outcomes are shown to explain the
+              model. They are never fed back as an engine input, or the system
+              would reproduce its own answer.
+            </p>
+          </CardContent>
+        </Card>
+
         <Alert className="border-amber-200 bg-amber-50">
           <AlertCircle />
-          <AlertTitle>Illustrative preview — approach, not a live model</AlertTitle>
+          <AlertTitle>Illustrative preview of the approach, not a live model</AlertTitle>
           <AlertDescription>
             Built from the exercise packet&apos;s 14 real historical cases. The
             bias figures use the {scorable.length} fully observed cases only.
             Censored records (cancelled, still filling, not mature) are shown but
-            excluded from the error stats — a blank outcome is not a zero.
+            excluded from the error stats. A blank outcome is not a zero.
           </AlertDescription>
         </Alert>
 
@@ -150,7 +203,7 @@ export default function CalibrationPreview() {
                 {inr(Math.abs(Math.round(revenueBias)))} {revenueBias < 0
                   ? 'below'
                   : 'above'}{' '}
-                forecast on average — a mild, not dominant, error.
+                forecast on average, a mild, not dominant, error.
               </p>
             </CardContent>
           </Card>
@@ -162,7 +215,7 @@ export default function CalibrationPreview() {
               </p>
               <p className="mt-2 text-xs leading-5 text-muted-foreground">
                 Real payback came in worse than forecast in {paybackWorse} of the{' '}
-                {scorable.length} scorable cases — consistent with the fill-time
+                {scorable.length} scorable cases, consistent with the fill-time
                 optimism above.
               </p>
             </CardContent>
@@ -171,9 +224,66 @@ export default function CalibrationPreview() {
 
         <Card>
           <CardHeader className="border-b">
+            <CardTitle>Fill-time error by case</CardTitle>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Actual minus predicted days to fill, observed cases only. Bars to
+              the right mean the home filled slower than we forecast. The
+              rightward lean is the systematic optimism.
+            </p>
+          </CardHeader>
+          <CardContent className="py-5">
+            <div className="flex flex-col gap-2">
+              {fillErrors.map((e) => {
+                const worse = e.err > 0;
+                const width = (Math.abs(e.err) / maxAbs) * 50;
+                return (
+                  <div key={e.id} className="flex items-center gap-3">
+                    <span className="w-36 shrink-0 text-xs text-muted-foreground">
+                      <span className="data-value text-foreground">{e.id}</span>{' '}
+                      · {e.mm}
+                    </span>
+                    <div className="relative h-5 flex-1 rounded bg-slate-50">
+                      <span className="absolute inset-y-0 left-1/2 w-px bg-slate-300" />
+                      <span
+                        className="absolute inset-y-0.5 rounded"
+                        style={{
+                          [worse ? 'left' : 'right']: '50%',
+                          width: `${width}%`,
+                          background: worse
+                            ? 'var(--status-danger)'
+                            : 'var(--flent-teal)',
+                          opacity: 0.85,
+                        }}
+                      />
+                    </div>
+                    <span
+                      className="data-value w-14 shrink-0 text-right text-xs font-semibold"
+                      style={{
+                        color: worse
+                          ? 'var(--status-danger)'
+                          : 'var(--flent-teal)',
+                      }}
+                    >
+                      {worse ? '+' : ''}
+                      {e.err} d
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="mt-4 border-t pt-3 text-xs text-muted-foreground">
+              Eight of ten observed homes filled slower than forecast. That is
+              where the model needs the most correction, and where a naive
+              average of listing asks would have hidden the risk.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="border-b">
             <CardTitle>Prediction vs. day-90 outcome</CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
-              Censored rows are greyed — they have no clean ground truth to score
+              Censored rows are greyed. They have no clean ground truth to score
               against.
             </p>
           </CardHeader>
