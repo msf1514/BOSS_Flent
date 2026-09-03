@@ -168,6 +168,35 @@ simpler baseline is enough. The plan is built to expose that, not to hide it.
 
 ---
 
+## The next increment — live ingestion replaces the CSV upload
+
+v1 starts from a hand-uploaded CSV on purpose, because the brief asks us to start
+with the provided listings and the reviewed run has to be reproducible. The natural
+next increment removes the manual upload: real listing data is pulled live and
+enters through the exact same gate. The whole point of the two-lane ingestion
+design is that this is a drop-in, not a rebuild.
+
+- **Outcome.** The reviewer no longer hunts for a CSV. A real portal adapter pulls
+  comparable listings on demand from the sources (MagicBricks, NoBroker, Housing
+  and similar) and produces the same 13-column contract, so everything downstream
+  is unchanged.
+- **In scope, not in scope.** One real source adapter that fetches from a live
+  source (for example a headless fetch or a hosted crawl step) and a captured,
+  hashed snapshot per run so the result stays reproducible. Not in scope for this
+  increment: a general multi-portal crawler farm, and letting a live pull feed a
+  run that must be reproducible without its snapshot.
+- **Depends on.** Pieces 1 through 8, and the ingestion seam that is already
+  designed. A mock adapter already proves it: the engine cannot tell a scrape from
+  an upload, because both arrive as the same contract.
+- **Data.** Real and live, with a captured snapshot stored alongside the run.
+- **How we prove it.** A live pull for a real area produces a valid 13-column set,
+  runs through the same engine, and tiers honestly. Re-running the captured snapshot
+  reproduces the run. Because the confidence tier already penalises thin source
+  diversity, a single-portal pull self-reports as lower confidence rather than a
+  falsely clean number, so bias resistance is structural, not bolted on.
+
+---
+
 ## Where this goes next
 
 Problem 1 is the first link in a chain, not the whole system. The frozen packet is

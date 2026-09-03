@@ -260,7 +260,7 @@ export async function listRuns() {
   const result = await db()
     .prepare(
       `SELECT r.id, r.deal_id, d.name deal_name, r.version_number, r.created_at, r.engine_version, u.filename,
-              c.id closure_id
+              r.summary_json, c.id closure_id, c.disposition
        FROM runs r
        JOIN deals d ON d.id=r.deal_id
        JOIN uploads u ON u.id=r.upload_id
@@ -268,16 +268,36 @@ export async function listRuns() {
        ORDER BY r.created_at DESC LIMIT 30`,
     )
     .all<Record<string, unknown>>();
-  return result.results.map((run) => ({
-    id: String(run.id),
-    dealId: String(run.deal_id),
-    dealName: String(run.deal_name),
-    versionNumber: Number(run.version_number),
-    createdAt: String(run.created_at),
-    engineVersion: String(run.engine_version),
-    filename: typeof run.filename === 'string' ? run.filename : '',
-    status: run.closure_id ? ('complete' as const) : ('in_progress' as const),
-  }));
+  return result.results.map((run) => {
+    // Confidence tier and median come straight from the stored engine output, so
+    // the deals list shows the engine's own verdict, not a re-derived one.
+    let confidence = 'UNKNOWN';
+    let median: number | null = null;
+    let trustedCount = 0;
+    try {
+      const summary = parsed<EngineResult['summary']>(run.summary_json);
+      confidence = summary.askingEvidenceConfidence;
+      median = summary.baselines.B2.estimate;
+      trustedCount = summary.baselines.B2.count;
+    } catch {
+      // A malformed summary just leaves the defaults; never block the list.
+    }
+    return {
+      id: String(run.id),
+      dealId: String(run.deal_id),
+      dealName: String(run.deal_name),
+      versionNumber: Number(run.version_number),
+      createdAt: String(run.created_at),
+      engineVersion: String(run.engine_version),
+      filename: typeof run.filename === 'string' ? run.filename : '',
+      status: run.closure_id ? ('complete' as const) : ('in_progress' as const),
+      confidence,
+      median,
+      trustedCount,
+      disposition:
+        typeof run.disposition === 'string' ? run.disposition : null,
+    };
+  });
 }
 
 export async function persistRun(input: {
