@@ -80,13 +80,6 @@ const SPECS: Spec[] = [
     noise: 'flagged', complete: false,
   },
   {
-    key: 'mar', dealName: 'Marathahalli · Gopalan Grandeur 1BHK',
-    society: 'Gopalan Grandeur', societyPrefix: 'Gopalan Grandeur',
-    locality: 'Marathahalli', bhk: 1, area: 650, furnishing: 'unfurnished',
-    rentCenter: 27000, goodCount: 3, portals: 2, spread: 1500,
-    noise: 'clean', complete: true,
-  },
-  {
     key: 'sar', dealName: 'Sarjapur Road · Mahaveer Ranches 2BHK',
     society: 'Mahaveer Ranches', societyPrefix: 'Mahaveer Ranches',
     locality: 'Sarjapur Road', bhk: 2, area: 1080, furnishing: 'semi-furnished',

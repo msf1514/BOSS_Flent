@@ -265,7 +265,8 @@ export async function listRuns() {
        JOIN deals d ON d.id=r.deal_id
        JOIN uploads u ON u.id=r.upload_id
        LEFT JOIN market_review_closures c ON c.run_id=r.id
-       ORDER BY r.created_at DESC LIMIT 30`,
+       WHERE d.name NOT LIKE 'Untitled%'
+       ORDER BY r.created_at DESC LIMIT 6`,
     )
     .all<Record<string, unknown>>();
   return result.results.map((run) => {
