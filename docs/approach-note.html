@@ -113,6 +113,7 @@
   .shot-bar .dots i { width:9px; height:9px; border-radius:50%; background:var(--line); display:block; }
   .shot-bar .url { font-size:.68rem; color:var(--ink-faint); font-weight:600; letter-spacing:.01em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .shot img { width:100%; height:auto; }
+  .shot.mini img { max-height:260px; object-fit:cover; object-position:top center; }
   figcaption { margin-top:9px; font-size:.76rem; color:var(--ink-faint); font-weight:600; }
 
   .roles { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--line); border-radius:13px; overflow:hidden; background:var(--canvas); }
@@ -553,6 +554,16 @@
           </ul>
           <p style="font-size:.78rem; color:var(--ink-faint); margin:2px 0 0;">Built as a preview on the packet’s 14 real cases at <strong>/calibration</strong>.</p>
         </div>
+      </div>
+      <div class="grid2" style="margin-top:16px;">
+        <figure class="shot mini">
+          <div class="shot-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/decision · why this call, and what would change it</span></div>
+          <img src="assets/shot-decision.png" alt="Problem 3 decision preview: a how-it-works band, the confirmed-versus-assumed evidence, where teams disagree, and the flip conditions.">
+        </figure>
+        <figure class="shot mini">
+          <div class="shot-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/calibration · did our predictions come true</span></div>
+          <img src="assets/shot-calibration.png" alt="Problem 2 calibration preview: a how-it-works band, the bias tiles, and the fill-time error chart on the real 14-case history.">
+        </figure>
       </div>
       <div class="callout" style="margin-top:16px;">Both previews are illustrative and clearly labelled. They use only real packet data, invent nothing, and keep the capture-versus-calculate wall intact across every problem.</div>
     </div>
