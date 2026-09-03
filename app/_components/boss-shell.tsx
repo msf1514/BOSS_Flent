@@ -88,6 +88,14 @@ export function ProductRail({
           >
             The 8-slide approach note &#8599;
           </a>
+          <a
+            href="/deck/execution-plan.html"
+            target="_blank"
+            rel="noreferrer"
+            className="block text-xs font-semibold text-[var(--flent-teal)] hover:underline"
+          >
+            The execution plan &#8599;
+          </a>
           <Link
             href="/calibration"
             className="block text-xs font-semibold text-[var(--flent-teal)] hover:underline"

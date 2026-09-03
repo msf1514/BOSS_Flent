@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOSS · Execution plan · Problem 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+  :root {
+    --ground:#f1efe9; --surface:#ffffff; --canvas:#fbfaf7;
+    --ink:#1c1b29; --ink-soft:#5f5d70; --ink-faint:#96959f;
+    --line:#e7e4db; --line-soft:#f0eee7;
+    --teal:#008f76; --teal-deep:#0a6f5c; --mint:#e3f3ef; --mint-line:#bfe3d9;
+    --amber:#9a5a08; --amber-fill:#f7ecd8; --amber-line:#e6d2a6;
+    --danger:#b42318; --danger-fill:#f7e0dc; --danger-line:#e6bdb5;
+    --shadow:0 1px 2px rgba(28,27,41,.04), 0 10px 30px -16px rgba(28,27,41,.14);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#0f1014; --surface:#181820; --canvas:#1b1b24;
+      --ink:#ecebf2; --ink-soft:#a0a0ad; --ink-faint:#6f6f7d;
+      --line:#282833; --line-soft:#20202a;
+      --teal:#2fb8a0; --teal-deep:#1e9a84; --mint:#0f2e28; --mint-line:#1d4a41;
+      --amber:#d59a3e; --amber-fill:#2b2413; --amber-line:#463b21;
+      --danger:#e0685a; --danger-fill:#2e1a17; --danger-line:#4b2b25;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 34px -18px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0f1014; --surface:#181820; --canvas:#1b1b24;
+    --ink:#ecebf2; --ink-soft:#a0a0ad; --ink-faint:#6f6f7d;
+    --line:#282833; --line-soft:#20202a;
+    --teal:#2fb8a0; --teal-deep:#1e9a84; --mint:#0f2e28; --mint-line:#1d4a41;
+    --amber:#d59a3e; --amber-fill:#2b2413; --amber-line:#463b21;
+    --danger:#e0685a; --danger-fill:#2e1a17; --danger-line:#4b2b25;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 34px -18px rgba(0,0,0,.6);
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:"Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+    font-weight:500; line-height:1.55; letter-spacing:-.01em; -webkit-font-smoothing:antialiased;
+  }
+  .wrap { max-width:900px; margin:0 auto; padding:44px 22px 80px; }
+  .eyebrow { text-transform:uppercase; letter-spacing:.16em; font-size:.66rem; font-weight:700; color:var(--teal); }
+  h1 { font-size:clamp(2rem,4vw,2.9rem); font-weight:800; letter-spacing:-.04em; line-height:1.05; margin:.5rem 0 0; text-wrap:balance; }
+  .byline { margin-top:10px; font-size:.85rem; color:var(--ink-faint); font-weight:700; }
+  .byline b { color:var(--teal-deep); }
+  .lede { margin-top:18px; font-size:1.02rem; color:var(--ink-soft); line-height:1.55; }
+  h2 { font-size:1.15rem; font-weight:800; letter-spacing:-.02em; margin:36px 0 12px; }
+  h2 .n { color:var(--teal); }
+  p { margin:0 0 .7em; }
+  strong { font-weight:700; color:var(--ink); }
+  a { color:var(--teal); }
+  .rule { height:1px; background:var(--line); margin:28px 0; border:0; }
+
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); padding:22px 24px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .mini { border:1px solid var(--line); border-radius:11px; padding:14px 16px; background:var(--canvas); }
+  .mini .label { text-transform:uppercase; font-size:.6rem; letter-spacing:.12em; font-weight:700; color:var(--ink-faint); margin-bottom:6px; }
+  .mini.bad .label { color:var(--danger); }
+  .mini ul, .card ul { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px; }
+  .mini li, .card li { position:relative; padding-left:18px; font-size:.88rem; color:var(--ink-soft); line-height:1.45; }
+  .mini li::before, .card li::before { content:""; position:absolute; left:2px; top:.5em; width:6px; height:6px; border-radius:2px; background:var(--teal); }
+  .mini.bad li::before { background:var(--danger); border-radius:50%; }
+
+  .metric { margin-top:14px; border-left:3px solid var(--teal); background:var(--mint); border-radius:0 10px 10px 0; padding:13px 16px; font-size:.9rem; color:var(--teal-deep); }
+  .metric strong { color:var(--teal-deep); }
+
+  .piece { display:flex; gap:16px; padding:20px 0; border-top:1px solid var(--line); }
+  .piece:first-of-type { border-top:0; }
+  .pn { flex:none; width:34px; height:34px; border-radius:10px; background:var(--teal); color:#fff; font-weight:800; font-size:.95rem;
+        display:flex; align-items:center; justify-content:center; font-variant-numeric:tabular-nums; }
+  .piece h3 { margin:2px 0 4px; font-size:1.02rem; font-weight:700; letter-spacing:-.015em; }
+  .piece .outcome { font-size:.95rem; color:var(--ink); margin:0 0 10px; }
+  dl.meta { display:grid; grid-template-columns:1fr 1fr; gap:8px 20px; margin:0; }
+  dl.meta > div { display:flex; gap:8px; }
+  dl.meta dt { flex:none; width:78px; font-size:.64rem; text-transform:uppercase; letter-spacing:.06em; color:var(--teal); font-weight:700; padding-top:2px; }
+  dl.meta dd { margin:0; font-size:.84rem; color:var(--ink-soft); line-height:1.4; }
+  .tag { display:inline-block; font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:2px 8px; border-radius:999px; border:1px solid var(--mint-line); background:var(--mint); color:var(--teal-deep); }
+
+  .loop { display:flex; flex-wrap:wrap; gap:8px; align-items:stretch; margin-top:6px; }
+  .node { flex:1; min-width:150px; border:1px solid var(--line); border-radius:11px; padding:12px 14px; background:var(--canvas); }
+  .node.p1 { border-color:var(--mint-line); background:var(--mint); }
+  .node .nl { font-size:.62rem; text-transform:uppercase; letter-spacing:.1em; color:var(--teal); font-weight:700; }
+  .node .nt { font-weight:700; font-size:.88rem; margin-top:2px; }
+  .node .nd { font-size:.78rem; color:var(--ink-soft); margin-top:3px; line-height:1.35; }
+  .arrow { display:flex; align-items:center; color:var(--teal); font-weight:800; }
+
+  .backlink { display:inline-flex; align-items:center; gap:6px; font-size:.8rem; font-weight:700; text-decoration:none; color:var(--teal); }
+  @media (max-width:640px) { .grid2, dl.meta { grid-template-columns:1fr; } .arrow { transform:rotate(90deg); justify-content:center; } }
+  @media print { body { background:#fff; } .card { box-shadow:none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="backlink" href="/">&larr; Back to the prototype</a>
+  <div style="margin-top:20px;">
+    <span class="eyebrow">Execution plan · Problem 1</span>
+    <h1>Market listings become trustable evidence</h1>
+    <p class="byline">Prepared by <b>Sufiyan</b> for Flent</p>
+  </div>
+  <p class="lede">
+    This is the plan I would run if Flent approved the approach, written the way I
+    would put it into Linear: one parent outcome, then a small number of pieces of
+    work in the order I would ship them. Each piece names what it delivers, what it
+    deliberately leaves out, what it depends on, whether it runs on real or mocked
+    data, and how I would prove it works. The order is the point. A flat list of
+    features would say little about what to ship first and what that first release
+    teaches.
+  </p>
+
+  <h2>Why this matters to Flent</h2>
+  <div class="card">
+    <p>Flent carries the vacancy risk on every home it signs. The market rate it
+      anchors to is a median of nearby listings, and that median is quietly built on
+      evidence that is often untrue: duplicates, stale inventory, bait prices and
+      optimistic asks. Once the junk is removed, an area that looked like thirty
+      comparables can hold four, and at that sample size one bad listing moves the
+      estimate by thousands of rupees. A bad market rate looks exactly as precise on
+      a dashboard as a good one.</p>
+    <p style="margin:0;">The outcome I am delivering is not a prettier number. It is
+      a market rate a reviewer can <strong>defend line by line</strong>, with an
+      explicit confidence level, and an honest &ldquo;not enough evidence&rdquo; when
+      that is the truth.</p>
+  </div>
+
+  <h2>Parent &middot; the outcome</h2>
+  <div class="card">
+    <p><strong>User outcome.</strong> A Supply or Market-Ops reviewer uploads a raw
+      listing pull for a home and gets back a market-rate estimate with an explicit
+      confidence level, a row-by-row account of what was kept, collapsed or excluded
+      and why, and the ability to disagree with any single decision. When the
+      surviving evidence is too thin or contradictory, the system says so instead of
+      manufacturing a number.</p>
+    <div class="grid2" style="margin-top:14px;">
+      <div class="mini">
+        <div class="label">What v1 includes</div>
+        <ul>
+          <li>CSV upload with a visible 13-column contract and runtime validation.</li>
+          <li>Staged baselines: every valid listing, the ones that match this home, the ones trusted for the rate.</li>
+          <li>Cross-post de-duplication, and bait, aspirational and mislabel flags, each a named reason.</li>
+          <li>An explicit confidence tier including INSUFFICIENT.</li>
+          <li>Row-level override with a required reason, and one frozen version on completion.</li>
+        </ul>
+      </div>
+      <div class="mini bad">
+        <div class="label">What v1 excludes</div>
+        <ul>
+          <li>The acquisition verdict and any blended deal score. That is Problem 3.</li>
+          <li>Achieved or signed rent. Listings are asking prices. That is Problem 2.</li>
+          <li>Any use of photos, comments or outcomes inside the median.</li>
+          <li>Live scraping in the graded path, so the reviewed run stays reproducible.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:14px;">
+      <div class="mini">
+        <div class="label">Must be true before release</div>
+        <ul>
+          <li>Deterministic: the same inputs produce an identical run.</li>
+          <li>No invented values: missing stays missing, every flag traces to a rule.</li>
+          <li>A reviewer can override any row, and it is auditable.</li>
+          <li>A thin or contradictory pull returns INSUFFICIENT, not a guess.</li>
+        </ul>
+      </div>
+      <div class="mini">
+        <div class="label">A note on judgement</div>
+        <p style="margin:0; font-size:.86rem; color:var(--ink-soft); line-height:1.45;">A
+          more complex method should not win because it improves a number by a
+          negligible amount. The trust layer earns its place only if the gain in
+          defensibility is worth the added moving parts, and there are real cases
+          where a simpler baseline is enough. The plan is built to expose that, not
+          to hide it.</p>
+      </div>
+    </div>
+    <div class="metric">
+      <strong>The first metric I would watch.</strong> The share of runs where the
+      reviewer accepts the engine's kept and excluded set without an override, as a
+      proxy for trust, tracked next to the median shift caused by overrides. If
+      reviewers constantly overturn the engine, the rules are wrong, not the
+      reviewers. This is a product-trust metric, kept separate on purpose from the
+      question of whether the trust layer produces a more accurate estimate than a
+      simpler baseline.
+    </div>
+  </div>
+
+  <h2>The work, in the order I would ship it</h2>
+  <div class="card">
+    <div class="piece"><div class="pn">1</div><div>
+      <h3>Raw ingest and validation <span class="tag">real data</span></h3>
+      <p class="outcome">A raw CSV is preserved and validated. Bad structure returns actionable issues, not a crash.</p>
+      <dl class="meta">
+        <div><dt>In scope</dt><dd>Preservation and validation only. No scoring yet.</dd></div>
+        <div><dt>Depends</dt><dd>The evidence registry (built).</dd></div>
+        <div><dt>Data</dt><dd>Real. The case packet.</dd></div>
+        <div><dt>Proof</dt><dd>The 86-row packet validates; a malformed header is rejected; an impossible date is caught.</dd></div>
+      </dl>
+    </div></div>
+    <div class="piece"><div class="pn">2</div><div>
+      <h3>Staged baselines, from all valid to trusted <span class="tag">real data</span></h3>
+      <p class="outcome">The reviewer sees the raw median, the same-home median and the trusted median side by side, with counts, so &ldquo;thirty comparables became four&rdquo; is visible.</p>
+      <dl class="meta">
+        <div><dt>In scope</dt><dd>Deterministic filtering by config: BHK, area band, furnishing, society, staleness. No price judgement yet.</dd></div>
+        <div><dt>Depends</dt><dd>Piece 1.</dd></div>
+        <div><dt>Data</dt><dd>Real.</dd></div>
+        <div><dt>Proof</dt><dd>On the packet the set narrows 84 &rarr; 9 &rarr; 8, each drop attributable to a named reason.</dd></div>
+      </dl>
+    </div></div>
+    <div class="piece"><div class="pn">3</div><div>
+      <h3>Cross-post de-duplication <span class="tag">real, built</span></h3>
+      <p class="outcome">The same flat re-posted on several portals counts once, so reposts cannot inflate the sample.</p>
+      <dl class="meta">
+        <div><dt>In scope</dt><dd>Same config, area within tolerance and identical deposit collapse to one representative.</dd></div>
+        <div><dt>Depends</dt><dd>Piece 2.</dd></div>
+        <div><dt>Data</dt><dd>Real, built.</dd></div>
+        <div><dt>Proof</dt><dd>The two known cross-posts collapse; genuinely distinct units never merge.</dd></div>
+      </dl>
+    </div></div>
+    <div class="piece"><div class="pn">4</div><div>
+      <h3>Price-plausibility and mislabel flags <span class="tag">real, built</span></h3>
+      <p class="outcome">Bait, aspirational and mislabelled rows are flagged for a human, neither silently included nor silently dropped.</p>
+      <dl class="meta">
+        <div><dt>In scope</dt><dd>Flags attach a reason and route the row to review. They never move the median by themselves.</dd></div>
+        <div><dt>Depends</dt><dd>Piece 2.</dd></div>
+        <div><dt>Data</dt><dd>Real, built.</dd></div>
+        <div><dt>Proof</dt><dd>The packet's bait, aspirational, mislabel and impossible-area rows each carry the correct reason.</dd></div>
+      </dl>
+    </div></div>
+    <div class="piece"><div class="pn">5</div><div>
+      <h3>An explicit confidence tier, including INSUFFICIENT <span class="tag">real + synthetic</span></h3>
+      <p class="outcome">Every estimate ships with HIGH, MEDIUM, LOW or INSUFFICIENT, derived from sample size, source diversity and leave-one-out stability.</p>
+      <dl class="meta">
+        <div><dt>In scope</dt><dd>Thresholds are chosen, documented and testable. Sensible operating numbers, not Flent's real cutoffs.</dd></div>
+        <div><dt>Depends</dt><dd>Pieces 3 and 4.</dd></div>
+        <div><dt>Data</dt><dd>Real, plus a small synthetic thin case.</dd></div>
+        <div><dt>Proof</dt><dd>The packet yields a defensible tier; a deliberately thin three-row input returns INSUFFICIENT.</dd></div>
+      </dl>
+    </div></div>
+    <div class="piece"><div class="pn">6</div><div>
+      <h3>Row-level human override <span class="tag">real, built</span></h3>
+      <p class="outcome">A reviewer includes, excludes or defers any row with a required reason, and the prior engine state is recorded, so a disagreement is traceable rather than silent.</p>
+      <dl class="meta">
+        <div><dt>In scope</dt><dd>Overrides re-run the median deterministically. Completed runs stay immutable; applying judgements creates a new version.</dd></div>
+        <div><dt>Depends</dt><dd>Pieces 2 to 5.</dd></div>
+        <div><dt>Data</dt><dd>Real, built.</dd></div>
+        <div><dt>Proof</dt><dd>Re-including an auto-excluded row changes the trusted set and is visible in the audit with the prior state.</dd></div>
+      </dl>
+    </div></div>
+    <div class="piece"><div class="pn">7</div><div>
+      <h3>Re-cluster duplicates across the human-included set <span class="tag">real, built</span></h3>
+      <p class="outcome">After overrides, two cross-post copies that were both excluded and then both re-included cannot double-count.</p>
+      <dl class="meta">
+        <div><dt>In scope</dt><dd>Re-run duplicate clustering over the post-override include set only.</dd></div>
+        <div><dt>Depends</dt><dd>Pieces 3 and 6.</dd></div>
+        <div><dt>Data</dt><dd>Real, with a constructed case.</dd></div>
+        <div><dt>Proof</dt><dd>Two excluded twins, both re-included, collapse to one in the recomputed median.</dd></div>
+      </dl>
+    </div></div>
+    <div class="piece"><div class="pn">8</div><div>
+      <h3>Frozen market-evidence handoff <span class="tag">real, built</span></h3>
+      <p class="outcome">Completing Problem 1 freezes one reviewed market-evidence version, with its confidence, caveats and open tasks, ready for the wider deal.</p>
+      <dl class="meta">
+        <div><dt>In scope</dt><dd>Freezes market evidence only. It does not authorise an acquisition.</dd></div>
+        <div><dt>Depends</dt><dd>Pieces 1 to 7.</dd></div>
+        <div><dt>Data</dt><dd>Real, built.</dd></div>
+        <div><dt>Proof</dt><dd>A completed run is immutable and reproducible from source; re-analysis creates a versioned child.</dd></div>
+      </dl>
+    </div></div>
+  </div>
+
+  <h2>The next increment &middot; live ingestion replaces the CSV upload</h2>
+  <div class="card">
+    <p>v1 starts from a hand-uploaded CSV on purpose, because the brief asks me to
+      start with the provided listings and the reviewed run has to be reproducible.
+      The natural next increment removes the manual upload: real listing data is
+      pulled live and enters through the exact same gate. The whole point of the
+      two-lane ingestion design is that this is a drop-in, not a rebuild.</p>
+    <dl class="meta">
+      <div><dt>Outcome</dt><dd>A real portal adapter pulls comparable listings on demand and produces the same 13-column contract, so everything downstream is unchanged.</dd></div>
+      <div><dt>In scope</dt><dd>One real source adapter (a headless fetch or a hosted crawl step) and a captured, hashed snapshot per run for reproducibility.</dd></div>
+      <div><dt>Depends</dt><dd>Pieces 1 to 8, and the ingestion seam that is already designed. A mock adapter already proves the engine cannot tell a scrape from an upload.</dd></div>
+      <div><dt>Proof</dt><dd>A live pull tiers honestly; re-running the snapshot reproduces the run; a single-portal pull self-reports as lower confidence, so bias resistance is structural.</dd></div>
+    </dl>
+  </div>
+
+  <h2>Where this goes next</h2>
+  <div class="card">
+    <p style="margin-bottom:14px;">Problem 1 is the first link in a chain, not the whole
+      system. The frozen packet is the object the rest of BOSS consumes.</p>
+    <div class="loop">
+      <div class="node p1"><div class="nl">Problem 1 · Supply</div><div class="nt">Freeze market evidence</div><div class="nd">Rate, confidence, caveats, versioned.</div></div>
+      <div class="arrow">&rarr;</div>
+      <div class="node"><div class="nl">Problem 3 · Acquisition</div><div class="nt">Decide, a human signs</div><div class="nd">Reads the packet plus terms. Never re-derives the rate.</div></div>
+      <div class="arrow">&rarr;</div>
+      <div class="node"><div class="nl">The real world</div><div class="nt">Day-90 outcome</div><div class="nd">The home rents, or it sits.</div></div>
+      <div class="arrow">&rarr;</div>
+      <div class="node"><div class="nl">Problem 2 · Learning</div><div class="nt">Calibrate</div><div class="nd">Compares prediction to actual, feeds a better Problem 1.</div></div>
+    </div>
+    <p style="margin:14px 0 0; font-size:.88rem; color:var(--ink-soft);">The full approach
+      for Problems 2 and 3 is in the <a href="/deck/approach-note.html">approach note</a>.
+      The prior assessment and past outcomes are shown there to explain the model, never
+      fed back as an engine input, or the system would reproduce its own answer.</p>
+  </div>
+</div>
+</body>
+</html>

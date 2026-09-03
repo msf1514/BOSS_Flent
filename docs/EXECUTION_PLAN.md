@@ -1,20 +1,20 @@
-# Execution plan — a trust layer for market listings (Problem 1)
+# Execution plan · a trust layer for market listings (Problem 1)
 
 Prepared by Sufiyan for Flent.
 
-This is the plan we would run if Flent approved the approach. It is written the way
-we would put it into Linear: one parent outcome, then a small number of pieces of
-work in the order we would ship them. Each piece names what it delivers, what it
+This is the plan I would run if Flent approved the approach. It is written the way
+I would put it into Linear: one parent outcome, then a small number of pieces of
+work in the order I would ship them. Each piece names what it delivers, what it
 deliberately leaves out, what it depends on, whether it runs on real or mocked
-data, and how we would prove it works. The order is the point. A flat list of
-features would tell you very little about what to ship first and what that first
-release teaches us.
+data, and how I would prove it works. The order is the point. A flat list of
+features would say very little about what to ship first and what that first
+release teaches.
 
 ---
 
 ## Why this matters to Flent
 
-Flent carries the vacancy risk on every home it signs. The market rate we anchor
+Flent carries the vacancy risk on every home it signs. The market rate Flent anchors
 to is a median of nearby listings, and that median is quietly built on evidence
 that is often untrue: duplicates, stale inventory, bait prices and optimistic
 asks. Once the junk is removed, an area that looked like thirty comparables can
@@ -22,13 +22,13 @@ hold four, and at that sample size one bad listing moves the estimate by thousan
 of rupees. The dangerous part is that a bad market rate looks exactly as precise on
 a dashboard as a good one.
 
-The outcome we are buying is not a prettier number. It is a market rate a reviewer
+The outcome I am delivering is not a prettier number. It is a market rate a reviewer
 can **defend line by line**, with an explicit confidence level, and an honest
 "not enough evidence" when that is the truth.
 
 ---
 
-## Parent — Market listings become trustable evidence
+## Parent · Market listings become trustable evidence
 
 **User outcome.** A Supply or Market-Ops reviewer uploads a raw listing pull for a
 home and gets back a market-rate estimate with an explicit confidence level, a
@@ -39,7 +39,7 @@ contradictory, the system says so instead of manufacturing a number.
 **What v1 includes.**
 - CSV upload with a visible 13-column contract and runtime schema and row validation.
 - Staged baselines, from every valid listing (B0), to the ones that match this home
-  (B1), to the ones we trust for the rate (B2), so the reviewer can see what
+  (B1), to the ones trusted for the rate (B2), so the reviewer can see what
   cleaning did to the number.
 - Cross-post de-duplication, bait and aspirational price flags, and mislabel flags,
   each as a named, inspectable reason.
@@ -63,13 +63,13 @@ contradictory, the system says so instead of manufacturing a number.
 - On a deliberately thin or contradictory pull, the confidence tier returns
   INSUFFICIENT rather than a confident guess.
 
-**The first metric we watch.** The **share of runs where the reviewer accepts the
+**The first metric I would watch.** The **share of runs where the reviewer accepts the
 engine's kept and excluded set without an override**, as a proxy for trust, tracked
 next to the **median shift caused by overrides**. If reviewers constantly overturn
 the engine, the rules are wrong, not the reviewers. This is deliberately a product-
 trust metric. The separate question of whether the trust layer produces a more
 accurate estimate than a simpler baseline is an estimation-quality benchmark, and
-we keep the two apart on purpose.
+I keep the two apart on purpose.
 
 A note on judgement. A more complex method should not win because it improves a
 number by a negligible amount. The trust layer earns its place only if the gain in
@@ -78,7 +78,7 @@ simpler baseline is enough. The plan is built to expose that, not to hide it.
 
 ---
 
-## The work, in the order we would ship it
+## The work, in the order I would ship it
 
 ### 1. Raw ingest and validation
 - **Outcome.** A raw CSV is preserved and validated. Bad structure returns
@@ -86,7 +86,7 @@ simpler baseline is enough. The plan is built to expose that, not to hide it.
 - **In scope, not in scope.** Preservation and validation only. No scoring yet.
 - **Depends on.** The evidence registry, which is already built.
 - **Data.** Real. The supplied case packet.
-- **How we prove it.** The 86-row packet validates. A malformed header set is
+- **How I prove it.** The 86-row packet validates. A malformed header set is
   rejected with a named issue. An impossible date is caught.
 
 ### 2. Staged baselines, from all valid to trusted
@@ -97,7 +97,7 @@ simpler baseline is enough. The plan is built to expose that, not to hide it.
   furnishing, society family and staleness. No price judgement yet.
 - **Depends on.** Piece 1.
 - **Data.** Real.
-- **How we prove it.** On the packet the set narrows from 84 valid, to 9 that match
+- **How I prove it.** On the packet the set narrows from 84 valid, to 9 that match
   the home, to 8 trusted, and every drop is attributable to a named reason on the
   excluded row.
 
@@ -109,7 +109,7 @@ simpler baseline is enough. The plan is built to expose that, not to hide it.
   listing kept. The asking rent may differ between the copies.
 - **Depends on.** Piece 2.
 - **Data.** Real, and built.
-- **How we prove it.** The two known cross-posts collapse with a duplicate reason,
+- **How I prove it.** The two known cross-posts collapse with a duplicate reason,
   and genuinely distinct units never merge, asserted in the signals tests.
 
 ### 4. Price-plausibility and mislabel flags
@@ -119,7 +119,7 @@ simpler baseline is enough. The plan is built to expose that, not to hide it.
   They never move the median by themselves.
 - **Depends on.** Piece 2.
 - **Data.** Real, and built.
-- **How we prove it.** The packet's bait, aspirational, mislabelled-configuration
+- **How I prove it.** The packet's bait, aspirational, mislabelled-configuration
   and impossible-area rows each carry the correct reason, asserted in the engine
   contract.
 
@@ -130,7 +130,7 @@ simpler baseline is enough. The plan is built to expose that, not to hide it.
   testable. They are sensible operating numbers, not Flent's real internal cutoffs.
 - **Depends on.** Pieces 3 and 4.
 - **Data.** Real for the packet, plus a small synthetic thin case.
-- **How we prove it.** The packet yields a defensible tier, and a deliberately thin
+- **How I prove it.** The packet yields a defensible tier, and a deliberately thin
   three-row input returns INSUFFICIENT. That failure case is required, not optional.
 
 ### 6. Row-level human override
@@ -141,7 +141,7 @@ simpler baseline is enough. The plan is built to expose that, not to hide it.
   Completed runs stay immutable, and applying judgements creates a new version.
 - **Depends on.** Pieces 2 through 5.
 - **Data.** Real, and built.
-- **How we prove it.** Re-including an auto-excluded row changes the trusted set and
+- **How I prove it.** Re-including an auto-excluded row changes the trusted set and
   is visible in the audit trail with the prior state attached.
 
 ### 7. Re-cluster duplicates across the human-included set
@@ -152,7 +152,7 @@ simpler baseline is enough. The plan is built to expose that, not to hide it.
 - **Depends on.** Pieces 3 and 6.
 - **Data.** Real, with a constructed case. This is the one honest gap in the current
   build, carried here as a tracked piece of work rather than quietly dropped.
-- **How we prove it.** Two excluded twins, both re-included, collapse to one in the
+- **How I prove it.** Two excluded twins, both re-included, collapse to one in the
   recomputed median.
 
 ### 8. Frozen market-evidence handoff
@@ -162,15 +162,15 @@ simpler baseline is enough. The plan is built to expose that, not to hide it.
   acquisition.
 - **Depends on.** Pieces 1 through 7.
 - **Data.** Real, and built.
-- **How we prove it.** A completed run is immutable and reproducible from the
+- **How I prove it.** A completed run is immutable and reproducible from the
   preserved source, and re-analysis creates a versioned child rather than
   overwriting the parent.
 
 ---
 
-## The next increment — live ingestion replaces the CSV upload
+## The next increment · live ingestion replaces the CSV upload
 
-v1 starts from a hand-uploaded CSV on purpose, because the brief asks us to start
+v1 starts from a hand-uploaded CSV on purpose, because the brief asks me to start
 with the provided listings and the reviewed run has to be reproducible. The natural
 next increment removes the manual upload: real listing data is pulled live and
 enters through the exact same gate. The whole point of the two-lane ingestion
@@ -189,7 +189,7 @@ design is that this is a drop-in, not a rebuild.
   designed. A mock adapter already proves it: the engine cannot tell a scrape from
   an upload, because both arrive as the same contract.
 - **Data.** Real and live, with a captured snapshot stored alongside the run.
-- **How we prove it.** A live pull for a real area produces a valid 13-column set,
+- **How I prove it.** A live pull for a real area produces a valid 13-column set,
   runs through the same engine, and tiers honestly. Re-running the captured snapshot
   reproduces the run. Because the confidence tier already penalises thin source
   diversity, a single-portal pull self-reports as lower confidence rather than a

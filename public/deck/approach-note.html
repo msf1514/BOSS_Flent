@@ -216,11 +216,11 @@
       <span class="brandmark"><b>BOSS</b> · Flent FDE take-home</span>
     </div>
     <div class="body" style="display:flex; flex-direction:column; justify-content:center;">
-      <div class="kicker">The market data lies to us</div>
+      <div class="kicker">The market data lies to Flent</div>
       <h1 class="t-hero">A trust layer for<br>market&nbsp;listings.</h1>
       <p class="lede" style="margin-top:20px;">
         Scraped rental listings are full of duplicates, stale inventory, bait and optimistic asks.
-        Yet a bad median rent looks exactly as precise on a dashboard as a good one. We turn a noisy
+        Yet a bad median rent looks exactly as precise on a dashboard as a good one. I turn a noisy
         listing pull into a <strong>market rate you can defend, with an explicit confidence level</strong>,
         where every keep-or-drop decision is visible with its reason and a human can overrule any single call.
       </p>
@@ -242,7 +242,7 @@
       <span class="brandmark"><b>BOSS</b> · Problem 1</span>
     </div>
     <h2 class="t-slide">This is a trust problem, not a pricing problem.</h2>
-    <p class="lede">Flent carries the vacancy risk on every home it signs. The rate we anchor to is a
+    <p class="lede">Flent carries the vacancy risk on every home it signs. The rate Flent anchors to is a
       median of nearby listings, and that median is quietly built on evidence that often is not true.
       The maths is easy. Knowing which rows to believe is the hard part.</p>
     <div class="body" style="margin-top:20px;">
@@ -268,7 +268,7 @@
   <!-- 03 BEFORE -> AFTER (proof) -->
   <section class="slide">
     <div class="chrome">
-      <div class="lead"><span class="num">03 / 08</span><span class="eyebrow">The bet we proved</span></div>
+      <div class="lead"><span class="num">03 / 08</span><span class="eyebrow">The bet I proved</span></div>
       <span class="brandmark"><b>BOSS</b> · Proof of work</span>
     </div>
     <h2 class="t-slide">The win is not a different number. It is a defensible one.</h2>
@@ -293,7 +293,7 @@
           <figcaption>After. The same 86-row pull, now with a confidence tier, the three checks behind it, and the funnel from 84 listings down to 8 trusted, each drop inspectable.</figcaption>
         </div>
       </div>
-      <div class="callout" style="margin-top:14px;">On this packet the estimate barely moved. That is the point. We produced a sample where every excluded row carries a reason a human can overrule, not a prettier number.</div>
+      <div class="callout" style="margin-top:14px;">On this packet the estimate barely moved. That is the point. It produces a sample where every excluded row carries a reason a human can overrule, not a prettier number.</div>
     </div>
     <div class="foot"><span>The riskiest assumption, proven: honest cleaning changes trustworthiness, not cosmetics.</span><span>03 / 08</span></div>
   </section>
@@ -375,7 +375,7 @@
             </span>
             <div style="min-width:180px;">
               <p style="margin:0; font-weight:700; font-size:.85rem; color:var(--teal-deep);">Try it with your own data</p>
-              <p style="margin:0; font-size:.75rem; color:var(--teal-deep);">Analysed in your browser. Never saved to our database.</p>
+              <p style="margin:0; font-size:.75rem; color:var(--teal-deep);">Analysed in your browser. Never saved to any database.</p>
             </div>
             <a class="trylink" href="https://mohsufboss.msf1514.workers.dev/">mohsufboss.msf1514.workers.dev ↗</a>
           </div>
@@ -402,8 +402,8 @@
     <div class="body" style="margin-top:12px;">
       <div class="ba" style="grid-template-columns:1fr 380px;">
         <div class="col">
-          <div class="card" style="border-color:var(--amber-line);"><div class="label" style="color:var(--amber);">The required failure case</div><p>Feed a deliberately thin or contradictory pull and the tier returns <strong>INSUFFICIENT</strong>. The honest answer is “we cannot say yet”, not a manufactured number.</p></div>
-          <div class="card"><div class="label">Missing is not zero</div><p>A blank stays blank and is shown as unknown. We never score a missing value as 0 to keep a formula running.</p></div>
+          <div class="card" style="border-color:var(--amber-line);"><div class="label" style="color:var(--amber);">The required failure case</div><p>Feed a deliberately thin or contradictory pull and the tier returns <strong>INSUFFICIENT</strong>. The honest answer is “not enough evidence yet”, not a manufactured number.</p></div>
+          <div class="card"><div class="label">Missing is not zero</div><p>A blank stays blank and is shown as unknown. It never scores a missing value as 0 to keep a formula running.</p></div>
           <div class="card"><div class="label">Disagreement is shown, not averaged</div><p>A reviewer can re-include or exclude any row, and conflicting calls stay visible in the audit trail.</p></div>
           <div class="card" style="border-color:var(--danger-line);"><div class="label" style="color:var(--danger);">The one hard no</div><p>Inventing evidence. No synthetic row poses as real. If it is not in the packet, it is a labelled assumption.</p></div>
         </div>
@@ -422,10 +422,10 @@
   <!-- 07 SCOPE / ASSUMPTIONS / METRIC / AI -->
   <section class="slide">
     <div class="chrome">
-      <div class="lead"><span class="num">07 / 08</span><span class="eyebrow">Scope · assumptions · how we would know</span></div>
+      <div class="lead"><span class="num">07 / 08</span><span class="eyebrow">Scope · assumptions · how I would know</span></div>
       <span class="brandmark"><b>BOSS</b> · Problem 1</span>
     </div>
-    <h2 class="t-slide">What we cut on purpose, and how we would know it works.</h2>
+    <h2 class="t-slide">What I cut on purpose, and how I would know it works.</h2>
     <div class="body" style="margin-top:14px;">
       <div class="grid2">
         <div class="col">
@@ -449,12 +449,12 @@
             <p><strong>Share of runs a reviewer accepts without override</strong>, a proxy for trust, tracked next to the <strong>median shift caused by overrides</strong>. If reviewers constantly overturn the engine, the rules are wrong, not the reviewers.</p>
           </div>
           <div class="card">
-            <div class="label">The trade-off we chose</div>
-            <p>A smaller, defensible sample over a larger, impressive-looking one. Four trustworthy comps beat thirty noisy ones, and where nothing qualifies, we say so.</p>
+            <div class="label">The trade-off I chose</div>
+            <p>A smaller, defensible sample over a larger, impressive-looking one. Four trustworthy comps beat thirty noisy ones, and where nothing qualifies, it says so.</p>
           </div>
           <div class="card">
-            <div class="label">How AI was used</div>
-            <p>AI scaffolded the modules and the UI, ran an adversarial code-review pass on each change, and pressure-tested the framing, always asking “is this capturing or calculating?”. <strong>Judgment stayed human on the boundaries.</strong></p>
+            <div class="label">How I used AI</div>
+            <p>I used AI to scaffold the modules and the UI, to run an adversarial code-review pass on each change, and to pressure-test the framing, always asking “is this capturing or calculating?”. <strong>I kept the judgment on the boundaries.</strong></p>
           </div>
         </div>
       </div>
@@ -465,7 +465,7 @@
   <!-- 08 WIDER SYSTEM + P2/P3 APPROACH -->
   <section class="slide">
     <div class="chrome">
-      <div class="lead"><span class="num">08 / 08</span><span class="eyebrow">How we would ship the rest · Problems 2 &amp; 3</span></div>
+      <div class="lead"><span class="num">08 / 08</span><span class="eyebrow">How I would ship the rest · Problems 2 &amp; 3</span></div>
       <span class="brandmark"><b>BOSS</b> · The wider system</span>
     </div>
     <h2 class="t-slide">A hand-off, then a loop. Problem 1 is the first link.</h2>
