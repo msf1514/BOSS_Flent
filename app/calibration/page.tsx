@@ -69,6 +69,47 @@ const inr = (v: number | null) =>
 const mean = (xs: number[]) =>
   xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0;
 
+const REVIEWER_QUESTIONS = [
+  {
+    q: 'Where do we systematically overpay?',
+    where: 'The bias tiles and the fill-time chart.',
+  },
+  {
+    q: 'Where can we not tell yet?',
+    where: 'Censored cases and where the comparison breaks.',
+  },
+  {
+    q: 'Is this improving anything?',
+    where: 'The lesson feeds the next Problem 1.',
+  },
+];
+
+// A small labelled input box in the architecture flow.
+function FlowIn({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="rounded-lg border bg-white px-3 py-2">
+      <p className="text-[0.6rem] font-bold uppercase tracking-wide text-teal-700">
+        {label}
+      </p>
+      <p className="mt-0.5 text-xs leading-4 text-muted-foreground">{text}</p>
+    </div>
+  );
+}
+
+// A flow arrow: rightwards on wide layouts, downwards when the flow stacks.
+function FlowArrow() {
+  return (
+    <>
+      <span className="hidden shrink-0 items-center justify-center px-1 text-xl font-bold text-teal-600 lg:flex">
+        &rarr;
+      </span>
+      <span className="flex items-center justify-center text-xl font-bold text-teal-600 lg:hidden">
+        &darr;
+      </span>
+    </>
+  );
+}
+
 export default function CalibrationPreview() {
   // Only fully observed cases carry a clean ground truth. Everything else is
   // censored and deliberately excluded from the error statistics.
@@ -126,43 +167,70 @@ export default function CalibrationPreview() {
 
         <Card>
           <CardHeader className="border-b">
-            <CardTitle>How the feedback loop works</CardTitle>
+            <CardTitle>How the feedback loop fits</CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
               It closes the loop after Problem 1 froze the market evidence and
               Problem 3 made the call. The lesson feeds a better Problem 1 next
               time.
             </p>
           </CardHeader>
-          <CardContent className="grid gap-4 py-5 md:grid-cols-3">
-            {[
-              {
-                title: '1 · Capture the outcome',
-                body: "Every signed home's day-90 result lands back on the same evidence registry as the prediction we made at acquisition.",
-              },
-              {
-                title: '2 · Compare, honestly',
-                body: 'Join prediction to actual, but exclude censored cases (cancelled, still filling, not mature) from the error stats. A blank is never a zero.',
-              },
-              {
-                title: '3 · Report the bias',
-                body: 'Show where estimates run systematically high or low, per micromarket, and where there is no clean ground truth to score against.',
-              },
-            ].map((s) => (
-              <div key={s.title} className="rounded-lg border bg-white p-4">
-                <p className="text-sm font-semibold">{s.title}</p>
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                  {s.body}
+          <CardContent className="space-y-5 py-5">
+            <div className="flex flex-col items-stretch gap-3 lg:flex-row lg:items-center">
+              <div className="flex flex-col gap-2 lg:w-[30%]">
+                <FlowIn label="At acquisition" text="What BOSS predicted: rent, fill time, payback" />
+                <FlowIn label="Day 90 · outcomes.csv" text="What actually happened, or a censored blank" />
+              </div>
+              <FlowArrow />
+              <div className="rounded-xl border border-teal-300 bg-teal-50 p-4 lg:flex-1">
+                <p className="data-label text-teal-800">Feedback loop</p>
+                <p className="mt-1 text-sm font-bold text-teal-950">
+                  Join prediction to actual, honour censoring
+                </p>
+                <p className="mt-1 text-xs leading-5 text-teal-900">
+                  Cancelled, still-filling and not-mature cases are shown but kept
+                  out of the error stats. A blank is never a zero.
                 </p>
               </div>
-            ))}
-          </CardContent>
-          <CardContent className="border-t bg-slate-50/60 py-4">
-            <p className="text-xs leading-5 text-muted-foreground">
-              <strong className="text-foreground">The circularity guard:</strong>{' '}
-              the prior assessment and past outcomes are shown to explain the
-              model. They are never fed back as an engine input, or the system
-              would reproduce its own answer.
-            </p>
+              <FlowArrow />
+              <div className="rounded-xl border bg-white p-4 lg:w-[24%]">
+                <p className="data-label">The lesson</p>
+                <p className="mt-1 text-sm font-bold">Bias per micromarket</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Feeds a better Problem 1 estimate next time.
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t pt-4">
+              <p className="data-label">
+                The questions a sceptical reviewer asks, and where this view
+                answers them
+              </p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                {REVIEWER_QUESTIONS.map((item) => (
+                  <div
+                    key={item.q}
+                    className="rounded-lg border bg-slate-50/60 p-3"
+                  >
+                    <p className="text-sm font-semibold">{item.q}</p>
+                    <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+                      {item.where}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-lg border bg-slate-50/60 p-3">
+              <p className="text-xs leading-5 text-muted-foreground">
+                <strong className="text-foreground">
+                  The circularity guard:
+                </strong>{' '}
+                the prior assessment and past outcomes are shown to explain the
+                model. They are never fed back as an engine input, or the system
+                would reproduce its own answer.
+              </p>
+            </div>
           </CardContent>
         </Card>
 

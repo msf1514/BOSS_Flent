@@ -79,7 +79,15 @@ export function ProductRail({
           packet for the wider BOSS decision.
         </p>
         <div className="mt-3 space-y-1 border-t pt-3">
-          <p className="data-label">Approach previews</p>
+          <p className="data-label">Approach note &amp; previews</p>
+          <a
+            href="/deck/approach-note.html"
+            target="_blank"
+            rel="noreferrer"
+            className="block text-xs font-semibold text-[var(--flent-teal)] hover:underline"
+          >
+            The 8-slide approach note &#8599;
+          </a>
           <Link
             href="/calibration"
             className="block text-xs font-semibold text-[var(--flent-teal)] hover:underline"

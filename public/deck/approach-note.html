@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOSS · Problem 1 · Market-Listing Trust Layer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+  /* Brand tokens lifted from app/globals.css so the deck reads as BOSS itself:
+     Plus Jakarta Sans, deep ink, Flent teal/mint, warm canvas, status colours. */
+  :root {
+    --ground:#f1efe9; --surface:#ffffff; --canvas:#fbfaf7;
+    --ink:#1c1b29; --ink-soft:#68667a; --ink-faint:#9a99a6;
+    --line:#e7e4db; --line-soft:#f0eee7;
+    --teal:#008f76; --teal-deep:#0a6f5c; --teal-bright:#00a888; --mint:#e3f3ef; --mint-line:#bfe3d9;
+    --amber:#9a5a08; --amber-fill:#f7ecd8; --amber-line:#e6d2a6;
+    --danger:#b42318; --danger-fill:#f7e0dc; --danger-line:#e6bdb5;
+    --success:#087a55;
+    --radius:0.85rem;
+    --shadow:0 1px 2px rgba(28,27,41,.04), 0 10px 30px -14px rgba(28,27,41,.16);
+    --shot-shadow:0 2px 6px rgba(28,27,41,.08), 0 22px 48px -20px rgba(28,27,41,.32);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#0f1014; --surface:#181820; --canvas:#1b1b24;
+      --ink:#ecebf2; --ink-soft:#a0a0ad; --ink-faint:#6f6f7d;
+      --line:#282833; --line-soft:#20202a;
+      --teal:#2fb8a0; --teal-deep:#1e9a84; --teal-bright:#43d0b6; --mint:#0f2e28; --mint-line:#1d4a41;
+      --amber:#d59a3e; --amber-fill:#2b2413; --amber-line:#463b21;
+      --danger:#e0685a; --danger-fill:#2e1a17; --danger-line:#4b2b25;
+      --success:#2faa7c;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 34px -16px rgba(0,0,0,.6);
+      --shot-shadow:0 2px 8px rgba(0,0,0,.4), 0 26px 56px -22px rgba(0,0,0,.75);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0f1014; --surface:#181820; --canvas:#1b1b24;
+    --ink:#ecebf2; --ink-soft:#a0a0ad; --ink-faint:#6f6f7d;
+    --line:#282833; --line-soft:#20202a;
+    --teal:#2fb8a0; --teal-deep:#1e9a84; --teal-bright:#43d0b6; --mint:#0f2e28; --mint-line:#1d4a41;
+    --amber:#d59a3e; --amber-fill:#2b2413; --amber-line:#463b21;
+    --danger:#e0685a; --danger-fill:#2e1a17; --danger-line:#4b2b25;
+    --success:#2faa7c;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 34px -16px rgba(0,0,0,.6);
+    --shot-shadow:0 2px 8px rgba(0,0,0,.4), 0 26px 56px -22px rgba(0,0,0,.75);
+  }
+
+  * { box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
+  body {
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:"Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+    font-weight:500; line-height:1.55; letter-spacing:-.01em; -webkit-font-smoothing:antialiased;
+  }
+  img { max-width:100%; display:block; }
+  .deck { max-width:1180px; margin:0 auto; padding:32px 20px 64px; display:flex; flex-direction:column; gap:24px; }
+
+  .slide {
+    background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow);
+    padding:42px 48px 34px; position:relative; overflow:hidden; display:flex; flex-direction:column; min-height:628px;
+  }
+  .slide::before { content:""; position:absolute; inset:0 auto 0 0; width:5px; background:var(--teal); }
+
+  .chrome { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:20px; }
+  .chrome .lead { display:flex; align-items:baseline; gap:14px; }
+  .num { font-weight:700; font-size:.78rem; color:var(--teal); letter-spacing:.02em; font-variant-numeric:tabular-nums; }
+  .eyebrow, .brandmark { text-transform:uppercase; letter-spacing:.16em; font-size:.64rem; font-weight:700; color:var(--ink-faint); }
+  .brandmark b { color:var(--teal); }
+
+  h1,h2,h3 { margin:0; color:var(--ink); text-wrap:balance; }
+  .t-hero { font-size:clamp(2.5rem,5.4vw,4.05rem); font-weight:800; line-height:1.0; letter-spacing:-.045em; }
+  .t-slide { font-size:clamp(1.5rem,2.8vw,2.2rem); font-weight:800; line-height:1.1; letter-spacing:-.035em; margin-bottom:6px; }
+  .kicker { text-transform:uppercase; letter-spacing:.16em; font-size:.72rem; font-weight:700; color:var(--teal); margin-bottom:16px; }
+  .lede { font-size:1.0rem; color:var(--ink-soft); max-width:66ch; line-height:1.5; font-weight:500; }
+  .body { flex:1; }
+  p { margin:0 0 .7em; }
+  strong { font-weight:700; color:var(--ink); }
+  em { font-style:normal; color:var(--teal-deep); font-weight:600; }
+  .tnum { font-variant-numeric:tabular-nums; }
+  .byline { font-size:.82rem; color:var(--ink-faint); font-weight:700; letter-spacing:.01em; }
+  .byline b { color:var(--teal-deep); }
+
+  .foot { margin-top:20px; padding-top:12px; border-top:1px solid var(--line-soft);
+          display:flex; justify-content:space-between; align-items:center; gap:12px;
+          font-size:.68rem; letter-spacing:.02em; color:var(--ink-faint); font-weight:600; }
+
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .col { display:flex; flex-direction:column; gap:12px; }
+
+  .card { background:var(--canvas); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .card p { font-size:.88rem; color:var(--ink-soft); margin:0; line-height:1.45; }
+  .label { text-transform:uppercase; font-size:.62rem; letter-spacing:.13em; color:var(--ink-faint); font-weight:700; margin-bottom:8px; }
+
+  ul.clean { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  ul.clean li { position:relative; padding-left:20px; font-size:.9rem; color:var(--ink-soft); line-height:1.45; }
+  ul.clean li::before { content:""; position:absolute; left:2px; top:.5em; width:7px; height:7px; border-radius:2px; background:var(--teal); }
+  ul.clean.no li::before { background:var(--danger); border-radius:50%; }
+
+  .pill { display:inline-flex; align-items:center; gap:6px; padding:4px 11px; border-radius:999px;
+          font-size:.7rem; font-weight:700; letter-spacing:.01em; border:1px solid var(--mint-line);
+          background:var(--mint); color:var(--teal-deep); }
+  a.pill { text-decoration:none; }
+
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .stat { border:1px solid var(--line); border-radius:12px; padding:16px; background:var(--canvas); }
+  .stat .big { font-weight:800; font-size:2rem; line-height:1; letter-spacing:-.03em; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .stat .cap { margin-top:8px; font-size:.8rem; color:var(--ink-soft); line-height:1.4; }
+
+  .shot { margin:0; border-radius:12px; overflow:hidden; border:1px solid var(--line); background:var(--canvas); box-shadow:var(--shot-shadow); }
+  .shot-bar { display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--canvas); border-bottom:1px solid var(--line); }
+  .shot-bar .dots { display:flex; gap:5px; }
+  .shot-bar .dots i { width:9px; height:9px; border-radius:50%; background:var(--line); display:block; }
+  .shot-bar .url { font-size:.67rem; color:var(--ink-faint); font-weight:600; letter-spacing:.01em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .shot img { width:100%; height:auto; }
+  .shot.mini img { max-height:230px; object-fit:cover; object-position:top center; }
+  figcaption { margin-top:8px; font-size:.75rem; color:var(--ink-faint); font-weight:600; }
+
+  .roles { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--line); border-radius:13px; overflow:hidden; background:var(--canvas); }
+  .role { padding:15px 16px; border-right:1px solid var(--line); }
+  .role:last-child { border-right:none; }
+  .role .rt { font-weight:700; font-size:.88rem; margin-bottom:7px; display:flex; align-items:center; gap:8px; letter-spacing:-.01em; }
+  .role .rt .tag { font-size:.55rem; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; border-radius:5px; font-weight:700; }
+  .role ul { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:5px; }
+  .role li { font-size:.79rem; color:var(--ink-soft); line-height:1.36; padding-left:14px; position:relative; }
+  .role li::before { content:"›"; position:absolute; left:0; color:var(--teal); font-weight:700; }
+
+  .lanes { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .lane { border:1px solid var(--line); border-radius:13px; padding:15px 16px; background:var(--canvas); }
+  .lane.pub { border-color:var(--mint-line); }
+  .lane .lh { font-weight:700; font-size:.94rem; margin-bottom:2px; letter-spacing:-.015em; }
+  .lane .ls { font-size:.7rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em; font-weight:600; margin-bottom:10px; }
+  .lane .flow { display:flex; flex-direction:column; gap:6px; }
+  .step { font-size:.82rem; color:var(--ink-soft); padding:7px 10px; border:1px solid var(--line-soft); border-radius:8px; background:var(--surface); }
+  .converge { text-align:center; margin-top:11px; padding:10px 14px; border-radius:11px; background:var(--mint);
+              border:1px solid var(--mint-line); font-size:.82rem; color:var(--teal-deep); font-weight:600; }
+
+  .ba { display:grid; grid-template-columns:330px 1fr; gap:20px; align-items:start; }
+  .panel { border:1px solid var(--line); border-radius:13px; padding:17px; background:var(--canvas); }
+  .panel.bad { border-color:var(--danger-line); background:linear-gradient(180deg, var(--danger-fill), var(--canvas) 66%); }
+  .panel .ph { font-size:.61rem; letter-spacing:.12em; text-transform:uppercase; font-weight:700; margin-bottom:8px; }
+  .panel.bad .ph { color:var(--danger); }
+  .panel .rate { font-weight:800; font-size:2.2rem; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-.04em; }
+  .panel .rlabel { font-size:.77rem; color:var(--ink-soft); margin-top:6px; }
+  .panel ul { margin:12px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; }
+  .panel li { font-size:.79rem; color:var(--ink-soft); padding-left:17px; position:relative; line-height:1.38; }
+  .panel.bad li::before { content:"✕"; position:absolute; left:0; color:var(--danger); font-size:.72rem; top:1px; }
+
+  .callout { border-left:3px solid var(--teal); background:var(--mint); border-radius:0 10px 10px 0; padding:12px 16px; font-size:.87rem; color:var(--teal-deep); font-weight:600; }
+  .callout.warn { border-color:var(--amber); background:var(--amber-fill); color:var(--amber); }
+
+  .steps { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+  .ustep { border:1px solid var(--line); border-radius:11px; padding:13px; background:var(--canvas); }
+  .ustep .n { width:22px; height:22px; border-radius:6px; background:var(--teal); color:#fff; font-weight:800; font-size:.74rem;
+              display:flex; align-items:center; justify-content:center; margin-bottom:8px; font-variant-numeric:tabular-nums; }
+  .ustep .ut { font-weight:700; font-size:.83rem; margin-bottom:3px; letter-spacing:-.01em; }
+  .ustep .ud { font-size:.73rem; color:var(--ink-soft); line-height:1.32; }
+
+  .loop { display:flex; flex-wrap:wrap; align-items:stretch; gap:8px; }
+  .node { flex:1; min-width:140px; border:1px solid var(--line); border-radius:11px; padding:11px 13px; background:var(--canvas); }
+  .node.p1 { border-color:var(--mint-line); background:var(--mint); }
+  .node .nt { font-weight:700; font-size:.86rem; letter-spacing:-.01em; }
+  .node .nlabel { font-size:.62rem; text-transform:uppercase; letter-spacing:.1em; color:var(--teal); font-weight:700; margin-bottom:3px; }
+  .node .nd { font-size:.74rem; color:var(--ink-soft); line-height:1.34; margin-top:3px; }
+  .arrow { display:flex; align-items:center; color:var(--teal); font-weight:800; font-size:1.1rem; }
+
+  .kv { display:flex; flex-direction:column; gap:9px; }
+  .kv .row { display:grid; grid-template-columns:120px 1fr; gap:12px; align-items:start; }
+  .kv .k { font-size:.65rem; text-transform:uppercase; letter-spacing:.08em; color:var(--teal); font-weight:700; padding-top:3px; }
+  .kv .v { font-size:.85rem; color:var(--ink-soft); line-height:1.4; }
+
+  .trybar { display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:14px 16px; border-radius:13px;
+            background:var(--mint); border:1px solid var(--mint-line); }
+  .trybar .lock { width:38px; height:38px; border-radius:10px; background:var(--surface); border:1px solid var(--mint-line);
+                  display:flex; align-items:center; justify-content:center; color:var(--teal); flex:none; }
+  .trylink { margin-left:auto; display:inline-flex; align-items:center; gap:8px; text-decoration:none; font-weight:700;
+             font-size:.8rem; color:#fff; background:var(--teal); border:1px solid var(--teal-deep); padding:9px 15px; border-radius:999px; }
+  .trylink:hover { background:var(--teal-deep); }
+
+  .printbtn { position:fixed; right:16px; bottom:16px; z-index:50; font-size:.72rem; font-weight:700; letter-spacing:.02em;
+              padding:10px 16px; border-radius:999px; border:1px solid var(--teal); background:var(--teal); color:#fff;
+              cursor:pointer; box-shadow:var(--shadow); font-family:inherit; }
+  .printbtn:hover { background:var(--teal-deep); }
+  a { color:var(--teal); }
+  :focus-visible { outline:2px solid var(--teal); outline-offset:2px; border-radius:3px; }
+
+  @media (max-width:860px) {
+    .slide { padding:26px 20px; min-height:0; }
+    .grid2,.stats,.grid3,.lanes,.roles,.ba,.steps,.loop { grid-template-columns:1fr; }
+    .roles .role,.role { border-right:none; border-bottom:1px solid var(--line); }
+    .roles .role:last-child { border-bottom:none; }
+    .kv .row { grid-template-columns:1fr; gap:3px; }
+    .trylink { margin-left:0; }
+    .arrow { transform:rotate(90deg); justify-content:center; }
+  }
+  @media print {
+    body { background:#fff; }
+    .deck { max-width:none; gap:0; padding:0; }
+    .slide { break-inside:avoid; page-break-after:always; border-radius:0; border:none; box-shadow:none; min-height:96vh; }
+    .shot { box-shadow:none; }
+    .printbtn { display:none; }
+  }
+  @media (prefers-reduced-motion:reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+</head>
+<body>
+<button class="printbtn" onclick="window.print()">Print / Save PDF</button>
+<div class="deck">
+
+  <!-- 01 TITLE / THESIS -->
+  <section class="slide">
+    <div class="chrome">
+      <div class="lead"><span class="num">01 / 08</span><span class="eyebrow">Approach note · Problem 1</span></div>
+      <span class="brandmark"><b>BOSS</b> · Flent FDE take-home</span>
+    </div>
+    <div class="body" style="display:flex; flex-direction:column; justify-content:center;">
+      <div class="kicker">The market data lies to us</div>
+      <h1 class="t-hero">A trust layer for<br>market&nbsp;listings.</h1>
+      <p class="lede" style="margin-top:20px;">
+        Scraped rental listings are full of duplicates, stale inventory, bait and optimistic asks.
+        Yet a bad median rent looks exactly as precise on a dashboard as a good one. We turn a noisy
+        listing pull into a <strong>market rate you can defend, with an explicit confidence level</strong>,
+        where every keep-or-drop decision is visible with its reason and a human can overrule any single call.
+      </p>
+      <div style="margin-top:22px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <span class="pill">Capture is not calculate</span>
+        <span class="pill">Missing is not zero</span>
+        <span class="pill">Says “insufficient” when it is</span>
+        <a class="pill" href="https://mohsufboss.msf1514.workers.dev/" style="border-color:var(--teal); background:var(--teal); color:#fff;">Try the live prototype ↗</a>
+      </div>
+      <p class="byline" style="margin-top:22px;">Prepared by <b>Sufiyan</b> for Flent</p>
+    </div>
+    <div class="foot"><span>It returns a rate and a confidence. It does not decide.</span><span>Urban Bangalore · monthly rent · INR</span></div>
+  </section>
+
+  <!-- 02 THE PROBLEM -->
+  <section class="slide">
+    <div class="chrome">
+      <div class="lead"><span class="num">02 / 08</span><span class="eyebrow">The problem, sharpened</span></div>
+      <span class="brandmark"><b>BOSS</b> · Problem 1</span>
+    </div>
+    <h2 class="t-slide">This is a trust problem, not a pricing problem.</h2>
+    <p class="lede">Flent carries the vacancy risk on every home it signs. The rate we anchor to is a
+      median of nearby listings, and that median is quietly built on evidence that often is not true.
+      The maths is easy. Knowing which rows to believe is the hard part.</p>
+    <div class="body" style="margin-top:20px;">
+      <div class="stats" style="margin-bottom:18px;">
+        <div class="stat"><div class="big">~27,000</div><div class="cap">Bangalore listings behind the benchmark. Comparables are picked by society first, then by config and furnishing.</div></div>
+        <div class="stat"><div class="big">30 to 4</div><div class="cap">Once the junk is removed, an area that looked like 30 comparables can hold just four real ones.</div></div>
+        <div class="stat"><div class="big">~1 month</div><div class="cap">of breakeven pushed back by roughly ten extra vacant days. Anchoring to a wrong rate is what causes those days.</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="label">Who feels it</div>
+          <p><strong>The Supply and Acquisition reviewer</strong> who signs a multi-year lease, and the P&amp;L behind them. At a sample of four, one bad listing moves the estimate by thousands of rupees.</p>
+        </div>
+        <div class="card">
+          <div class="label" style="color:var(--danger);">Why it is dangerous</div>
+          <p>The failure is invisible. The dashboard shows the same clean figure whether the sample was trustworthy or not, so a confident number built on bad evidence is worse than an honest blank.</p>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>The sharper framing: reduce the confidence, do not just clean the cells.</span><span>02 / 08</span></div>
+  </section>
+
+  <!-- 03 BEFORE -> AFTER (proof) -->
+  <section class="slide">
+    <div class="chrome">
+      <div class="lead"><span class="num">03 / 08</span><span class="eyebrow">The bet we proved</span></div>
+      <span class="brandmark"><b>BOSS</b> · Proof of work</span>
+    </div>
+    <h2 class="t-slide">The win is not a different number. It is a defensible one.</h2>
+    <div class="body" style="margin-top:14px;">
+      <div class="ba">
+        <div class="panel bad">
+          <div class="ph">Before · naive median</div>
+          <div class="rate">₹58,250</div>
+          <div class="rlabel"><span class="pill" style="border-color:var(--danger-line); background:var(--danger-fill); color:var(--danger);">HIGH confidence</span></div>
+          <ul>
+            <li>Zero cross-posts collapsed, so the same flat is counted several times.</li>
+            <li>Bait at <span class="tnum">₹12k</span> and aspirational at <span class="tnum">₹185k</span> still in the sample.</li>
+            <li>A 3BHK that is really this 2BHK, silently included.</li>
+            <li>It looks precise. It is not.</li>
+          </ul>
+        </div>
+        <div>
+          <figure class="shot">
+            <div class="shot-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">mohsufboss.msf1514.workers.dev · market review</span></div>
+            <img src="assets/shot-overview.png" alt="BOSS market review overview: a progress tracker in the header, the market rate with a confidence tier, the derivation behind the tier, and the funnel from all uploaded listings down to the trusted set.">
+          </figure>
+          <figcaption>After. The same 86-row pull, now with a confidence tier, the three checks behind it, and the funnel from 84 listings down to 8 trusted, each drop inspectable.</figcaption>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:14px;">On this packet the estimate barely moved. That is the point. We produced a sample where every excluded row carries a reason a human can overrule, not a prettier number.</div>
+    </div>
+    <div class="foot"><span>The riskiest assumption, proven: honest cleaning changes trustworthiness, not cosmetics.</span><span>03 / 08</span></div>
+  </section>
+
+  <!-- 04 SYSTEM SHAPE -->
+  <section class="slide">
+    <div class="chrome">
+      <div class="lead"><span class="num">04 / 08</span><span class="eyebrow">Shape of the system</span></div>
+      <span class="brandmark"><b>BOSS</b> · Problem 1</span>
+    </div>
+    <h2 class="t-slide">Everything is captured. Only listings are calculated.</h2>
+    <p class="lede">The decision the whole system rests on: capture is not calculate. Photos, comments,
+      outcomes and deal terms are all preserved with their source, but only the listing CSV is ever
+      allowed to move the market median. That is how opinions never quietly become numbers.</p>
+    <div class="body" style="margin-top:14px;">
+      <div class="lanes">
+        <div class="lane pub">
+          <div class="lh">Lane 1 · Market comparables</div>
+          <div class="ls">public, scraped · fails as duplicate, stale, bait</div>
+          <div class="flow">
+            <div class="step">Portal adapters normalise to one 13-column contract</div>
+            <div class="step"><strong>Trust layer</strong>: dedup, flag, score confidence</div>
+            <div class="step">Feeds the market-rate median</div>
+          </div>
+        </div>
+        <div class="lane">
+          <div class="lh">Lane 2 · Deal terms</div>
+          <div class="ls">private, negotiated · fails as unconfirmed, verbal</div>
+          <div class="flow">
+            <div class="step">Deal record and Slack, per-field evidence status</div>
+            <div class="step"><strong>Confirmation layer</strong>: review before commit</div>
+            <div class="step">Stays a labelled deal fact, never the median</div>
+          </div>
+        </div>
+      </div>
+      <div class="converge">Maintenance, capex and the landlord ask are absent from Lane 1 by construction, so a scraper can never invent them onto a listing. The two lanes meet only at the human decision layer.</div>
+      <div class="roles" style="margin-top:14px;">
+        <div class="role">
+          <div class="rt"><span class="tag" style="background:var(--mint); color:var(--teal-deep);">Human</span> judges</div>
+          <ul><li>Overrules any row, with a reason</li><li>Owns and resolves evidence tasks</li><li>Signs the completion</li></ul>
+        </div>
+        <div class="role">
+          <div class="rt"><span class="tag" style="background:var(--amber-fill); color:var(--amber);">AI</span> assists</div>
+          <ul><li>Reads messy inputs, extracts</li><li>Suggests a value and its source</li><li>Never commits it silently</li></ul>
+        </div>
+        <div class="role">
+          <div class="rt"><span class="tag" style="background:var(--line-soft); color:var(--ink-soft);">Code</span> does the maths</div>
+          <ul><li>Median, dedup, confidence tiers</li><li>Same inputs give the same output</li><li>Every line is inspectable</li></ul>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>An automation nobody can audit is just a faster way to be wrong.</span><span>04 / 08</span></div>
+  </section>
+
+  <!-- 05 HOW YOU USE IT + TRY IT ANONYMOUSLY -->
+  <section class="slide">
+    <div class="chrome">
+      <div class="lead"><span class="num">05 / 08</span><span class="eyebrow">How the team uses it</span></div>
+      <span class="brandmark"><b>BOSS</b> · Problem 1</span>
+    </div>
+    <h2 class="t-slide">Five steps, and you can try it on your own data.</h2>
+    <div class="body" style="margin-top:12px;">
+      <div class="steps" style="margin-bottom:16px;">
+        <div class="ustep"><div class="n">1</div><div class="ut">Upload</div><div class="ud">Drop a listings CSV, or try it anonymously with your own pull.</div></div>
+        <div class="ustep"><div class="n">2</div><div class="ut">Clean and score</div><div class="ud">The trust layer runs the funnel and returns a rate with a confidence tier.</div></div>
+        <div class="ustep"><div class="n">3</div><div class="ut">Review row by row</div><div class="ud">Inspect every flagged listing and overrule any call with a recorded reason.</div></div>
+        <div class="ustep"><div class="n">4</div><div class="ut">Assign the gaps</div><div class="ud">Raise evidence tasks to a named teammate. They block completion until resolved.</div></div>
+        <div class="ustep"><div class="n">5</div><div class="ut">Freeze</div><div class="ud">Lock one versioned market-evidence packet for the wider deal.</div></div>
+      </div>
+      <div class="ba" style="grid-template-columns:1fr 420px;">
+        <div class="col">
+          <p style="font-size:.9rem; color:var(--ink-soft); margin:0;">Collaboration is concrete, not a slogan: an evidence gap becomes a task with an
+            <strong>accountable role, a named person and a notification</strong>, and the review cannot be
+            frozen until those tasks clear. Market Ops, Pricing, Property and Acquisition each own the
+            items only they can answer, all recorded in the history.</p>
+          <div class="trybar">
+            <span class="lock" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            </span>
+            <div style="min-width:180px;">
+              <p style="margin:0; font-weight:700; font-size:.85rem; color:var(--teal-deep);">Try it with your own data</p>
+              <p style="margin:0; font-size:.75rem; color:var(--teal-deep);">Analysed in your browser. Never saved to our database.</p>
+            </div>
+            <a class="trylink" href="https://mohsufboss.msf1514.workers.dev/">mohsufboss.msf1514.workers.dev ↗</a>
+          </div>
+        </div>
+        <div>
+          <figure class="shot">
+            <div class="shot-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">Anonymous market-trust check</span></div>
+            <img src="assets/shot-anon-result.png" alt="Anonymous market-trust check: a banner stating the data never leaves the browser, above the market rate, the confidence derivation, the funnel and the flagged-listing chips.">
+          </figure>
+          <figcaption>In anonymous mode the CSV is analysed entirely in your browser. Never uploaded, never stored.</figcaption>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Concrete collaboration, and privacy by construction on your own data.</span><span>05 / 08</span></div>
+  </section>
+
+  <!-- 06 WHEN EVIDENCE RUNS OUT -->
+  <section class="slide">
+    <div class="chrome">
+      <div class="lead"><span class="num">06 / 08</span><span class="eyebrow">When the evidence runs out</span></div>
+      <span class="brandmark"><b>BOSS</b> · Problem 1</span>
+    </div>
+    <h2 class="t-slide">Every number opens the listings behind it. And it can say no.</h2>
+    <div class="body" style="margin-top:12px;">
+      <div class="ba" style="grid-template-columns:1fr 380px;">
+        <div class="col">
+          <div class="card" style="border-color:var(--amber-line);"><div class="label" style="color:var(--amber);">The required failure case</div><p>Feed a deliberately thin or contradictory pull and the tier returns <strong>INSUFFICIENT</strong>. The honest answer is “we cannot say yet”, not a manufactured number.</p></div>
+          <div class="card"><div class="label">Missing is not zero</div><p>A blank stays blank and is shown as unknown. We never score a missing value as 0 to keep a formula running.</p></div>
+          <div class="card"><div class="label">Disagreement is shown, not averaged</div><p>A reviewer can re-include or exclude any row, and conflicting calls stay visible in the audit trail.</p></div>
+          <div class="card" style="border-color:var(--danger-line);"><div class="label" style="color:var(--danger);">The one hard no</div><p>Inventing evidence. No synthetic row poses as real. If it is not in the packet, it is a labelled assumption.</p></div>
+        </div>
+        <div>
+          <figure class="shot">
+            <div class="shot-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">Funnel breakdown · every drop to its listings</span></div>
+            <img src="assets/shot-funnel.png" alt="The funnel breakdown modal: each stage from all uploaded listings to trusted, with each removed group expandable into the exact listings and the reason they were dropped.">
+          </figure>
+          <figcaption>Click any number and it opens the exact rows behind it, grouped by the reason each was dropped.</figcaption>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Confidence is derived from three checks: sample size, source diversity, leave-one-out stability.</span><span>06 / 08</span></div>
+  </section>
+
+  <!-- 07 SCOPE / ASSUMPTIONS / METRIC / AI -->
+  <section class="slide">
+    <div class="chrome">
+      <div class="lead"><span class="num">07 / 08</span><span class="eyebrow">Scope · assumptions · how we would know</span></div>
+      <span class="brandmark"><b>BOSS</b> · Problem 1</span>
+    </div>
+    <h2 class="t-slide">What we cut on purpose, and how we would know it works.</h2>
+    <div class="body" style="margin-top:14px;">
+      <div class="grid2">
+        <div class="col">
+          <div class="label" style="color:var(--danger);">Deliberately not solved</div>
+          <ul class="clean no">
+            <li><strong>The verdict</strong> and any blended deal score. That is Problem 3.</li>
+            <li><strong>Achieved rent.</strong> Listings are asking prices, signed reality is Problem 2.</li>
+            <li><strong>Photos, comments and outcomes inside the number.</strong> Captured, never calculated from.</li>
+            <li><strong>Live scraping in the graded path.</strong> The seam is designed, a crawler is a drop-in later.</li>
+          </ul>
+          <div class="label" style="margin-top:4px;">Assumptions, labelled</div>
+          <div class="kv">
+            <div class="row"><div class="k">Comparability</div><div class="v">Same BHK and furnishing, society match, area within a tolerance, seen within a max age.</div></div>
+            <div class="row"><div class="k">Median</div><div class="v">Positional median over mean, so one extreme listing cannot drag the rate.</div></div>
+            <div class="row"><div class="k">Thresholds</div><div class="v">Sensible, documented numbers, not Flent’s real internal cutoffs.</div></div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card" style="border-color:var(--mint-line);">
+            <div class="label" style="color:var(--teal);">First metric to watch</div>
+            <p><strong>Share of runs a reviewer accepts without override</strong>, a proxy for trust, tracked next to the <strong>median shift caused by overrides</strong>. If reviewers constantly overturn the engine, the rules are wrong, not the reviewers.</p>
+          </div>
+          <div class="card">
+            <div class="label">The trade-off we chose</div>
+            <p>A smaller, defensible sample over a larger, impressive-looking one. Four trustworthy comps beat thirty noisy ones, and where nothing qualifies, we say so.</p>
+          </div>
+          <div class="card">
+            <div class="label">How AI was used</div>
+            <p>AI scaffolded the modules and the UI, ran an adversarial code-review pass on each change, and pressure-tested the framing, always asking “is this capturing or calculating?”. <strong>Judgment stayed human on the boundaries.</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Clear beats clever. Every claim traces to evidence, weak deals die early.</span><span>07 / 08</span></div>
+  </section>
+
+  <!-- 08 WIDER SYSTEM + P2/P3 APPROACH -->
+  <section class="slide">
+    <div class="chrome">
+      <div class="lead"><span class="num">08 / 08</span><span class="eyebrow">How we would ship the rest · Problems 2 &amp; 3</span></div>
+      <span class="brandmark"><b>BOSS</b> · The wider system</span>
+    </div>
+    <h2 class="t-slide">A hand-off, then a loop. Problem 1 is the first link.</h2>
+    <div class="body" style="margin-top:12px;">
+      <div class="loop" style="margin-bottom:14px;">
+        <div class="node p1"><div class="nlabel">P1 · Supply</div><div class="nt">Freeze market evidence</div><div class="nd">Rate, confidence, caveats, versioned.</div></div>
+        <div class="arrow">›</div>
+        <div class="node"><div class="nlabel">P3 · Acquisition</div><div class="nt">Decide, a human signs</div><div class="nd">Reads the packet plus terms. Never re-derives the rate.</div></div>
+        <div class="arrow">›</div>
+        <div class="node"><div class="nlabel">Real world</div><div class="nt">Day-90 outcome</div><div class="nd">The home rents, or it sits.</div></div>
+        <div class="arrow">›</div>
+        <div class="node"><div class="nlabel">P2 · Learning</div><div class="nt">Calibrate</div><div class="nd">Compares prediction to actual, feeds a better P1.</div></div>
+      </div>
+      <div class="grid2">
+        <div>
+          <div class="label" style="color:var(--teal);">Problem 3 · Decision page</div>
+          <ul class="clean" style="margin-bottom:10px;">
+            <li><strong>Reads, does not recompute</strong> the frozen benchmark and terms.</li>
+            <li>Routes each comment to the domain that owns it, so a demand note never moves the market number.</li>
+            <li>Shows confirmed versus assumed, plus the flip conditions. A named human signs.</li>
+          </ul>
+          <figure class="shot mini">
+            <div class="shot-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/decision</span></div>
+            <img src="assets/shot-decision.png" alt="Problem 3 decision preview: how-it-works band, confirmed versus assumed, where teams disagree, flip conditions.">
+          </figure>
+        </div>
+        <div>
+          <div class="label" style="color:var(--teal);">Problem 2 · Feedback loop</div>
+          <ul class="clean" style="margin-bottom:10px;">
+            <li>Joins acquisition-time predictions to day-90 actuals on the same registry.</li>
+            <li><strong>Honours censoring</strong>: cancelled, still-filling and not-mature cases are shown but excluded. A blank is not a zero.</li>
+            <li>Reports systematic bias per micromarket, and where there is no clean ground truth.</li>
+          </ul>
+          <figure class="shot mini">
+            <div class="shot-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/calibration</span></div>
+            <img src="assets/shot-calibration.png" alt="Problem 2 calibration preview: how-it-works band, bias tiles, and the fill-time error chart on the real 14-case history.">
+          </figure>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:12px;">Both previews use only real packet data and invent nothing. The prior assessment explains the model, it never feeds back as an engine input, or the system would reproduce its own answer.</div>
+    </div>
+    <div class="foot"><span>Proof of work · Approach note · Execution plan. Prepared by Sufiyan for Flent.</span><span>Thank you · 08 / 08</span></div>
+  </section>
+
+</div>
+</body>
+</html>

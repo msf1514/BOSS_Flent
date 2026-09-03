@@ -77,6 +77,45 @@ const FLIP_CONDITIONS = [
   ['Society rules block working-professional sharing', 'PASS regardless of the headline arithmetic'],
 ];
 
+const SIGNER_QUESTIONS = [
+  { q: 'Why this call?', where: 'The posture and the drivers behind it.' },
+  {
+    q: 'What if achievable rent is ₹2,000 lower?',
+    where: 'The sensitivity scenarios below.',
+  },
+  {
+    q: 'Which parts are we least sure about?',
+    where: 'Confirmed versus assumed.',
+  },
+  { q: 'What would change the answer?', where: 'The flip conditions.' },
+];
+
+// A small labelled input box in the architecture flow.
+function FlowIn({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="rounded-lg border bg-white px-3 py-2">
+      <p className="text-[0.6rem] font-bold uppercase tracking-wide text-teal-700">
+        {label}
+      </p>
+      <p className="mt-0.5 text-xs leading-4 text-muted-foreground">{text}</p>
+    </div>
+  );
+}
+
+// A flow arrow: rightwards on wide layouts, downwards when the flow stacks.
+function FlowArrow() {
+  return (
+    <>
+      <span className="hidden shrink-0 items-center justify-center px-1 text-xl font-bold text-teal-600 lg:flex">
+        &rarr;
+      </span>
+      <span className="flex items-center justify-center text-xl font-bold text-teal-600 lg:hidden">
+        &darr;
+      </span>
+    </>
+  );
+}
+
 export default function DecisionPreview() {
   return (
     <div className="workbench-grid min-h-screen">
@@ -108,35 +147,60 @@ export default function DecisionPreview() {
 
         <Card>
           <CardHeader className="border-b">
-            <CardTitle>How the decision page works</CardTitle>
+            <CardTitle>How the decision page fits</CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
-              The step right after Problem 1. It consumes the frozen market
-              evidence and the deal terms, then presents the call for a human to
-              sign. BOSS recommends, a person authorises.
+              The step right after Problem 1. It reads the frozen market evidence
+              and the deal terms and assembles the call. It never re-derives the
+              rate, so the market number keeps one owner.
             </p>
           </CardHeader>
-          <CardContent className="grid gap-4 py-5 md:grid-cols-3">
-            {[
-              {
-                title: '1 · Read, do not recompute',
-                body: 'It reads the frozen Problem 1 benchmark and the confirmed deal terms. It never re-derives the rate, so the market number has one owner.',
-              },
-              {
-                title: '2 · Route every claim',
-                body: 'Each comment goes to the domain that owns it (Supply, Property, Demand, Pricing, Finance), so a demand note never silently moves the market number.',
-              },
-              {
-                title: '3 · Separate fact from guess',
-                body: 'Confirmed, assumed and missing are labelled, so a call built on three guesses cannot look like one built on five confirmed facts.',
-              },
-            ].map((s) => (
-              <div key={s.title} className="rounded-lg border bg-white p-4">
-                <p className="text-sm font-semibold">{s.title}</p>
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                  {s.body}
+          <CardContent className="space-y-5 py-5">
+            <div className="flex flex-col items-stretch gap-3 lg:flex-row lg:items-center">
+              <div className="flex flex-col gap-2 lg:w-[30%]">
+                <FlowIn label="Problem 1" text="Frozen market evidence: rate and confidence" />
+                <FlowIn label="Lane 2 · deal terms" text="Landlord ask, escalation, deposit, capex, per-field status" />
+                <FlowIn label="Slack thread" text="Team comments, routed to the domain that owns each" />
+              </div>
+              <FlowArrow />
+              <div className="rounded-xl border border-teal-300 bg-teal-50 p-4 lg:flex-1">
+                <p className="data-label text-teal-800">Decision page</p>
+                <p className="mt-1 text-sm font-bold text-teal-950">
+                  Assemble the call, do not recompute it
+                </p>
+                <p className="mt-1 text-xs leading-5 text-teal-900">
+                  Drivers, confirmed versus assumed, where teams disagree, and
+                  what would flip the answer, on one page.
                 </p>
               </div>
-            ))}
+              <FlowArrow />
+              <div className="rounded-xl border bg-white p-4 lg:w-[22%]">
+                <p className="data-label">The verdict</p>
+                <p className="mt-1 text-sm font-bold">A named human signs</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  ACQUIRE / NEGOTIATE / HOLD / PASS
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t pt-4">
+              <p className="data-label">
+                The questions the person signing asks, and where this page answers
+                them
+              </p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {SIGNER_QUESTIONS.map((item) => (
+                  <div
+                    key={item.q}
+                    className="rounded-lg border bg-slate-50/60 p-3"
+                  >
+                    <p className="text-sm font-semibold">{item.q}</p>
+                    <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+                      {item.where}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
