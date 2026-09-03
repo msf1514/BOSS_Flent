@@ -130,13 +130,15 @@ npm run build           # vinext build, also confirms the engine bundles client-
   an `unknown` (it becomes `{}`), so cast DB columns like `(item.x as string | null) ?? ''`
   instead of `item.x ? String(item.x) : ''`.
 
-### Known pre-existing issue (not from this session)
+### Test suite (all green)
 
-`npm run test:engine` currently fails with a state-count mismatch (the engine reports
-`exclude: 75, needs_human_review: 1` where the test expects `74 / 2`). This fails
-identically with all recent work stashed, so it predates this session and is in the
-engine or its test, not the UI. Worth a look, but it is not caused by the recent
-commits.
+All checks pass: `npm run lint`, `npx tsc --noEmit`, and the engine, signals,
+registry and ingestion contract tests. An earlier `test:engine` state-count
+mismatch was traced to a stale source-annotation hash: the sample CSV bytes had
+changed, so `sourceAnnotationsForHash` stopped binding and the mislabel row CP-0081
+fell to `exclude` instead of `needs_human_review`. Re-keying
+`ANONYMISED_SAMPLE_SHA256` in `lib/source-annotations.ts` to the current sample hash
+fixed it. If the sample CSV is ever edited again, re-key that constant.
 
 ---
 
@@ -207,14 +209,13 @@ all match the build and the execution plan.
 
 ## 9. Open items and honest gaps
 
-- **Execution-plan piece 7** (re-cluster duplicates across the human-included set)
-  is the one real gap in the current build, carried as a tracked piece of work in
-  `docs/EXECUTION_PLAN.md`. If two cross-post twins are both excluded and then both
-  re-included by a human, they could double-count.
+- **Execution-plan piece 7 is now built.** The engine re-clusters duplicates across
+  the human-included set (`lib/evidence-engine.ts`, right before B2 is computed), so
+  two cross-post twins that are both re-included cannot double-count. Covered by a
+  test in `scripts/test-engine.mjs`.
 - **RBAC / tenancy** is auth-only today (`authorizeDealAccess` confirms
   authentication, not per-user isolation). Documented as an accepted pilot
   limitation.
-- **The pre-existing engine test failure** (section 5).
 - The live prototype only matches the latest work after Cloudflare finishes building
   the latest `main`. If the deck's screenshots look newer than the live site, a
   build is still in flight or has not been triggered.

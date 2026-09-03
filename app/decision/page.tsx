@@ -50,7 +50,7 @@ const SCENARIOS = [
 const EVIDENCE = [
   { item: 'Opening landlord terms', status: 'Recorded', kind: 'assumed', effect: 'Used in the opening-ask scenario.' },
   { item: 'Verbal ₹54,000 alternative', status: 'Unconfirmed', kind: 'assumed', effect: 'Shown as a scenario only.' },
-  { item: '₹72,000 tenant-revenue hypothesis', status: 'Estimate', kind: 'assumed', effect: 'Largest positive assumption in the economics.' },
+  { item: '₹72,000 tenant-revenue hypothesis', status: 'Estimate', kind: 'assumed', effect: 'Achievable rent, not achieved or signed. A Problem 2 question, never the Problem 1 market number.' },
   { item: '₹1,60,000 capex placeholder', status: 'No BOQ', kind: 'assumed', effect: 'Keeps capital employed and payback provisional.' },
   { item: 'Comparable listings (cleaned)', status: 'Market engine', kind: 'confirmed', effect: 'A defensible asking-rent benchmark with confidence.' },
   { item: 'Demand thread', status: '4 comparable enquiries', kind: 'assumed', effect: 'Directional only; sample is small.' },

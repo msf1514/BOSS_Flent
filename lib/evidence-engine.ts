@@ -583,6 +583,40 @@ export async function runEvidenceEngine(
       };
     })
     .sort((a, b) => a.listingId.localeCompare(b.listingId));
+  // Re-cluster duplicates across the human-included set. After overrides, two
+  // cross-post twins that were both collapsed or excluded and then both
+  // re-included would double-count the same flat in B2. Cluster the final include
+  // set and collapse all but one representative. In the common case (no
+  // re-including overrides) the include set carries no duplicates, so this is a
+  // no-op and the earlier baselines are unaffected.
+  const rowById = new Map(rows.map((row) => [row.listingId, row]));
+  const includedSignals: SignalRow[] = base
+    .filter(
+      (row) => rowById.get(row.item.raw.listing_id)?.b2State === 'include',
+    )
+    .map((row) => ({
+      listingId: row.item.raw.listing_id,
+      bhk: row.item.bhk,
+      area: row.item.area,
+      rent: row.item.rent,
+      deposit: row.item.deposit,
+      furnishing: row.item.furnishing,
+      source: String(row.item.raw.source ?? ''),
+      posterType: String(row.item.raw.poster_type ?? ''),
+      lastSeen: row.item.lastSeen,
+    }));
+  for (const cluster of clusterDuplicates(includedSignals)) {
+    for (const memberId of cluster.memberIds) {
+      if (memberId === cluster.representativeId) continue;
+      const collapsed = rowById.get(memberId);
+      if (collapsed && collapsed.b2State === 'include') {
+        collapsed.b2State = 'duplicate_collapsed';
+        collapsed.effectiveWeight = 0;
+        if (!collapsed.reasons.includes('cross_post_duplicate'))
+          collapsed.reasons.push('cross_post_duplicate');
+      }
+    }
+  }
   const b0Values = accepted
     .filter((row) => row.bhk === config.bhk)
     .map((row) => row.rent);

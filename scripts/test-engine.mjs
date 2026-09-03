@@ -180,6 +180,38 @@ assert.equal(
   true,
 );
 
+// Piece 7 (re-cluster the human-included set): re-including both collapsed twins
+// must not double-count. They re-collapse to one representative, so the trusted
+// count does not grow by two.
+const reincluded = await runEvidenceEngine(
+  csv,
+  config,
+  [
+    {
+      listingId: 'CP-0071',
+      decision: 'include',
+      reason: 'Reviewer re-included twin one',
+    },
+    {
+      listingId: 'CP-0075',
+      decision: 'include',
+      reason: 'Reviewer re-included twin two',
+    },
+  ],
+  sourceAnnotationsForHash(inputHash),
+);
+const reState = (id) =>
+  reincluded.rows.find((row) => row.listingId === id)?.b2State;
+assert.ok(
+  !(reState('CP-0071') === 'include' && reState('CP-0075') === 'include'),
+  'Re-included cross-post twins must not both count in B2',
+);
+assert.ok(
+  reincluded.summary.baselines.B2.count <=
+    result.summary.baselines.B2.count + 1,
+  'Re-including two twins must not add two to the trusted count',
+);
+
 // Bait: CP-0082 (₹12k) is pulled out of the median and flagged for a human.
 assert.ok(reasonsOf('CP-0082').includes('suspected_bait_price'));
 assert.equal(stateOf('CP-0082'), 'needs_human_review');
